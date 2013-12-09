@@ -2,6 +2,7 @@ package eu.socialsensor.sfc.builder.input.InputReaderImpl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import eu.socialsensor.framework.common.domain.Feed;
 import eu.socialsensor.framework.common.domain.Feed.FeedType;
@@ -59,6 +60,11 @@ public class DyscoInputReader implements InputReader{
 	public void run(){
 		
 		
+	}
+	
+	@Override
+	public Map<String,Set<String>> getUsersToLists(){
+		return null;
 	}
 	
 	private void formSolrQuery(){

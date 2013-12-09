@@ -248,4 +248,9 @@ public class ConfigInputReader implements InputReader{
 	public void run(){
 		
 	}
+	
+	@Override
+	public Map<String,Set<String>> getUsersToLists(){
+		return null;
+	}
 }

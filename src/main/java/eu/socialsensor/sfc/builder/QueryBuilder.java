@@ -74,6 +74,10 @@ public class QueryBuilder {
 		
 		return reader.createFeeds();
 	}
+	
+	public Map<String,Set<String>> getUsersToLists(){
+		return reader.getUsersToLists();
+	}
 	/**
 	 * @param args
 	 */

@@ -43,6 +43,7 @@ public class MongoInputReader implements InputReader{
 	private Date sinceDate = null;
 	
 	private Map<String,List<Feed>> feeds = new HashMap<String,List<Feed>>();
+	private Map<String, Set<String>> usersToLists = new HashMap<String, Set<String>>();
 	
 	public MongoInputReader(StorageInputConfiguration config){
 		
@@ -139,6 +140,20 @@ public class MongoInputReader implements InputReader{
 		SourceDAO sourceDao = new SourceDAOImpl(host, db, newsHoundsCollection);
 		sources.addAll(sourceDao.findTopSources(5000, streamType));
 		
+		//Assign users to newshound lists
+		for(Source source : sources) {
+			String user = streamType+"#"+source.getId();
+			String list = source.getList();
+			if(list != null) {
+				Set<String> lists = usersToLists.get(user);
+				if(lists == null) {
+					lists = new HashSet<String>();
+				}
+				lists.add(list);
+				usersToLists.put(user, lists);
+			}
+		}
+		
 		if(!sources.isEmpty())
 			inputDataPerType.put(FeedType.SOURCE,sources);
 		
@@ -148,6 +163,11 @@ public class MongoInputReader implements InputReader{
 	@Override
 	public void run(){
 		
+	}
+	
+	@Override
+	public Map<String,Set<String>> getUsersToLists(){
+		return usersToLists;
 	}
 	
 }
