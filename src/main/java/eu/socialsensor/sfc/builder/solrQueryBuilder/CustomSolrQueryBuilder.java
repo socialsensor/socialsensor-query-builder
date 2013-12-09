@@ -47,7 +47,7 @@ public class CustomSolrQueryBuilder {
 				first = false;
 			}	
 			else
-				solrQuery += "OR" + hashtag;
+				solrQuery += "AND" + hashtag;
 		}
 		solrQuery += ") OR contributors : (";
 		
