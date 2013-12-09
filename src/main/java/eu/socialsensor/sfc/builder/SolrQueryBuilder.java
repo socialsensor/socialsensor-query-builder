@@ -10,7 +10,6 @@ import org.xml.sax.SAXException;
 
 import eu.socialsensor.framework.client.dao.TopicDAO;
 import eu.socialsensor.framework.client.dao.impl.TopicDAOImpl;
-import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.CustomSolrQueryBuilder;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.RSSProcessor;
@@ -42,8 +41,8 @@ public class SolrQueryBuilder {
 		topicDAO = new TopicDAOImpl(host, database,collection);
 		
 		//Set RSS Processor
-		this.rssProcessor = new RSSProcessor();
-		this.rssProcessor.setRSSProcessor(topicDAO);
+		//this.rssProcessor = new RSSProcessor();
+		//this.rssProcessor.setRSSProcessor(topicDAO);
 		
 	}
 	
@@ -59,7 +58,7 @@ public class SolrQueryBuilder {
 		else{
 			logger.info("Find solr query for trending dysco : "+dysco.getId());
 			
-			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco,rssProcessor);
+			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
 			
 			return trendingBuilder.createSolrQuery();
 		}

@@ -37,11 +37,9 @@ public class TrendingSolrQueryBuilder {
 	Stopwords stopwords = new Stopwords();
 	
 	
-	public TrendingSolrQueryBuilder(Dysco dysco,RSSProcessor rssProcessor){
+	public TrendingSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
-		this.rssProcessor = rssProcessor;
-		
-		this.wordsToRSSItems = rssProcessor.getWordsToRSSItems();
+		filterContent();
 	}
 	
 	public String createSolrQuery(){
@@ -51,7 +49,7 @@ public class TrendingSolrQueryBuilder {
 		
 		boolean first = true;
 		//add keywords to query
-		for(String keyword : topKeywords){
+		for(String keyword : keywords){
 			if(first){
 				solrQuery += keyword;
 				first = false;
