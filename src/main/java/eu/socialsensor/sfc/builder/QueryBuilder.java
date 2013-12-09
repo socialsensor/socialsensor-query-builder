@@ -26,6 +26,7 @@ public class QueryBuilder {
 	private InputReader reader = null;
 	
 	public <T> QueryBuilder(DataInputType dataInputType, T inputData){
+		
 		switch(dataInputType){
 			
 			case CONFIGURATION:
@@ -57,6 +58,7 @@ public class QueryBuilder {
 				break;
 				
 			case DYSCO:
+				//this will probably change when called form media searcher - solr query will be split
 				Dysco dysco = (Dysco) inputData;
 				reader = new DyscoInputReader(dysco);
 				break;
@@ -98,7 +100,7 @@ public class QueryBuilder {
 			
 			InputConfiguration config = InputConfiguration.readFromFile(configFile);		
 			long t1 = System.currentTimeMillis();
-	        QueryBuilder q_builder = new QueryBuilder(DataInputType.CONFIGURATION,config);
+			QueryBuilder q_builder = new QueryBuilder(DataInputType.CONFIGURATION,config);
 	       
 	        Map<String,List<Feed>> results = q_builder.getQueryPerStream();
 	        long t2 = System.currentTimeMillis();
