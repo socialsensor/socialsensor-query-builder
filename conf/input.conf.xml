@@ -4,7 +4,8 @@
 	   		<Storage id = "Mongodb">
 	   			<Parameter name="host"><![CDATA[your.ip]]></Parameter>
 	   			<Parameter name="database"><![CDATA[your.database]]></Parameter>
-	   			<Parameter name="collection"><![CDATA[your.collection]]></Parameter>
+	   			<Parameter name="sources.collection"><![CDATA[your.sources.collection]]></Parameter>
+	   			<Parameter name="experts.collection"><![CDATA[your.experts.collection]]></Parameter>
 	   		</Storage>
 	   </StorageInput>
 	   
