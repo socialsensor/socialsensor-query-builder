@@ -11,6 +11,7 @@ import org.xml.sax.SAXException;
 import eu.socialsensor.framework.client.dao.TopicDAO;
 import eu.socialsensor.framework.client.dao.impl.TopicDAOImpl;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
+import eu.socialsensor.framework.common.domain.dysco.Dysco.DyscoType;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.CustomSolrQueryBuilder;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.RSSProcessor;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.TrendingSolrQueryBuilder;
@@ -48,7 +49,7 @@ public class SolrQueryBuilder {
 	
 	public String getSolrQuery(Dysco dysco){
 		
-		if(dysco.getEvolution().equals("dynamic")){
+		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)){
 			logger.info("Find solr query for custom dysco : "+dysco.getId());
 			
 			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(dysco);
