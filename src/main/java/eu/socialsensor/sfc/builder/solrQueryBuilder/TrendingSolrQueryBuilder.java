@@ -50,11 +50,6 @@ public class TrendingSolrQueryBuilder {
 	
 	public String createSolrQuery(){
 		
-		logger.info("Creating solr query");
-		logger.info("Keywords size : "+keywords.size());
-		logger.info("Entities size : "+entities.size());
-		logger.info("Hashtags size : "+hashtags.size());
-		
 		String solrQuery = "keywords : (";
 		
 		boolean first = true;
@@ -387,8 +382,6 @@ public class TrendingSolrQueryBuilder {
 			}
 			
 			entities.addAll(filteredEntities);
-		}else{
-			logger.error("Received NULL Entities!");
 		}
 			
 		//Filter keywords
@@ -419,14 +412,10 @@ public class TrendingSolrQueryBuilder {
 			}
 			
 			keywords.addAll(filteredKeywords);
-		}else{
-			logger.error("Received NULL Keywords!");
 		}
 		
 		if(dysco.getHashtags() != null){
 			hashtags.addAll(dysco.getHashtags().keySet());
-		}else{
-			logger.error("Received NULL Hashtags!");
 		}
 			
 	}

@@ -50,16 +50,21 @@ public class SolrQueryBuilder {
 	
 	public String getSolrQuery(Dysco dysco){
 		
+		if(dysco.getDyscoType() == null){
+			logger.error("Dysco Type is not defined - Cannot extract solr query");
+			return null;
+		}
+		
 		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)){
 			logger.info("Find solr query for custom dysco : "+dysco.getId());
-			logger.info("Dysco's content is : "+ dysco.toString());
+			
 			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(dysco);
 			
 			return customBuilder.createSolrQuery();
 		}
 		else{
 			logger.info("Find solr query for trending dysco : "+dysco.getId());
-			logger.info("Dysco's content is : "+ dysco.toString());
+			
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
 			
 			return trendingBuilder.createSolrQuery();

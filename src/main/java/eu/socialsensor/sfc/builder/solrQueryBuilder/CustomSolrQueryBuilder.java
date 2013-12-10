@@ -36,11 +36,7 @@ public class CustomSolrQueryBuilder {
 	}
 	
 	public String createSolrQuery(){
-		logger.info("Creating solr query");
-		logger.info("Keywords size : "+keywords.size());
-		logger.info("Contributors size : "+contributors.size());
-		logger.info("Hashtags size : "+hashtags.size());
-		
+	
 		String solrQuery = "keywords : (";
 		
 		boolean first = true;
