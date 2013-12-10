@@ -6,6 +6,7 @@ import java.util.Set;
 
 import eu.socialsensor.framework.common.domain.Feed;
 import eu.socialsensor.framework.common.domain.Feed.FeedType;
+import eu.socialsensor.framework.common.domain.StreamUser.Category;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Entity;
 import eu.socialsensor.sfc.builder.input.InputReader;
@@ -67,6 +68,11 @@ public class DyscoInputReader implements InputReader{
 		return null;
 	}
 	
+	@Override
+	public Map<String,Category> getUsersToCategories(){
+		return null;
+	}
+	
 	private void formSolrQuery(){
 		
 	}
@@ -78,4 +84,5 @@ public class DyscoInputReader implements InputReader{
 	private Map<String,List<Feed>> createTrendingFeeds(){
 		return null;
 	}
+
 }

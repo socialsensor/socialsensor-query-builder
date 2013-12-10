@@ -6,6 +6,7 @@ import java.util.Set;
 
 import eu.socialsensor.framework.common.domain.Feed;
 import eu.socialsensor.framework.common.domain.Feed.FeedType;
+import eu.socialsensor.framework.common.domain.StreamUser.Category;
 
 public interface InputReader {
 	
@@ -16,6 +17,8 @@ public interface InputReader {
 	public Map<String,List<Feed>> createFeedsPerStream();
 	
 	public Map<String,Set<String>> getUsersToLists();
+	
+	public Map<String,Category> getUsersToCategories();
 	
 	public List<Feed> createFeeds();
 }

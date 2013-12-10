@@ -9,17 +9,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import eu.socialsensor.framework.client.dao.ExpertDAO;
 import eu.socialsensor.framework.client.dao.SourceDAO;
+import eu.socialsensor.framework.client.dao.impl.ExpertDAOImpl;
 import eu.socialsensor.framework.client.dao.impl.SourceDAOImpl;
 import eu.socialsensor.framework.common.domain.Feed;
 import eu.socialsensor.framework.common.domain.Feed.FeedType;
 import eu.socialsensor.framework.common.domain.feeds.KeywordsFeed;
 import eu.socialsensor.framework.common.domain.feeds.LocationFeed;
 import eu.socialsensor.framework.common.domain.feeds.SourceFeed;
+import eu.socialsensor.framework.common.domain.Expert;
 import eu.socialsensor.framework.common.domain.Keyword;
 import eu.socialsensor.framework.common.domain.Location;
 import eu.socialsensor.framework.common.domain.SocialNetworkSource;
 import eu.socialsensor.framework.common.domain.Source;
+import eu.socialsensor.framework.common.domain.StreamUser.Category;
 import eu.socialsensor.sfc.builder.StorageInputConfiguration;
 import eu.socialsensor.sfc.builder.input.InputReader;
 
@@ -27,8 +31,8 @@ public class MongoInputReader implements InputReader{
 	
 	protected static final String HOST = "host";
 	protected static final String DB = "database";
-	protected static final String SOURCES_COLLECTION = "collection";
-	
+	protected static final String SOURCES_COLLECTION = "sources.collection";
+	protected static final String EXPERTS_COLLECTION = "experts.collection";
 	
 	private StorageInputConfiguration storage_config;
 	
@@ -37,6 +41,7 @@ public class MongoInputReader implements InputReader{
 	private String host = null;
 	private String db = null;
 	private String newsHoundsCollection = null;
+	private String expertsCollection = null;
 	
 	private SocialNetworkSource streamType = null;
 	
@@ -44,6 +49,7 @@ public class MongoInputReader implements InputReader{
 	
 	private Map<String,List<Feed>> feeds = new HashMap<String,List<Feed>>();
 	private Map<String, Set<String>> usersToLists = new HashMap<String, Set<String>>();
+	private Map<String,Category> usersToCategories = new HashMap<String,Category>();
 	
 	public MongoInputReader(StorageInputConfiguration config){
 		
@@ -129,20 +135,28 @@ public class MongoInputReader implements InputReader{
 		this.host = storage_config.getParameter(MongoInputReader.HOST);
 		this.db = storage_config.getParameter(MongoInputReader.DB);
 		this.newsHoundsCollection = storage_config.getParameter(MongoInputReader.SOURCES_COLLECTION, "Sources");
+		this.expertsCollection = storage_config.getParameter(MongoInputReader.EXPERTS_COLLECTION,"Experts");
 		
-		if(host == null || db == null || newsHoundsCollection == null){
+		if(host == null || db == null || newsHoundsCollection == null || expertsCollection == null){
 			System.out.println("News hounds collection needs to be configured correctly");
 			return null;
 		}
 		
 		//sources
 		List<Source> sources = new ArrayList<Source>();
+		List<Expert> experts = new ArrayList<Expert>();
+		
 		SourceDAO sourceDao = new SourceDAOImpl(host, db, newsHoundsCollection);
+		ExpertDAO expertsDao = new ExpertDAOImpl(host,db,expertsCollection);
+		
 		sources.addAll(sourceDao.findTopSources(5000, streamType));
+		experts = expertsDao.getExperts();
 		
 		//Assign users to newshound lists
 		for(Source source : sources) {
 			String user = streamType+"#"+source.getId();
+			
+			//extract list
 			String list = source.getList();
 			if(list != null) {
 				Set<String> lists = usersToLists.get(user);
@@ -152,6 +166,13 @@ public class MongoInputReader implements InputReader{
 				lists.add(list);
 				usersToLists.put(user, lists);
 			}
+			
+		}
+		
+		//extract categories
+		for(Expert expert : experts){
+			String user = streamType+"#"+expert.getId();
+			usersToCategories.put(user, expert.getCategory());
 		}
 		
 		if(!sources.isEmpty())
@@ -168,6 +189,11 @@ public class MongoInputReader implements InputReader{
 	@Override
 	public Map<String,Set<String>> getUsersToLists(){
 		return usersToLists;
+	}
+	
+	@Override
+	public Map<String,Category> getUsersToCategories(){
+		return usersToCategories;
 	}
 	
 }
