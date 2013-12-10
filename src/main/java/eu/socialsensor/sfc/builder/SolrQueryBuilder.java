@@ -36,8 +36,8 @@ public class SolrQueryBuilder {
 		//this.database = inputConfig.getParameter(SolrQueryBuilder.DATABASE);
 		//this.collection = inputConfig.getParameter(SolrQueryBuilder.COLLECTION);
 		
-		if(host == null || database == null || collection == null)
-			logger.error("Solr Query Builder needs to be configured!");
+		//if(host == null || database == null || collection == null)
+			//logger.error("Solr Query Builder needs to be configured!");
 		
 		//topicDAO = new TopicDAOImpl(host, database,collection);
 		
