@@ -12,6 +12,7 @@ import org.xml.sax.SAXException;
 
 import eu.socialsensor.framework.common.domain.Feed;
 import eu.socialsensor.framework.common.domain.Feed.FeedType;
+import eu.socialsensor.framework.common.domain.StreamUser.Category;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.feeds.KeywordsFeed;
 import eu.socialsensor.framework.common.domain.feeds.SourceFeed;
@@ -80,6 +81,11 @@ public class QueryBuilder {
 	public Map<String,Set<String>> getUsersToLists(){
 		return reader.getUsersToLists();
 	}
+	
+	public Map<String,Category> getUsersToCategories(){
+		return reader.getUsersToCategories();
+	}
+	
 	/**
 	 * @param args
 	 */
