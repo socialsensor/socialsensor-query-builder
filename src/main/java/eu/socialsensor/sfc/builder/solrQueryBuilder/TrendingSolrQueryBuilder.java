@@ -7,11 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import eu.socialsensor.framework.common.domain.Stopwords;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Entity;
 
+
 public class TrendingSolrQueryBuilder {
+	
+	public final Logger logger = Logger.getLogger(TrendingSolrQueryBuilder.class);
 	
 	private static final int MIN_RSS_THRESHOLD = 5;
 	private static final int KEYWORDS_LIMIT = 3;
@@ -39,11 +44,16 @@ public class TrendingSolrQueryBuilder {
 	
 	public TrendingSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
+		
 		filterContent();
 	}
 	
 	public String createSolrQuery(){
 		
+		logger.info("Creating solr query");
+		logger.info("Keywords size : "+keywords.size());
+		logger.info("Entities size : "+entities.size());
+		logger.info("Hashtags size : "+hashtags.size());
 		
 		String solrQuery = "keywords : (";
 		
@@ -55,7 +65,15 @@ public class TrendingSolrQueryBuilder {
 				first = false;
 			}	
 			else
-				solrQuery += " OR " + keyword;
+				solrQuery += " AND " + keyword;
+		}
+		for(Entity entity : entities){
+			if(first){
+				solrQuery += entity.getName();
+				first = false;
+			}	
+			else
+				solrQuery += " AND " + entity.getName();
 		}
 		solrQuery += ") OR hashtags : (";
 		
@@ -369,6 +387,8 @@ public class TrendingSolrQueryBuilder {
 			}
 			
 			entities.addAll(filteredEntities);
+		}else{
+			logger.error("Received NULL Entities!");
 		}
 			
 		//Filter keywords
@@ -399,10 +419,14 @@ public class TrendingSolrQueryBuilder {
 			}
 			
 			keywords.addAll(filteredKeywords);
+		}else{
+			logger.error("Received NULL Keywords!");
 		}
 		
 		if(dysco.getHashtags() != null){
 			hashtags.addAll(dysco.getHashtags().keySet());
+		}else{
+			logger.error("Received NULL Hashtags!");
 		}
 			
 	}

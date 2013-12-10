@@ -1,30 +1,46 @@
 package eu.socialsensor.sfc.builder.solrQueryBuilder;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 
 public class CustomSolrQueryBuilder {
 	
+	public final Logger logger = Logger.getLogger(CustomSolrQueryBuilder.class);
+	
 	private Dysco dysco = null;
 
-	private List<String> contributors = null;
+	private List<String> contributors = new ArrayList<String>();
 	
-	private Set<String> keywords = null;
-	private Set<String> hashtags = null;
+	private Set<String> keywords =  new HashSet<String>();
+	private Set<String> hashtags = new HashSet<String>();
 	
 	public CustomSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
 		
-		this.contributors = dysco.getContributors();
-		this.keywords = dysco.getKeywords().keySet();
-		this.hashtags = dysco.getHashtags().keySet();
+		if(dysco.getContributors() != null)
+			this.contributors = dysco.getContributors();
+		
+		if(dysco.getKeywords() != null)
+			this.keywords = dysco.getKeywords().keySet();
+		
+		if(dysco.getHashtags() != null)
+			this.hashtags = dysco.getHashtags().keySet();
 		
 		filterContent();
 	}
 	
 	public String createSolrQuery(){
+		logger.info("Creating solr query");
+		logger.info("Keywords size : "+keywords.size());
+		logger.info("Contributors size : "+contributors.size());
+		logger.info("Hashtags size : "+hashtags.size());
+		
 		String solrQuery = "keywords : (";
 		
 		boolean first = true;

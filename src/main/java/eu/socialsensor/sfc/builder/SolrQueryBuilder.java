@@ -32,6 +32,7 @@ public class SolrQueryBuilder {
 	private String collection = null;
 	
 	public SolrQueryBuilder(){
+		logger.info("SolrQueryBuilder instance created");
 		//this.host = inputConfig.getParameter(SolrQueryBuilder.HOST);
 		//this.database = inputConfig.getParameter(SolrQueryBuilder.DATABASE);
 		//this.collection = inputConfig.getParameter(SolrQueryBuilder.COLLECTION);
@@ -51,14 +52,14 @@ public class SolrQueryBuilder {
 		
 		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)){
 			logger.info("Find solr query for custom dysco : "+dysco.getId());
-			
+			logger.info("Dysco's content is : "+ dysco.toString());
 			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(dysco);
 			
 			return customBuilder.createSolrQuery();
 		}
 		else{
 			logger.info("Find solr query for trending dysco : "+dysco.getId());
-			
+			logger.info("Dysco's content is : "+ dysco.toString());
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
 			
 			return trendingBuilder.createSolrQuery();
