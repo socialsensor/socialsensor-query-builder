@@ -55,7 +55,7 @@ public class TrendingSolrQueryBuilder {
 				first = false;
 			}	
 			else
-				solrQuery += "OR" + keyword;
+				solrQuery += " OR " + keyword;
 		}
 		solrQuery += ") OR hashtags : (";
 		
@@ -67,7 +67,7 @@ public class TrendingSolrQueryBuilder {
 				first = false;
 			}	
 			else
-				solrQuery += "OR" + hashtag;
+				solrQuery += " OR " + hashtag;
 		}
 		
 		solrQuery += ")";

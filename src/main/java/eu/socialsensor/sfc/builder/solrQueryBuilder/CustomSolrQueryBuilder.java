@@ -35,7 +35,7 @@ public class CustomSolrQueryBuilder {
 				first = false;
 			}	
 			else
-				solrQuery += "OR" + keyword;
+				solrQuery += " OR " + keyword;
 		}
 		solrQuery += ") OR hashtags : (";
 		
@@ -47,7 +47,7 @@ public class CustomSolrQueryBuilder {
 				first = false;
 			}	
 			else
-				solrQuery += "AND" + hashtag;
+				solrQuery += " AND " + hashtag;
 		}
 		solrQuery += ") OR contributors : (";
 		
@@ -59,7 +59,7 @@ public class CustomSolrQueryBuilder {
 				first = false;
 			}	
 			else
-				solrQuery += "OR" + contributor;
+				solrQuery += " OR " + contributor;
 		}
 		solrQuery += ")";
 		

@@ -30,15 +30,15 @@ public class SolrQueryBuilder {
 	private String database = null;
 	private String collection = null;
 	
-	public SolrQueryBuilder(InputConfiguration inputConfig){
-		this.host = inputConfig.getParameter(SolrQueryBuilder.HOST);
-		this.database = inputConfig.getParameter(SolrQueryBuilder.DATABASE);
-		this.collection = inputConfig.getParameter(SolrQueryBuilder.COLLECTION);
+	public SolrQueryBuilder(){
+		//this.host = inputConfig.getParameter(SolrQueryBuilder.HOST);
+		//this.database = inputConfig.getParameter(SolrQueryBuilder.DATABASE);
+		//this.collection = inputConfig.getParameter(SolrQueryBuilder.COLLECTION);
 		
 		if(host == null || database == null || collection == null)
 			logger.error("Solr Query Builder needs to be configured!");
 		
-		topicDAO = new TopicDAOImpl(host, database,collection);
+		//topicDAO = new TopicDAOImpl(host, database,collection);
 		
 		//Set RSS Processor
 		//this.rssProcessor = new RSSProcessor();
@@ -93,7 +93,7 @@ public class SolrQueryBuilder {
 		
 		try {
 			InputConfiguration config = InputConfiguration.readFromFile(configFile);
-			SolrQueryBuilder solrQueryBuilder = new SolrQueryBuilder(config);
+			SolrQueryBuilder solrQueryBuilder = new SolrQueryBuilder();
 			
 			System.out.println("Solr query : "+solrQueryBuilder.getSolrQuery(dysco));
 			
