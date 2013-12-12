@@ -12,8 +12,6 @@ import eu.socialsensor.framework.common.domain.dysco.Dysco;
 public class CustomSolrQueryBuilder {
 	
 	public final Logger logger = Logger.getLogger(CustomSolrQueryBuilder.class);
-	
-	private Dysco dysco = null;
 
 	private List<String> contributors = new ArrayList<String>();
 	
@@ -21,67 +19,123 @@ public class CustomSolrQueryBuilder {
 	private Set<String> hashtags = new HashSet<String>();
 	
 	public CustomSolrQueryBuilder(Dysco dysco){
-		this.dysco = dysco;
 		
-		if(dysco.getContributors() != null)
-			this.contributors = dysco.getContributors();
+		this.contributors = dysco.getContributors();
+		this.keywords = dysco.getKeywords().keySet();
+		this.hashtags = dysco.getHashtags().keySet();
 		
-		if(dysco.getKeywords() != null)
-			this.keywords = dysco.getKeywords().keySet();
-		
-		if(dysco.getHashtags() != null)
-			this.hashtags = dysco.getHashtags().keySet();
-		
-		filterContent();
 	}
 	
 	public String createSolrQuery(){
 	
-		String solrQuery = "keywords : (";
-		
+		if(keywords.isEmpty() && contributors.isEmpty() && hashtags.isEmpty())
+			return null;
+	
 		boolean first = true;
-		//add keywords to query
-		for(String keyword : keywords){
-			if(first){
-				solrQuery += keyword;
-				first = false;
-			}	
-			else
-				solrQuery += " OR " + keyword;
-		}
-		solrQuery += ") OR hashtags : (";
 		
-		first = true;
-		//add hashtags to query
-		for(String hashtag : hashtags){
-			if(first){
-				solrQuery += hashtag;
-				first = false;
-			}	
-			else
-				solrQuery += " AND " + hashtag;
-		}
-		solrQuery += ") OR contributors : (";
+		String solrQuery = "title : (";
 		
-		first = true;
-		//add contributors to query
-		for(String contributor : contributors){
-			if(first){
-				solrQuery += contributor;
-				first = false;
-			}	
-			else
-				solrQuery += " OR " + contributor;
+		if(!keywords.isEmpty()){
+			//add keywords to query
+			for(String keyword : keywords){
+				if(first){
+					solrQuery += keyword;
+					first = false;
+				}	
+				else
+					solrQuery += " AND " + keyword;
+			}
+		}
+		
+		if(!hashtags.isEmpty()){
+			for(String hashtag : hashtags){
+				if(first){
+					solrQuery += hashtag;
+					first = false;
+				}	
+				else
+					solrQuery += " OR " + hashtag;
+			}
 		}
 		solrQuery += ")";
 		
+		solrQuery += " OR description : (";
+		
+		if(!keywords.isEmpty()){
+			//add keywords to query
+			for(String keyword : keywords){
+				if(first){
+					solrQuery += keyword;
+					first = false;
+				}	
+				else
+					solrQuery += " AND " + keyword;
+			}
+		}
+		
+		if(!hashtags.isEmpty()){
+			for(String hashtag : hashtags){
+				if(first){
+					solrQuery += hashtag;
+					first = false;
+				}	
+				else
+					solrQuery += " OR " + hashtag;
+			}
+		}
+		
+		solrQuery += ")";
+		
+		solrQuery += " OR tags : (";
+		
+		if(!keywords.isEmpty()){
+			//add keywords to query
+			for(String keyword : keywords){
+				if(first){
+					solrQuery += keyword;
+					first = false;
+				}	
+				else
+					solrQuery += " AND " + keyword;
+			}
+		}
+		
+		if(!hashtags.isEmpty()){
+			for(String hashtag : hashtags){
+				if(first){
+					solrQuery += hashtag;
+					first = false;
+				}	
+				else
+					solrQuery += " OR " + hashtag;
+			}
+		}
+		
+		solrQuery += ")";
+		
+		if(!contributors.isEmpty()){
+			solrQuery += " OR author : (";
+			
+			first = true;
+			
+			for(String contributor : contributors){
+				if(first){
+					solrQuery += contributor;
+					first = false;
+				}	
+				else
+					solrQuery += " OR " + contributor;
+			}
+			
+			solrQuery += ")";
+		}	
 		
 		return solrQuery;
 	}
 	
-	/**
+/*	*//**
 	 * Filters dysco's content 
-	 */
+	 *//*
 	private void filterContent(){
 		for(String d_keyword : keywords){
 			d_keyword = d_keyword.toLowerCase();
@@ -100,5 +154,5 @@ public class CustomSolrQueryBuilder {
 			d_tag = d_tag.replaceAll("\\s+", " ").trim();
 			
 		}
-	}
+	}*/
 }
