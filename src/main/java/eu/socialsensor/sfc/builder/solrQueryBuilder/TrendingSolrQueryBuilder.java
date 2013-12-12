@@ -75,12 +75,43 @@ public class TrendingSolrQueryBuilder {
 		
 		if(!entities.isEmpty()){
 			for(Entity entity : entities){
+				String[] parts = null;
+				if(entity.getName().split(" ").length > 1){
+					parts = entity.getName().split(" ");
+					
+				}
+				
 				if(first){
-					solrQuery += entity.getName();
+					if(parts != null){
+						solrQuery +="(";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += entity.getName();
+					
 					first = false;
 				}	
-				else
-					solrQuery += " AND " + entity.getName();
+				else{
+					if(parts != null){
+						solrQuery +=" AND (";
+						for(int i = 0;i<parts.length;i++){
+							System.out.println("entity : "+parts[i]);
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += " AND " + entity.getName();
+				}	
 			}
 		}
 		
@@ -112,12 +143,41 @@ public class TrendingSolrQueryBuilder {
 		
 		if(!entities.isEmpty()){
 			for(Entity entity : entities){
+				String[] parts = null;
+				if(entity.getName().split(" ").length > 1){
+					parts = entity.getName().split(" ");
+				}
+				
 				if(first){
-					solrQuery += entity.getName();
+					if(parts != null){
+						solrQuery +="(";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += entity.getName();
+					
 					first = false;
 				}	
-				else
-					solrQuery += " AND " + entity.getName();
+				else{
+					if(parts != null){
+						solrQuery +=" AND (";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += " AND " + entity.getName();
+				}	
 			}
 		}
 		
@@ -139,6 +199,7 @@ public class TrendingSolrQueryBuilder {
 		if(!keywords.isEmpty()){
 			//add keywords to query
 			for(String keyword : keywords){
+					
 				if(first){
 					solrQuery += keyword;
 					first = false;
@@ -150,12 +211,41 @@ public class TrendingSolrQueryBuilder {
 		
 		if(!entities.isEmpty()){
 			for(Entity entity : entities){
+				String[] parts = null;
+				if(entity.getName().split(" ").length > 1){
+					parts = entity.getName().split(" ");
+				}
+				
 				if(first){
-					solrQuery += entity.getName();
+					if(parts != null){
+						solrQuery +="(";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += entity.getName();
+					
 					first = false;
 				}	
-				else
-					solrQuery += " AND " + entity.getName();
+				else{
+					if(parts != null){
+						solrQuery +=" AND (";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += " AND " + entity.getName();
+				}	
 			}
 		}
 		

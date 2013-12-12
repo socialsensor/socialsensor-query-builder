@@ -36,14 +36,42 @@ public class CustomSolrQueryBuilder {
 		String solrQuery = "title : (";
 		
 		if(!keywords.isEmpty()){
-			//add keywords to query
 			for(String keyword : keywords){
+				String[] parts = null;
+				if(keyword.split(" ").length > 1){
+					parts = keyword.split(" ");
+				}
+				
 				if(first){
-					solrQuery += keyword;
+					if(parts != null){
+						solrQuery +="(";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += keyword;
+					
 					first = false;
 				}	
-				else
-					solrQuery += " AND " + keyword;
+				else{
+					if(parts != null){
+						solrQuery +="AND (";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += " AND " + keyword;
+				}	
 			}
 		}
 		
@@ -62,14 +90,42 @@ public class CustomSolrQueryBuilder {
 		solrQuery += " OR description : (";
 		
 		if(!keywords.isEmpty()){
-			//add keywords to query
 			for(String keyword : keywords){
+				String[] parts = null;
+				if(keyword.split(" ").length > 1){
+					parts = keyword.split(" ");
+				}
+				
 				if(first){
-					solrQuery += keyword;
+					if(parts != null){
+						solrQuery +="(";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += keyword;
+					
 					first = false;
 				}	
-				else
-					solrQuery += " AND " + keyword;
+				else{
+					if(parts != null){
+						solrQuery +="(";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += " AND " + keyword;
+				}	
 			}
 		}
 		
@@ -89,14 +145,42 @@ public class CustomSolrQueryBuilder {
 		solrQuery += " OR tags : (";
 		
 		if(!keywords.isEmpty()){
-			//add keywords to query
 			for(String keyword : keywords){
+				String[] parts = null;
+				if(keyword.split(" ").length > 1){
+					parts = keyword.split(" ");
+				}
+				
 				if(first){
-					solrQuery += keyword;
+					if(parts != null){
+						solrQuery +="(";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += keyword;
+					
 					first = false;
 				}	
-				else
-					solrQuery += " AND " + keyword;
+				else{
+					if(parts != null){
+						solrQuery +="(";
+						for(int i = 0;i<parts.length;i++){
+							if(i == parts.length-1)
+								solrQuery += parts[i];
+							else
+								solrQuery += parts[i]+" AND ";
+						}
+						solrQuery +=")";
+					}
+					else
+						solrQuery += " AND " + keyword;
+				}	
 			}
 		}
 		
