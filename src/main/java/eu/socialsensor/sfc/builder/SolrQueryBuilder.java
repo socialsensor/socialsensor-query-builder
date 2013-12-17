@@ -10,6 +10,7 @@ import org.xml.sax.SAXException;
 
 import eu.socialsensor.framework.client.dao.TopicDAO;
 import eu.socialsensor.framework.client.dao.impl.TopicDAOImpl;
+import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Dysco.DyscoType;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.CustomSolrQueryBuilder;
@@ -85,38 +86,15 @@ public class SolrQueryBuilder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Dysco dysco = new Dysco();
-		File configFile;
 		
-		if(args.length != 1 ) {
-			configFile = new File("./conf/input.conf.xml");
+		
+		SolrQueryBuilder solrQueryBuilder = new SolrQueryBuilder();
+		SolrDyscoHandler dyscoHandler = SolrDyscoHandler.getInstance("dyscos");
+		Dysco dysco = dyscoHandler.findDyscoLight("399993f4-05d6-4a8d-94db-66b6048f7915");
+		
+		System.out.println("Solr query : "+solrQueryBuilder.getSolrQuery(dysco));
 			
-		}
-		else {
-			configFile = new File(args[0]);
-		
-		}
-		
-		
-		try {
-			InputConfiguration config = InputConfiguration.readFromFile(configFile);
-			SolrQueryBuilder solrQueryBuilder = new SolrQueryBuilder();
-			
-			System.out.println("Solr query : "+solrQueryBuilder.getSolrQuery(dysco));
-			
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		
-		
-		
+	
 		
 	}
 

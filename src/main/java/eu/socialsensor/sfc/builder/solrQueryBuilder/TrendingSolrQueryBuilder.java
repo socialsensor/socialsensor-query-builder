@@ -126,7 +126,7 @@ public class TrendingSolrQueryBuilder {
 			}
 		}
 		solrQuery += ")";
-		
+		first = true;
 		solrQuery += " OR description : (";
 		
 		if(!keywords.isEmpty()){
@@ -193,7 +193,7 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		solrQuery += ")";
-		
+		first = true;
 		solrQuery += " OR tags : (";
 		
 		if(!keywords.isEmpty()){
@@ -205,7 +205,7 @@ public class TrendingSolrQueryBuilder {
 					first = false;
 				}	
 				else
-					solrQuery += " AND " + keyword;
+					solrQuery += " OR " + keyword;
 			}
 		}
 		
@@ -223,7 +223,7 @@ public class TrendingSolrQueryBuilder {
 							if(i == parts.length-1)
 								solrQuery += parts[i];
 							else
-								solrQuery += parts[i]+" AND ";
+								solrQuery += parts[i]+" OR ";
 						}
 						solrQuery +=")";
 					}
@@ -234,17 +234,17 @@ public class TrendingSolrQueryBuilder {
 				}	
 				else{
 					if(parts != null){
-						solrQuery +=" AND (";
+						solrQuery +=" OR (";
 						for(int i = 0;i<parts.length;i++){
 							if(i == parts.length-1)
 								solrQuery += parts[i];
 							else
-								solrQuery += parts[i]+" AND ";
+								solrQuery += parts[i]+" OR ";
 						}
 						solrQuery +=")";
 					}
 					else
-						solrQuery += " AND " + entity.getName();
+						solrQuery += " OR " + entity.getName();
 				}	
 			}
 		}

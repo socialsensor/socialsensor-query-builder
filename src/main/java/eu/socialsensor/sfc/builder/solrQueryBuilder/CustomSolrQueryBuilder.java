@@ -86,7 +86,7 @@ public class CustomSolrQueryBuilder {
 			}
 		}
 		solrQuery += ")";
-		
+		first = true;
 		solrQuery += " OR description : (";
 		
 		if(!keywords.isEmpty()){
@@ -141,7 +141,7 @@ public class CustomSolrQueryBuilder {
 		}
 		
 		solrQuery += ")";
-		
+		first = true;
 		solrQuery += " OR tags : (";
 		
 		if(!keywords.isEmpty()){
