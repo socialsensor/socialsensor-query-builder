@@ -50,6 +50,7 @@ public class TrendingSolrQueryBuilder {
 		this.keywords = dysco.getKeywords().keySet();
 		this.hashtags = dysco.getHashtags().keySet();
 		
+		filterContent();
 	}
 	
 	public String createSolrQuery(){
