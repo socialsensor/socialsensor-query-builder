@@ -46,9 +46,9 @@ public class TrendingSolrQueryBuilder {
 	public TrendingSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
 		
-		this.entities = dysco.getEntities();
-		this.keywords = dysco.getKeywords().keySet();
-		this.hashtags = dysco.getHashtags().keySet();
+		//this.entities = dysco.getEntities();
+		//this.keywords = dysco.getKeywords().keySet();
+		//this.hashtags = dysco.getHashtags().keySet();
 		
 		filterContent();
 	}
@@ -76,43 +76,13 @@ public class TrendingSolrQueryBuilder {
 		
 		if(!entities.isEmpty()){
 			for(Entity entity : entities){
-				String[] parts = null;
-				if(entity.getName().split(" ").length > 1){
-					parts = entity.getName().split(" ");
-					
-				}
-				
 				if(first){
-					if(parts != null){
-						solrQuery +="(";
-						for(int i = 0;i<parts.length;i++){
-							if(i == parts.length-1)
-								solrQuery += parts[i];
-							else
-								solrQuery += parts[i]+" AND ";
-						}
-						solrQuery +=")";
-					}
-					else
-						solrQuery += entity.getName();
-					
+					solrQuery += entity.getName();
 					first = false;
 				}	
-				else{
-					if(parts != null){
-						solrQuery +=" AND (";
-						for(int i = 0;i<parts.length;i++){
-							System.out.println("entity : "+parts[i]);
-							if(i == parts.length-1)
-								solrQuery += parts[i];
-							else
-								solrQuery += parts[i]+" AND ";
-						}
-						solrQuery +=")";
-					}
-					else
-						solrQuery += " AND " + entity.getName();
-				}	
+				else
+					solrQuery += " AND " + entity.getName();
+				
 			}
 		}
 		
@@ -144,41 +114,13 @@ public class TrendingSolrQueryBuilder {
 		
 		if(!entities.isEmpty()){
 			for(Entity entity : entities){
-				String[] parts = null;
-				if(entity.getName().split(" ").length > 1){
-					parts = entity.getName().split(" ");
-				}
-				
 				if(first){
-					if(parts != null){
-						solrQuery +="(";
-						for(int i = 0;i<parts.length;i++){
-							if(i == parts.length-1)
-								solrQuery += parts[i];
-							else
-								solrQuery += parts[i]+" AND ";
-						}
-						solrQuery +=")";
-					}
-					else
-						solrQuery += entity.getName();
-					
+					solrQuery += entity.getName();
 					first = false;
 				}	
-				else{
-					if(parts != null){
-						solrQuery +=" AND (";
-						for(int i = 0;i<parts.length;i++){
-							if(i == parts.length-1)
-								solrQuery += parts[i];
-							else
-								solrQuery += parts[i]+" AND ";
-						}
-						solrQuery +=")";
-					}
-					else
-						solrQuery += " AND " + entity.getName();
-				}	
+				else
+					solrQuery += " AND " + entity.getName();
+				
 			}
 		}
 		
@@ -216,38 +158,31 @@ public class TrendingSolrQueryBuilder {
 				if(entity.getName().split(" ").length > 1){
 					parts = entity.getName().split(" ");
 				}
-				
-				if(first){
-					if(parts != null){
-						solrQuery +="(";
-						for(int i = 0;i<parts.length;i++){
-							if(i == parts.length-1)
-								solrQuery += parts[i];
-							else
-								solrQuery += parts[i]+" OR ";
-						}
-						solrQuery +=")";
+				if(parts != null){
+					String unifiedEntity = "";
+					for(int i=0; i<parts.length;i++){
+						unifiedEntity += parts[i];
 					}
+										
+					if(first){
+						solrQuery += unifiedEntity;
+						first = false;
+					}	
 					else
-						solrQuery += entity.getName();
+						solrQuery += " OR " + unifiedEntity;
+				}else{
 					
-					first = false;
-				}	
-				else{
-					if(parts != null){
-						solrQuery +=" OR (";
-						for(int i = 0;i<parts.length;i++){
-							if(i == parts.length-1)
-								solrQuery += parts[i];
-							else
-								solrQuery += parts[i]+" OR ";
-						}
-						solrQuery +=")";
-					}
+					if(first){
+						solrQuery += entity.getName();
+						first = false;
+					}	
 					else
 						solrQuery += " OR " + entity.getName();
-				}	
-			}
+
+				}
+				
+			}	
+				
 		}
 		
 		if(!hashtags.isEmpty()){
