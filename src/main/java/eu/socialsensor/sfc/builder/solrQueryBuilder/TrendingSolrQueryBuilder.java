@@ -1,10 +1,8 @@
 package eu.socialsensor.sfc.builder.solrQueryBuilder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -18,26 +16,13 @@ public class TrendingSolrQueryBuilder {
 	
 	public final Logger logger = Logger.getLogger(TrendingSolrQueryBuilder.class);
 	
-	private static final int MIN_RSS_THRESHOLD = 5;
 	private static final int KEYWORDS_LIMIT = 3;
-	
-	private Map<String,Set<String>> wordsToRSSItems;
-	private Map<String,Double> dyscoAttributesWithScore = new HashMap<String,Double>();
-	private Map<String,Double> rssTopicsScore = new HashMap<String,Double>();
 	
 	private List<Entity> entities = new ArrayList<Entity>();
 	private Set<String> keywords = new HashSet<String>();
 	private Set<String> hashtags = new HashSet<String>();
 	
-	private List<String> topKeywords = new ArrayList<String>();
-	
-	private static List<String> mostSimilarRSSTopics = new ArrayList<String>();
-	
 	private Dysco dysco = null;
-	
-	private RSSProcessor rssProcessor = null;
-	
-	private Set<Entity> mostImportantEntities = new HashSet<Entity>();
 	
 	Stopwords stopwords = new Stopwords();
 	
@@ -46,11 +31,7 @@ public class TrendingSolrQueryBuilder {
 	public TrendingSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
 		
-		//this.entities = dysco.getEntities();
-		//this.keywords = dysco.getKeywords().keySet();
-		//this.hashtags = dysco.getHashtags().keySet();
-		
-		filterContent();
+		addfilteredDyscoContent();
 	}
 	
 	public String createSolrQuery(){
@@ -202,245 +183,10 @@ public class TrendingSolrQueryBuilder {
 		return solrQuery;
 	}
 	
-	public void selectUsefulContent(){
-		List<String> mostSimilarRSSTopics = extractSimilarRSSForDysco(dysco);
-		
-		//add most important entities first
-		if(getMostImportantEntities() != null){
-			for(Entity ent : getMostImportantEntities())
-				topKeywords.add(ent.getName());
-		}
-		
-		//if there is need for more keywords add those that were found to be relevant from similar rss topics
-		if(topKeywords.size()<KEYWORDS_LIMIT){
-			
-    		List<String> processorKeywords = rssProcessor.getTopKeywordsFromSimilarRSS(mostSimilarRSSTopics, dysco);
-    		
-    		Set<String> keywordsToAdd = new HashSet<String>();
-    		
-    		//remove possible duplicates
-			for(String p_key : processorKeywords){
-				boolean exists = false;
-				for(String key : topKeywords){
-				
-					if(key.toLowerCase().equals(p_key.toLowerCase()) || key.toLowerCase().contains(p_key.toLowerCase())){
-							exists = true;
-							break;
-					}
-				}
-				if(!exists){
-				
-					keywordsToAdd.add(p_key);
-				}
-			}
-
-			for(String keyToAdd : keywordsToAdd){
-				boolean exists = false;
-				for(String keyToAdd_ : keywordsToAdd){
-					
-					if(!keyToAdd.equals(keyToAdd_)){
-						if(keyToAdd_.contains(keyToAdd)){
-							exists = true;
-						}
-					}
-				}
-				
-				if(!exists)
-					topKeywords.add(keyToAdd);
-			}
-			
-		}
-		
-	}
-	
-	/**
-	 * Sets the best (most representative) keywords 
-	 * @param topKeywords
-	 */
-	public void setTopKeywords(List<String> topKeywords){
-		this.topKeywords = topKeywords;
-	}
-	/**
-	 * Returns the best (most representative) keywords 
-	 * @param topKeywords
-	 * @return List of strings
-	 */
-	public List<String> getTopKeywords(){
-		return topKeywords;
-	}
-	/**
-	 * Returns the most important entities for the dysco
-	 * 
-	 * @return List of Entity
-	 */
-	public Set<Entity> getMostImportantEntities(){
-		
-		return mostImportantEntities;
-	}
-	
-	/**
-	 * Finds the most similar rss topics to the dysco
-	 * @param dysco
-	 * @return
-	 */
-	public List<String> extractSimilarRSSForDysco(Dysco dysco){
-		
-		filterContent();
-		extractDyscosAttributes();
-		computeTopSimilarRSS();
-		findMostSimilarRSS();
-		
-		if(mostSimilarRSSTopics.isEmpty())
-			System.out.println("Dysco has no similar RSS Topic - Can't extract usefull keywords");
-		
-		return mostSimilarRSSTopics;
-	}
-	
-	/**
-	 * Sets the importance of its dysco word according to 
-	 * its type and frequency in the dysco
-	 */
-	private void extractDyscosAttributes(){
-		for(Entity entity : entities){
-			Double score = entity.getCont();
-			if(dysco.getTitle().contains(entity.getName().toLowerCase()))
-				score *= 2;
-			if(entity.getType().equals(Entity.Type.ORGANIZATION))
-				score *= 2;
-			if(entity.getType().equals(Entity.Type.PERSON))
-				score *= 4;
-			dyscoAttributesWithScore.put(entity.getName().toLowerCase(), score*entity.getCont());
-		}
-		
-		for(String keyword : keywords){
-			Double score = 1.0;
-			if(dysco.getTitle().contains(keyword.toLowerCase())){
-				score *= 2;
-			}
-			dyscoAttributesWithScore.put(keyword.toLowerCase(), score);
-		}
-		
-	}
-	
-	/**
-	 * Computes the similarities scores of the rss topics
-	 * to the dysco based on their common entities and keywords
-	 */
-	private void computeTopSimilarRSS(){
-		Set<String> similarRSS = new HashSet<String>();
-		
-		//find most important entity
-		Double maxEntityScore = 0.0;
-		for(Entity entity : entities){
-			//find max score in entities
- 			if(entity.getCont() > maxEntityScore){
-				maxEntityScore = entity.getCont();
-			}
-		}
-		for(Entity entity : entities){
-			if(entity.getCont() == maxEntityScore)
-				mostImportantEntities.add(entity);
-		}
-		
-		if(!mostImportantEntities.isEmpty()){
-			
-			for(Entity imp_entity : mostImportantEntities){
-				
-				if(wordsToRSSItems.get(imp_entity.getName().toLowerCase())!=null)
-					similarRSS.addAll(wordsToRSSItems.get(imp_entity.getName().toLowerCase()));
-			}
-				
-			if(similarRSS.isEmpty())
-				System.out.println("No similar RSS Items for important entities");
-			else{
-				for(Entity entity : entities){
-					if(wordsToRSSItems.containsKey(entity.getName().toLowerCase())){
-						Double score = dyscoAttributesWithScore.get(entity.getName().toLowerCase());
-						for(String rss : similarRSS){
-							if(wordsToRSSItems.get(entity.getName().toLowerCase()).contains(rss)){
-								if(rssTopicsScore.containsKey(rss)){
-									rssTopicsScore.put(rss, (rssTopicsScore.get(rss)+1)*score);
-								}
-								else{
-									rssTopicsScore.put(rss, score);
-								}
-							}
-							
-						}
-					}
-				}
-				
-				for(String keyword : keywords){
-					if(wordsToRSSItems.containsKey(keyword.toLowerCase())){
-						Double score = dyscoAttributesWithScore.get(keyword.toLowerCase());
-						for(String rss : similarRSS){
-							if(wordsToRSSItems.get(keyword.toLowerCase()).contains(rss)){
-								if(rssTopicsScore.containsKey(rss)){
-									rssTopicsScore.put(rss, (rssTopicsScore.get(rss)+1)*score);
-								}
-								else{
-									rssTopicsScore.put(rss, score);
-								}
-							}
-							
-						}
-					}
-				}
-			}
-		}
-		
-		if(similarRSS.isEmpty()){
-			
-			for(String keyword : keywords){
-				
-				if(wordsToRSSItems.containsKey(keyword.toLowerCase())){
-					Double score = dyscoAttributesWithScore.get(keyword.toLowerCase());
-					similarRSS = wordsToRSSItems.get(keyword.toLowerCase());
-					for(String rss : similarRSS){
-						if(rssTopicsScore.containsKey(rss)){
-							rssTopicsScore.put(rss, (rssTopicsScore.get(rss)+1)*score);
-						}
-						else{
-							rssTopicsScore.put(rss, score);
-						}
-					}
-				}
-			}
-			
-			boolean isSimilar = false;
-			for(Double score : rssTopicsScore.values()){
-				if(score >= MIN_RSS_THRESHOLD)
-					isSimilar = true;
-			}
-			
-			if(!isSimilar)
-				rssTopicsScore.clear();
-		}
-	}
-	
-	/**
-	 * Finds the rss topics that have the maximum 
-	 * similarity score to the dysco
-	 */
-	private void findMostSimilarRSS(){
-		Double maxScore = 0.0;
-	
-		for(String rss : rssTopicsScore.keySet()){
-			if(rssTopicsScore.get(rss) > maxScore)
-				maxScore = rssTopicsScore.get(rss);
-		}
-		mostSimilarRSSTopics.clear();
-		for(Map.Entry<String, Double> entry : rssTopicsScore.entrySet()){
-			if(entry.getValue() == maxScore){
-				mostSimilarRSSTopics.add(entry.getKey());
-			}
-		}
-	}
-	
 	/**
 	 * Filters dysco's content 
 	 */
-	private void filterContent(){
+	private void addfilteredDyscoContent(){
 		
 		List<Entity> filteredEntities = new ArrayList<Entity>();
 		List<String> filteredKeywords = new ArrayList<String>();
@@ -535,7 +281,4 @@ public class TrendingSolrQueryBuilder {
 			
 	}
 	
-	public static void main(String[] args) {
-		
-	}
 }

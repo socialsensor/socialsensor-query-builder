@@ -217,26 +217,4 @@ public class CustomSolrQueryBuilder {
 		return solrQuery;
 	}
 	
-/*	*//**
-	 * Filters dysco's content 
-	 *//*
-	private void filterContent(){
-		for(String d_keyword : keywords){
-			d_keyword = d_keyword.toLowerCase();
-			d_keyword = d_keyword.replaceAll("'s", "");
-			d_keyword = d_keyword.replaceAll("'", "");
-			d_keyword = d_keyword.replaceAll("[:.,?!;&'#]+","");
-			d_keyword = d_keyword.replaceAll("\\s+", " ");
-			
-		}
-		
-		for(String d_tag : hashtags){
-			d_tag = d_tag.toLowerCase();
-			d_tag = d_tag.replaceAll("'s", "");
-			d_tag = d_tag.replaceAll("'", "");
-			d_tag = d_tag.replaceAll("[:.,?!;&']+","");
-			d_tag = d_tag.replaceAll("\\s+", " ").trim();
-			
-		}
-	}*/
 }

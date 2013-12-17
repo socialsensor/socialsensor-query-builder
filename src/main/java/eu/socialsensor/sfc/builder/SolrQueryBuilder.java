@@ -1,20 +1,12 @@
 package eu.socialsensor.sfc.builder;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.log4j.Logger;
-import org.xml.sax.SAXException;
 
 import eu.socialsensor.framework.client.dao.TopicDAO;
-import eu.socialsensor.framework.client.dao.impl.TopicDAOImpl;
 import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Dysco.DyscoType;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.CustomSolrQueryBuilder;
-import eu.socialsensor.sfc.builder.solrQueryBuilder.RSSProcessor;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.TrendingSolrQueryBuilder;
 
 public class SolrQueryBuilder {
@@ -23,8 +15,6 @@ public class SolrQueryBuilder {
 	protected static final String HOST = "host";
 	protected static final String DATABASE = "database";
 	protected static final String COLLECTION = "collection";
-	
-	private RSSProcessor rssProcessor = null;
 	
 	private TopicDAO topicDAO;
 	
@@ -72,15 +62,7 @@ public class SolrQueryBuilder {
 		}
 	}
 	
-	/**
-	 * Sets the RSSProcessor that is used for handling
-	 * the rss topics for keywords' extraction
-	 * @param topicDAO
-	 */
-	public void setRSSProcessor(TopicDAO topicDAO){
-		rssProcessor.setRSSProcessor(topicDAO);
-		rssProcessor.processRSSItems();
-	}
+	
 
 	/**
 	 * @param args
@@ -89,9 +71,10 @@ public class SolrQueryBuilder {
 		
 		
 		SolrQueryBuilder solrQueryBuilder = new SolrQueryBuilder();
-		SolrDyscoHandler dyscoHandler = SolrDyscoHandler.getInstance("dyscos");
-		Dysco dysco = dyscoHandler.findDyscoLight("399993f4-05d6-4a8d-94db-66b6048f7915");
-		
+		final SolrDyscoHandler handler = SolrDyscoHandler.getInstance("http://social1.atc.gr:8080/solr/dyscos");
+		Dysco dysco = handler.findDyscoLight("0dbcbe53-2ceb-414b-aa9d-d477f21a2623");
+		if(dysco == null)
+			System.err.println("Dysco is NULL");
 		System.out.println("Solr query : "+solrQueryBuilder.getSolrQuery(dysco));
 			
 	
