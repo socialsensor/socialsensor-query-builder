@@ -27,9 +27,9 @@ public class SolrQueryBuilder {
 	
 	/**
 	 * Returns the solr query based on the information of
-	 * a dysco
+	 * a dysco (trending/custom)
 	 * @param dysco
-	 * @return
+	 * @return the solr query
 	 */
 	public String getSolrQuery(Dysco dysco){
 		
@@ -61,7 +61,7 @@ public class SolrQueryBuilder {
 	 */
 	public static void main(String[] args) {
 
-		
+
 			
 	
 	}
