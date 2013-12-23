@@ -138,64 +138,6 @@ public class FeedsCreator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
-try {
-			
-			File configFile;
-			
-			if(args.length != 1 ) {
-				configFile = new File("./conf/input.conf.xml");
-				
-			}
-			else {
-				configFile = new File(args[0]);
-			
-			}
-			
-			InputConfiguration config = InputConfiguration.readFromFile(configFile);	
-			
-			SolrQueryBuilder solrQueryBuilder = new SolrQueryBuilder();
-			final SolrDyscoHandler handler = SolrDyscoHandler.getInstance("http://social1.atc.gr:8080/solr/dyscos");
-			Dysco dysco = handler.findDyscoLight("7073ee25-5ee1-472b-9b1d-a840c748be15");
-			if(dysco == null)
-				System.err.println("Dysco is NULL");
-
-			dysco.setSolrQuery(solrQueryBuilder.getSolrQuery(dysco));
-			System.out.println("Solr query : "+solrQueryBuilder.getSolrQuery(dysco));
-			
-			long t1 = System.currentTimeMillis();
-			FeedsCreator feedsCreator = new FeedsCreator(DataInputType.DYSCO,dysco);
-	       
-	        List<Feed> results = feedsCreator.getQuery();
-	        
-	        if(results == null){
-	        	System.err.println("No feeds for this query");
-	        	return;
-	        }
-	        	
-	        long t2 = System.currentTimeMillis();
-	        System.out.println("Running time of Query Builder : "+(t2-t1) +" miliseconds");
-			for(Feed feed : results){
-
-				if(feed.getFeedtype().equals(FeedType.SOURCE)){
-					SourceFeed sFeed = (SourceFeed) feed;
-					System.out.println(sFeed.toJSONString());
-				}
-				else if (feed.getFeedtype().equals(FeedType.KEYWORDS)){
-					KeywordsFeed kFeed = (KeywordsFeed) feed;
-					System.out.println(kFeed.toJSONString());
-				}
-				
-			}
-		
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-
 	}
 
 }

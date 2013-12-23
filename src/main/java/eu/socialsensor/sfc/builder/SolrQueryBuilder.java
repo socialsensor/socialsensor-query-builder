@@ -60,12 +60,7 @@ public class SolrQueryBuilder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		SolrQueryBuilder solrQueryBuilder = new SolrQueryBuilder();
-		final SolrDyscoHandler handler = SolrDyscoHandler.getInstance("http://social1.atc.gr:8080/solr/dyscos");
-		Dysco dysco = handler.findDyscoLight("7073ee25-5ee1-472b-9b1d-a840c748be15");
-		if(dysco == null)
-			System.err.println("Dysco is NULL");
-		System.out.println("Solr query : "+solrQueryBuilder.getSolrQuery(dysco));
+
 	
 	}
 
