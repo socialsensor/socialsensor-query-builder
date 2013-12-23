@@ -11,7 +11,12 @@ import eu.socialsensor.framework.common.domain.Stopwords;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Entity;
 
-
+/**
+ * @brief The class that creates the solr query based on the 
+ * information of a trending dysco (keywords,entities,hashtags)
+ * @author ailiakop
+ * @email  ailiakop@iti.gr
+ */
 public class TrendingSolrQueryBuilder {
 	
 	public final Logger logger = Logger.getLogger(TrendingSolrQueryBuilder.class);
@@ -34,6 +39,12 @@ public class TrendingSolrQueryBuilder {
 		addfilteredDyscoContent();
 	}
 	
+	/**
+	 * Creates and returns the solr query. The solr query is created by combining 
+	 * the keywords , entities and hashtags that represent the topic of a trending 
+	 * dysco.
+	 * @return the solr querty
+	 */
 	public String createSolrQuery(){
 		
 		if(keywords.isEmpty() && entities.isEmpty() && hashtags.isEmpty())
@@ -51,7 +62,7 @@ public class TrendingSolrQueryBuilder {
 					first = false;
 				}	
 				else
-					solrQuery += " AND " + keyword;
+					solrQuery += " OR " + keyword;
 			}
 		}
 		
@@ -62,7 +73,7 @@ public class TrendingSolrQueryBuilder {
 					first = false;
 				}	
 				else
-					solrQuery += " AND " + entity.getName();
+					solrQuery += " OR " + entity.getName();
 				
 			}
 		}
@@ -89,7 +100,7 @@ public class TrendingSolrQueryBuilder {
 					first = false;
 				}	
 				else
-					solrQuery += " AND " + keyword;
+					solrQuery += " OR " + keyword;
 			}
 		}
 		
@@ -100,7 +111,7 @@ public class TrendingSolrQueryBuilder {
 					first = false;
 				}	
 				else
-					solrQuery += " AND " + entity.getName();
+					solrQuery += " OR " + entity.getName();
 				
 			}
 		}

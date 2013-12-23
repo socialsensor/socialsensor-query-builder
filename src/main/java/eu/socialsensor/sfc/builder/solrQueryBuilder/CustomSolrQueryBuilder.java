@@ -8,7 +8,12 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
-
+/**
+ * @brief The class that creates the solr query based on the 
+ * information of a custom dysco (keywords,hashtags,contributors)
+ * @author ailiakop
+ * @email  ailiakop@iti.gr
+ */
 public class CustomSolrQueryBuilder {
 	
 	public final Logger logger = Logger.getLogger(CustomSolrQueryBuilder.class);
@@ -26,6 +31,12 @@ public class CustomSolrQueryBuilder {
 		
 	}
 	
+	/**
+	 * Creates and returns the solr query. The solr query is created by combining 
+	 * the keywords, hashtags and contributors that are inserted by the user from UI when
+	 * a custom dysco is created.
+	 * @return
+	 */
 	public String createSolrQuery(){
 	
 		if(keywords.isEmpty() && contributors.isEmpty() && hashtags.isEmpty())
