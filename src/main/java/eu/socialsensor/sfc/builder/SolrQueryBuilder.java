@@ -2,11 +2,18 @@ package eu.socialsensor.sfc.builder;
 
 import org.apache.log4j.Logger;
 
+import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Dysco.DyscoType;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.CustomSolrQueryBuilder;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.TrendingSolrQueryBuilder;
 
+/**
+ * @brief Class for the creation of a SolrQuery
+ * that will be used for the retrieval of Items and MediaItems
+ * @author ailiakop
+ * @email  ailiakop@iti.gr
+ */
 public class SolrQueryBuilder {
 	public final Logger logger = Logger.getLogger(SolrQueryBuilder.class);
 	
@@ -18,6 +25,12 @@ public class SolrQueryBuilder {
 		logger.info("SolrQueryBuilder instance created");
 	}
 	
+	/**
+	 * Returns the solr query based on the information of
+	 * a dysco
+	 * @param dysco
+	 * @return
+	 */
 	public String getSolrQuery(Dysco dysco){
 		
 		if(dysco.getDyscoType() == null){
@@ -49,6 +62,8 @@ public class SolrQueryBuilder {
 	public static void main(String[] args) {
 
 		
+			
+	
 	}
 
 }
