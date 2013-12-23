@@ -27,6 +27,13 @@ import eu.socialsensor.framework.common.domain.StreamUser.Category;
 import eu.socialsensor.sfc.builder.StorageInputConfiguration;
 import eu.socialsensor.sfc.builder.input.InputReader;
 
+
+/**
+ * @brief The class responsible for the creation of input feeds from
+ * mongo db storage
+ * @author ailiakop
+ * @email  ailiakop@iti.gr
+ */
 public class MongoInputReader implements InputReader{
 	
 	protected static final String HOST = "host";
@@ -71,18 +78,18 @@ public class MongoInputReader implements InputReader{
 			List<Feed> feedsPerStream = new ArrayList<Feed>();
 			if(stream.equals("Twitter"))
 				this.streamType = SocialNetworkSource.Twitter;
-			else if(stream.equals("Facebook"))
-				this.streamType = SocialNetworkSource.Facebook;
-			else if(stream.equals("Flickr"))
-				this.streamType = SocialNetworkSource.Flickr;
-			else if(stream.equals("GooglePlus"))
-				this.streamType = SocialNetworkSource.GooglePlus;
-			else if(stream.equals("Instagram"))
-				this.streamType = SocialNetworkSource.Instagram;
-			else if(stream.equals("Tumblr"))
-				this.streamType = SocialNetworkSource.Tumblr;
-			else if(stream.equals("Youtube"))
-				this.streamType = SocialNetworkSource.Youtube;
+//			else if(stream.equals("Facebook"))
+//				this.streamType = SocialNetworkSource.Facebook;
+//			else if(stream.equals("Flickr"))
+//				this.streamType = SocialNetworkSource.Flickr;
+//			else if(stream.equals("GooglePlus"))
+//				this.streamType = SocialNetworkSource.GooglePlus;
+//			else if(stream.equals("Instagram"))
+//				this.streamType = SocialNetworkSource.Instagram;
+//			else if(stream.equals("Tumblr"))
+//				this.streamType = SocialNetworkSource.Tumblr;
+//			else if(stream.equals("Youtube"))
+//				this.streamType = SocialNetworkSource.Youtube;
 			
 			Map<FeedType,Object> inputData = getData();
 			
@@ -180,12 +187,7 @@ public class MongoInputReader implements InputReader{
 		
 		return inputDataPerType;
 	}
-	
-	@Override
-	public void run(){
-		
-	}
-	
+
 	@Override
 	public Map<String,Set<String>> getUsersToLists(){
 		return usersToLists;

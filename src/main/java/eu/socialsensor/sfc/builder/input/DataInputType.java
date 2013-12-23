@@ -1,6 +1,13 @@
 package eu.socialsensor.sfc.builder.input;
 
+
+/**
+ * @brief  The type of input data that is used for the
+ * creation of input feeds
+ * @author ailiakop
+ * @email  ailiakop@iti.gr 
+ */
 public enum DataInputType {
 	
-	CONFIGURATION, DYSCO
+	CONFIG_FILE, MONGO_STORAGE , DYSCO
 }

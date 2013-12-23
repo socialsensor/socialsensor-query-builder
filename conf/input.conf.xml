@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
-	   <StorageInput>
+	 <!--   <StorageInput>
 	   		<Storage id = "Mongodb">
-	   			<Parameter name="host"><![CDATA[your.ip]]></Parameter>
-	   			<Parameter name="database"><![CDATA[your.database]]></Parameter>
-	   			<Parameter name="sources.collection"><![CDATA[your.sources.collection]]></Parameter>
-	   			<Parameter name="experts.collection"><![CDATA[your.experts.collection]]></Parameter>
+	   			<Parameter name="host"><![CDATA[social1.atc.gr]]></Parameter>
+	   			<Parameter name="database"><![CDATA[Streams]]></Parameter>
+	   			<Parameter name="sources.collection"><![CDATA[Sources]]></Parameter>
+	   			<Parameter name="experts.collection"><![CDATA[Experts]]></Parameter>
 	   		</Storage>
-	   </StorageInput>
+	   </StorageInput> -->
 	   
-	  <!--  <StreamInput>
+	   <StreamInput>
 	   		<Stream id="Facebook">
 		        <Parameter name="since">
 		        	<![CDATA[2013-10-31 00:00:00.000]]>
@@ -116,7 +116,7 @@
 			</Stream> 
 	   		
 	   </StreamInput>
-   		 -->
+   		
    	
 </Configuration>
 

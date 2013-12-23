@@ -28,6 +28,12 @@ import eu.socialsensor.sfc.builder.InputConfiguration;
 import eu.socialsensor.sfc.builder.StreamInputConfiguration;
 import eu.socialsensor.sfc.builder.input.InputReader;
 
+/**
+ * @brief The class that is responsible for the creation of input feeds
+ * from a configuration file
+ * @author ailiakop
+ * @email  ailiakop@iti.gr
+ */
 public class ConfigInputReader implements InputReader{
 	protected static final String SINCE = "since";
 	protected static final String KEYWORDS = "keywords";
@@ -245,10 +251,6 @@ public class ConfigInputReader implements InputReader{
 		return inputDataPerType;
 	}
 	
-	@Override
-	public void run(){
-		
-	}
 	
 	@Override
 	public Map<String,Set<String>> getUsersToLists(){
