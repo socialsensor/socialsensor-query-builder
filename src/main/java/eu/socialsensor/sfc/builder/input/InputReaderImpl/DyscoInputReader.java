@@ -64,9 +64,27 @@ public class DyscoInputReader implements InputReader{
 			//System.out.println("rawString : "+rawString);
 			int endIndex = rawString.indexOf(")");
 			String keywordsString = rawString.substring(0, endIndex);
-			//System.out.println("keywordsString : "+keywordsString);
-			if(keywordsString.contains("OR")){
+			System.out.println("keywordsString : "+keywordsString);
+			
+			if(keywordsString.contains("OR") && keywordsString.contains("AND")){
 				String[] splittedKeywords = keywordsString.split(" OR ");
+				for(int i = 0 ; i<splittedKeywords.length ; i++){
+					String[] doubleSplitted = splittedKeywords[i].split(" AND ");
+					for(int j = 0 ; j<doubleSplitted.length ; j++){
+						System.out.println("keyword : "+doubleSplitted[j]);
+						dyscoKeywords.add(new Keyword(doubleSplitted[j], 0.0f));
+					}
+				}
+			}
+			else if(keywordsString.contains("OR")){
+				String[] splittedKeywords = keywordsString.split(" OR ");
+				for(int i = 0 ; i<splittedKeywords.length ; i++){
+					System.out.println("keyword : "+splittedKeywords[i]);
+					dyscoKeywords.add(new Keyword(splittedKeywords[i], 0.0f));
+				}
+			}
+			else if(keywordsString.contains("AND")){
+				String[] splittedKeywords = keywordsString.split(" AND ");
 				for(int i = 0 ; i<splittedKeywords.length ; i++){
 					System.out.println("keyword : "+splittedKeywords[i]);
 					dyscoKeywords.add(new Keyword(splittedKeywords[i], 0.0f));
@@ -129,7 +147,7 @@ public class DyscoInputReader implements InputReader{
 				List<Source> sources = (List<Source>) inputData.get(feedType);
 				for(Source source : sources){
 					String feedID = UUID.randomUUID().toString();
-					SourceFeed sourceFeed = new SourceFeed(source,date,feedID,null);
+					SourceFeed sourceFeed = new SourceFeed(source,date,feedID);
 					feeds.add(sourceFeed);
 				}
 				break;
@@ -138,7 +156,7 @@ public class DyscoInputReader implements InputReader{
 				Set<Keyword> keywords = (Set<Keyword>) inputData.get(feedType);
 				for(Keyword keyword : keywords){
 					String feedID = UUID.randomUUID().toString();
-					KeywordsFeed keywordsFeed = new KeywordsFeed(keyword,date,feedID,null);
+					KeywordsFeed keywordsFeed = new KeywordsFeed(keyword,date,feedID);
 					feeds.add(keywordsFeed);
 				}
 				break;

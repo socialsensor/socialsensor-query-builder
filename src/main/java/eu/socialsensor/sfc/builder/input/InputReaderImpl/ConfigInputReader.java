@@ -88,7 +88,7 @@ public class ConfigInputReader implements InputReader{
 					List<Source> sources = (List<Source>) inputData.get(feedType);
 					for(Source source : sources){
 						String feedID = UUID.randomUUID().toString();
-						SourceFeed sourceFeed = new SourceFeed(source,sinceDate,feedID,null);
+						SourceFeed sourceFeed = new SourceFeed(source,sinceDate,feedID);
 						feedsPerStream.add(sourceFeed);
 					}
 					break;
@@ -97,7 +97,7 @@ public class ConfigInputReader implements InputReader{
 					List<Keyword> keywords = (List<Keyword>) inputData.get(feedType);
 					for(Keyword keyword : keywords){
 						String feedID = UUID.randomUUID().toString();
-						KeywordsFeed keywordsFeed = new KeywordsFeed(keyword,sinceDate,feedID,null);
+						KeywordsFeed keywordsFeed = new KeywordsFeed(keyword,sinceDate,feedID);
 						feedsPerStream.add(keywordsFeed);
 					}
 					break;

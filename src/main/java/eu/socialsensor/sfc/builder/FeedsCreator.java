@@ -1,22 +1,12 @@
 package eu.socialsensor.sfc.builder;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
-import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.common.domain.Feed;
-import eu.socialsensor.framework.common.domain.Feed.FeedType;
 import eu.socialsensor.framework.common.domain.StreamUser.Category;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
-import eu.socialsensor.framework.common.domain.feeds.KeywordsFeed;
-import eu.socialsensor.framework.common.domain.feeds.SourceFeed;
 import eu.socialsensor.sfc.builder.input.InputReader;
 import eu.socialsensor.sfc.builder.input.DataInputType;
 import eu.socialsensor.sfc.builder.input.InputReaderImpl.ConfigInputReader;
