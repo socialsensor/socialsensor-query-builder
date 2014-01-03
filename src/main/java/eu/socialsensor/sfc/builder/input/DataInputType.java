@@ -9,5 +9,5 @@ package eu.socialsensor.sfc.builder.input;
  */
 public enum DataInputType {
 	
-	CONFIG_FILE, MONGO_STORAGE , DYSCO
+	CONFIG_FILE, MONGO_STORAGE , DYSCO, TXT_FILE
 }
