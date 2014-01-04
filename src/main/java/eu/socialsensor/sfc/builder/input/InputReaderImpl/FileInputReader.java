@@ -16,8 +16,6 @@ import java.util.UUID;
 
 import eu.socialsensor.framework.common.domain.Feed;
 import eu.socialsensor.framework.common.domain.NewsFeedSource;
-import eu.socialsensor.framework.common.domain.SocialNetworkSource;
-import eu.socialsensor.framework.common.domain.Source;
 import eu.socialsensor.framework.common.domain.Feed.FeedType;
 import eu.socialsensor.framework.common.domain.StreamUser.Category;
 import eu.socialsensor.framework.common.domain.feeds.URLFeed;
@@ -46,23 +44,25 @@ public class FileInputReader implements InputReader{
 	
 	public Map<FeedType,Object> getData(){
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
-		List<URL> urls = new ArrayList<URL>();
+		List<String> urls = new ArrayList<String>();
 		String path = stream_config.getParameter(FileInputReader.PATH);
+		
 		String line;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(path));
 			line = reader.readLine();
 			while (line != null) {
 				
-	        	URL url = new URL(line);
-	        	urls.add(url);
+	        	urls.add(line);
 	            line = reader.readLine();
 	        }
-			inputDataPerType.put(FeedType.URL, urls);
+			
 			reader.close();
 		} catch (IOException e) {
 	
 		}
+		
+		inputDataPerType.put(FeedType.URL, urls);
 		
 		return inputDataPerType;
 	}
@@ -74,8 +74,6 @@ public class FileInputReader implements InputReader{
 			
 			if(stream.equals("RSS"))
 				this.streamType = NewsFeedSource.RSS;
-			
-			Map<FeedType,Object> inputData = getData();
 			
 			this.stream_config = config.getStreamInputConfig(streamType.toString());
 			
@@ -97,13 +95,18 @@ public class FileInputReader implements InputReader{
 				System.err.println("No Date to retrieve from");
 				return feeds;
 			}
-				
+			
+			Map<FeedType,Object> inputData = getData();
+			System.out.println("inputData : "+inputData.keySet().size());
 			for(FeedType feedType : inputData.keySet()){
 				switch(feedType){
 					case URL :
+						
 						@SuppressWarnings("unchecked")
-						List<URL> urls = (List<URL>) inputData.get(feedType);
-						for(URL url : urls){
+						List<String> urls = (List<String>) inputData.get(feedType);
+						
+						for(String url : urls){
+					
 							String feedId = UUID.randomUUID().toString();
 							URLFeed feed = new URLFeed(url,dateToRetrieve,feedId);
 							feedsPerStream.add(feed);

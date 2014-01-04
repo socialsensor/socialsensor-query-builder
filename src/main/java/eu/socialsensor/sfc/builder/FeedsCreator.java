@@ -11,6 +11,7 @@ import eu.socialsensor.sfc.builder.input.InputReader;
 import eu.socialsensor.sfc.builder.input.DataInputType;
 import eu.socialsensor.sfc.builder.input.InputReaderImpl.ConfigInputReader;
 import eu.socialsensor.sfc.builder.input.InputReaderImpl.DyscoInputReader;
+import eu.socialsensor.sfc.builder.input.InputReaderImpl.FileInputReader;
 import eu.socialsensor.sfc.builder.input.InputReaderImpl.MongoInputReader;
 
 /**
@@ -46,6 +47,26 @@ public class FeedsCreator {
 				}
 				else{
 					System.err.println("Streams need to be configured");
+					return;
+				}
+				
+				break;
+			case TXT_FILE:
+				
+				this.config = (InputConfiguration) inputData;
+				
+				if(this.config == null){
+					System.out.println("Input Configuration is not set");
+					return;
+				}
+				
+				Set<String> newsCollectors = config.getStreamInputIds();
+				
+				if(!newsCollectors.isEmpty()){
+					reader = new FileInputReader(config);
+				}
+				else{
+					System.err.println("News Collectors need to be configured");
 					return;
 				}
 				
