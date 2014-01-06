@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import eu.socialsensor.framework.client.search.solr.SolrNewsFeedHandler;
 import eu.socialsensor.framework.common.domain.Keyword;
 import eu.socialsensor.framework.common.domain.Stopwords;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
@@ -32,6 +33,8 @@ public class TrendingSolrQueryBuilder {
 	
 	private Dysco dysco = null;
 	
+	private TrendsRanker trendsRanker = null;
+	
 	Stopwords stopwords = new Stopwords();
 	
 	//at this point every information that remains in the dysco will be used for the creation of the solr query
@@ -39,11 +42,17 @@ public class TrendingSolrQueryBuilder {
 	public TrendingSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
 		
+		
 		addfilteredDyscoContent();
 		extractDyscosVocabulary();
 		printVocabulary();
 	}
 	
+	public void setHandler(SolrNewsFeedHandler handler){
+		
+		this.trendsRanker = new TrendsRanker(handler);
+		
+	}
 	/**
 	 * Creates and returns the solr query. The solr query is created by combining 
 	 * the keywords , entities and hashtags that represent the topic of a trending 
@@ -55,6 +64,8 @@ public class TrendingSolrQueryBuilder {
 		if(keywords.isEmpty() && entities.isEmpty() && hashtags.isEmpty())
 			return null;
 	
+		//call here the method to select best content for quering
+		
 		boolean first = true;
 		
 		String solrQuery = "title : (";
@@ -337,6 +348,10 @@ public class TrendingSolrQueryBuilder {
 		for(String word : vocabulary.keySet()){
 			System.out.println(word + " - "+vocabulary.get(word));
 		}
+	}
+	
+	private void selectValuableContent(){
+		
 	}
 	
 }

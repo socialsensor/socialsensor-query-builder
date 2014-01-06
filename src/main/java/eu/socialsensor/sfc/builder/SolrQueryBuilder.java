@@ -1,13 +1,19 @@
 package eu.socialsensor.sfc.builder;
 
+import java.io.File;
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.log4j.Logger;
+import org.xml.sax.SAXException;
 
 import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
+import eu.socialsensor.framework.client.search.solr.SolrNewsFeedHandler;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Dysco.DyscoType;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.CustomSolrQueryBuilder;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.TrendingSolrQueryBuilder;
-
 /**
  * @brief Class for the creation of a SolrQuery
  * that will be used for the retrieval of Items and MediaItems
@@ -17,12 +23,42 @@ import eu.socialsensor.sfc.builder.solrQueryBuilder.TrendingSolrQueryBuilder;
 public class SolrQueryBuilder {
 	public final Logger logger = Logger.getLogger(SolrQueryBuilder.class);
 	
-	protected static final String HOST = "host";
-	protected static final String DATABASE = "database";
-	protected static final String COLLECTION = "collection";
+	protected static final String NEWS_FEED_HOST = "news.feed.host";
+	protected static final String NEWS_FEED_COLLECTION = "news.feed.collection";
+	private static final String SOLR_SERVICE = "solr.service";
+	
+	private String solrService;
+	private String newsfeedHost;
+	private String newsfeedCollection;
+	
+	private SolrNewsFeedHandler solrNewsFeedHandler;
 	
 	public SolrQueryBuilder(){
 		logger.info("SolrQueryBuilder instance created");
+		
+		File configFile = new File("./conf/newsfeed.conf.xml");
+	
+		InputConfiguration config = null;
+		try {
+			config = InputConfiguration.readFromFile(configFile);
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
+		if(config != null){
+			this.solrService = config.getParameter(SolrQueryBuilder.SOLR_SERVICE);
+			this.newsfeedHost = config.getParameter(SolrQueryBuilder.NEWS_FEED_HOST);
+			this.newsfeedCollection = config.getParameter(SolrQueryBuilder.NEWS_FEED_COLLECTION);
+		
+			this.solrNewsFeedHandler = SolrNewsFeedHandler.getInstance(newsfeedHost+"/"+solrService+"/"+newsfeedCollection);
+		}
 	}
 	
 	/**
@@ -49,7 +85,8 @@ public class SolrQueryBuilder {
 			logger.info("Find solr query for trending dysco : "+dysco.getId());
 			
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
-			
+			if(solrNewsFeedHandler != null)
+				trendingBuilder.setHandler(solrNewsFeedHandler);
 			return trendingBuilder.createSolrQuery();
 		}
 	}
@@ -60,7 +97,6 @@ public class SolrQueryBuilder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
 	
 	}
 
