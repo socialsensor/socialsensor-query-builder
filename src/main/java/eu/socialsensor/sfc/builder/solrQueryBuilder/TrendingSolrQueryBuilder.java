@@ -1,12 +1,13 @@
 package eu.socialsensor.sfc.builder.solrQueryBuilder;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import eu.socialsensor.framework.common.domain.Keyword;
 import eu.socialsensor.framework.common.domain.Stopwords;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Entity;
@@ -24,8 +25,10 @@ public class TrendingSolrQueryBuilder {
 	private static final int KEYWORDS_LIMIT = 3;
 	
 	private List<Entity> entities = new ArrayList<Entity>();
-	private Set<String> keywords = new HashSet<String>();
-	private Set<String> hashtags = new HashSet<String>();
+	private List<Keyword> keywords = new ArrayList<Keyword>();
+	private List<Keyword> hashtags = new ArrayList<Keyword>();
+	
+	private Map<String,Double> vocabulary = new HashMap<String,Double>();
 	
 	private Dysco dysco = null;
 	
@@ -37,6 +40,8 @@ public class TrendingSolrQueryBuilder {
 		this.dysco = dysco;
 		
 		addfilteredDyscoContent();
+		extractDyscosVocabulary();
+		printVocabulary();
 	}
 	
 	/**
@@ -56,13 +61,13 @@ public class TrendingSolrQueryBuilder {
 		
 		if(!keywords.isEmpty()){
 			//add keywords to query
-			for(String keyword : keywords){
+			for(Keyword keyword : keywords){
 				if(first){
-					solrQuery += keyword;
+					solrQuery += keyword.getName();
 					first = false;
 				}	
 				else
-					solrQuery += " OR " + keyword;
+					solrQuery += " OR " + keyword.getName();
 			}
 		}
 		
@@ -79,13 +84,13 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		if(!hashtags.isEmpty()){
-			for(String hashtag : hashtags){
+			for(Keyword hashtag : hashtags){
 				if(first){
-					solrQuery += hashtag;
+					solrQuery += hashtag.getName();
 					first = false;
 				}	
 				else
-					solrQuery += " OR " + hashtag;
+					solrQuery += " OR " + hashtag.getName();
 			}
 		}
 		solrQuery += ")";
@@ -94,13 +99,13 @@ public class TrendingSolrQueryBuilder {
 		
 		if(!keywords.isEmpty()){
 			//add keywords to query
-			for(String keyword : keywords){
+			for(Keyword keyword : keywords){
 				if(first){
-					solrQuery += keyword;
+					solrQuery += keyword.getName();
 					first = false;
 				}	
 				else
-					solrQuery += " OR " + keyword;
+					solrQuery += " OR " + keyword.getName();
 			}
 		}
 		
@@ -117,13 +122,13 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		if(!hashtags.isEmpty()){
-			for(String hashtag : hashtags){
+			for(Keyword hashtag : hashtags){
 				if(first){
-					solrQuery += hashtag;
+					solrQuery += hashtag.getName();
 					first = false;
 				}	
 				else
-					solrQuery += " OR " + hashtag;
+					solrQuery += " OR " + hashtag.getName();
 			}
 		}
 		
@@ -133,14 +138,14 @@ public class TrendingSolrQueryBuilder {
 		
 		if(!keywords.isEmpty()){
 			//add keywords to query
-			for(String keyword : keywords){
+			for(Keyword keyword : keywords){
 					
 				if(first){
-					solrQuery += keyword;
+					solrQuery += keyword.getName();
 					first = false;
 				}	
 				else
-					solrQuery += " OR " + keyword;
+					solrQuery += " OR " + keyword.getName();
 			}
 		}
 		
@@ -178,13 +183,13 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		if(!hashtags.isEmpty()){
-			for(String hashtag : hashtags){
+			for(Keyword hashtag : hashtags){
 				if(first){
-					solrQuery += hashtag;
+					solrQuery += hashtag.getName();
 					first = false;
 				}	
 				else
-					solrQuery += " OR " + hashtag;
+					solrQuery += " OR " + hashtag.getName();
 			}
 		}
 		
@@ -280,16 +285,58 @@ public class TrendingSolrQueryBuilder {
 				filteredKeywords.get(index).replaceAll("'", "");
 				filteredKeywords.get(index).replaceAll("[:.,?!;&'#]+-","");
 				filteredKeywords.get(index).replaceAll("\\s+", " ");
-       		 	
+				
+				//Create the keyword to use
+				Keyword keyword = new Keyword(filteredKeywords.get(index),dysco.getKeywords().get(key).floatValue());
+				keywords.add(keyword);
 			}
 			
-			keywords.addAll(filteredKeywords);
 		}
 		
 		if(dysco.getHashtags() != null){
-			hashtags.addAll(dysco.getHashtags().keySet());
+			for(String hashtag : dysco.getHashtags().keySet()){
+				//Create the keyword to use
+				Keyword keyword = new Keyword(hashtag,dysco.getHashtags().get(hashtag).floatValue());
+				hashtags.add(keyword);
+			}
 		}
 			
+	}
+	
+	private void extractDyscosVocabulary(){
+		
+		for(Entity entity : entities){
+			if(!vocabulary.containsKey(entity.getName())){
+				vocabulary.put(entity.getName(), entity.getCont()+1);
+			}
+		}
+		
+		for(Keyword hashtag : hashtags){
+			if(!vocabulary.containsKey(hashtag.getName())){
+				vocabulary.put(hashtag.getName(), new Double(hashtag.getScore()+1));
+			}
+		}
+		
+		for(Keyword keyword : keywords){
+			String[] ngrams = keyword.getName().split(" ");
+			for(int i=0;i<ngrams.length;i++){
+				if(!vocabulary.containsKey(ngrams[i])){
+					vocabulary.put(ngrams[i], new Double(keyword.getScore()+1));
+				}
+				else{
+					double score = vocabulary.get(ngrams[i]);
+					score += 1;
+					vocabulary.put(ngrams[i], score);
+				}
+			}
+		}
+	}
+	
+	public void printVocabulary(){
+		System.out.println("---Vocabulary---");
+		for(String word : vocabulary.keySet()){
+			System.out.println(word + " - "+vocabulary.get(word));
+		}
 	}
 	
 }
