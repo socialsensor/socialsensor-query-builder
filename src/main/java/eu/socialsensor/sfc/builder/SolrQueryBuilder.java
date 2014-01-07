@@ -31,27 +31,28 @@ public class SolrQueryBuilder {
 	private String newsfeedHost;
 	private String newsfeedCollection;
 	
+	private InputConfiguration config = null;
+	
 	private SolrNewsFeedHandler solrNewsFeedHandler;
 	
 	public SolrQueryBuilder(){
 		logger.info("SolrQueryBuilder instance created");
 		
-		File configFile = new File("./conf/newsfeed.conf.xml");
-	
-		InputConfiguration config = null;
-		try {
-			config = InputConfiguration.readFromFile(configFile);
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		
+//		File configFile = new File("./conf/newsfeed.conf.xml");
+//		
+//		try {
+//			config = InputConfiguration.readFromFile(configFile);
+//		} catch (ParserConfigurationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (SAXException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}	
+//		
 		if(config != null){
 			this.solrService = config.getParameter(SolrQueryBuilder.SOLR_SERVICE);
 			this.newsfeedHost = config.getParameter(SolrQueryBuilder.NEWS_FEED_HOST);
@@ -97,7 +98,7 @@ public class SolrQueryBuilder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-	
+		
 	}
 
 }

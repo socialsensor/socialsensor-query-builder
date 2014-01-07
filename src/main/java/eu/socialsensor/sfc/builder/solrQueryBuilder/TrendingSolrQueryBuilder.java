@@ -23,11 +23,12 @@ public class TrendingSolrQueryBuilder {
 	
 	public final Logger logger = Logger.getLogger(TrendingSolrQueryBuilder.class);
 	
-	private static final int KEYWORDS_LIMIT = 3;
-	
 	private List<Entity> entities = new ArrayList<Entity>();
 	private List<Keyword> keywords = new ArrayList<Keyword>();
 	private List<Keyword> hashtags = new ArrayList<Keyword>();
+	
+	private List<Keyword> mikeywords = new ArrayList<Keyword>();
+	private List<Entity> lientities = new ArrayList<Entity>();
 	
 	private Map<String,Double> vocabulary = new HashMap<String,Double>();
 	
@@ -332,7 +333,14 @@ public class TrendingSolrQueryBuilder {
 			String[] ngrams = keyword.getName().split(" ");
 			for(int i=0;i<ngrams.length;i++){
 				if(!vocabulary.containsKey(ngrams[i])){
-					vocabulary.put(ngrams[i], new Double(keyword.getScore()+1));
+					double score = 0;
+					//check if it is or contains an entity
+					for(Entity ent : entities){
+						if(ngrams[i].equals(ent.getName()) || ent.getName().contains(ngrams[i]))
+							score += ent.getCont() + 1;
+					} 
+					score += keyword.getScore()+1;
+					vocabulary.put(ngrams[i], score);
 				}
 				else{
 					double score = vocabulary.get(ngrams[i]);
@@ -351,7 +359,40 @@ public class TrendingSolrQueryBuilder {
 	}
 	
 	private void selectValuableContent(){
-		
+		findMostImportantKeywords();
+		findLessImportantEntities();
 	}
 	
+	private void findMostImportantKeywords(){
+		double maxScore = 0;
+		for(Keyword key : keywords){
+			if(vocabulary.get(key) > maxScore)
+				maxScore = vocabulary.get(key);
+		}
+		
+		for(Keyword key : keywords){
+			if(vocabulary.get(key) == maxScore)
+				mikeywords.add(key);
+		}
+	}
+	
+	private void findLessImportantEntities(){
+		
+		for(Entity ent : entities){
+			boolean exists = false;
+			
+			for(Keyword key : keywords){
+				if(key.getName().contains(ent.getName())){
+					exists = true;
+					break;
+				}
+		
+			}
+			
+			if(!exists){
+				lientities.add(ent);
+			}
+		}
+		
+	}
 }
