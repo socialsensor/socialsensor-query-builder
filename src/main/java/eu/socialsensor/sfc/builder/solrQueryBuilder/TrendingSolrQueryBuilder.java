@@ -1,9 +1,11 @@
 package eu.socialsensor.sfc.builder.solrQueryBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
@@ -28,7 +30,7 @@ public class TrendingSolrQueryBuilder {
 	private List<Keyword> hashtags = new ArrayList<Keyword>();
 	
 	private List<Keyword> mikeywords = new ArrayList<Keyword>();
-	private List<Entity> lientities = new ArrayList<Entity>();
+	private List<Entity> mientities = new ArrayList<Entity>();
 	
 	private Map<String,Double> vocabulary = new HashMap<String,Double>();
 	
@@ -43,10 +45,11 @@ public class TrendingSolrQueryBuilder {
 	public TrendingSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
 		
-		
 		addfilteredDyscoContent();
-		extractDyscosVocabulary();
-		printVocabulary();
+		extractDyscosVocabularyWithWeights();
+		//printVocabulary();
+		
+		selectValuableContent();
 	}
 	
 	public void setHandler(SolrNewsFeedHandler handler){
@@ -211,6 +214,67 @@ public class TrendingSolrQueryBuilder {
 		return solrQuery;
 	}
 	
+	public String createUpdatedSolrQuery(){
+		String solrQuery = "";
+		if(mikeywords.isEmpty() && mientities.isEmpty() && hashtags.isEmpty())
+			return solrQuery;
+		
+		boolean first = true;
+		
+		String hash_ent_part = "";
+		
+		String key_part = "";
+		
+		if(!mientities.isEmpty()){
+			for(Entity entity : mientities){
+				
+				if(first){
+					hash_ent_part += "\""+entity.getName()+"\"";
+					first = false;
+				}	
+				else
+					hash_ent_part += " OR \"" + entity.getName()+"\"";
+				
+			}
+		}
+		
+		if(!hashtags.isEmpty()){
+			for(Keyword hashtag : hashtags){
+				if(first){
+					hash_ent_part += hashtag.getName();
+					first = false;
+				}	
+				else
+					hash_ent_part += " OR " + hashtag.getName();
+			}
+		}
+		
+		first = true;
+		
+		if(!mikeywords.isEmpty()){
+			//add keywords to query
+			for(Keyword keyword : mikeywords){
+				if(first){
+					key_part += keyword.getName();
+					first = false;
+				}	
+				else
+					key_part += " OR " + keyword.getName();
+			}
+		}
+		
+		//Final formulation of solr query
+		
+		if(!hash_ent_part.equals(""))
+			solrQuery += "("+hash_ent_part+")";
+		if(!hash_ent_part.equals("") && !key_part.equals(""))
+			solrQuery += " AND ";
+		if(!key_part.equals(""))
+			solrQuery += "("+key_part+")";
+		
+		return solrQuery;
+	}
+	
 	/**
 	 * Filters dysco's content 
 	 */
@@ -299,7 +363,7 @@ public class TrendingSolrQueryBuilder {
 				filteredKeywords.get(index).replaceAll("\\s+", " ");
 				
 				//Create the keyword to use
-				Keyword keyword = new Keyword(filteredKeywords.get(index),dysco.getKeywords().get(key).floatValue());
+				Keyword keyword = new Keyword(filteredKeywords.get(index).toLowerCase(),dysco.getKeywords().get(key).floatValue());
 				keywords.add(keyword);
 			}
 			
@@ -315,7 +379,7 @@ public class TrendingSolrQueryBuilder {
 			
 	}
 	
-	private void extractDyscosVocabulary(){
+	private void extractDyscosVocabularyWithWeights(){
 		
 		for(Entity entity : entities){
 			if(!vocabulary.containsKey(entity.getName())){
@@ -330,8 +394,26 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		for(Keyword keyword : keywords){
+			
+			for(Entity ent : entities){
+				if(keyword.getName().equals(ent.getName())){
+					double eScore = vocabulary.get(ent.getName());
+				//	System.out.println("keyword equal to entity");
+					vocabulary.put(ent.getName(), eScore+1);
+					
+				}
+			}
+			
 			String[] ngrams = keyword.getName().split(" ");
 			for(int i=0;i<ngrams.length;i++){
+			//	System.out.println("Handling word : "+ngrams[i]);
+				for(Entity ent : entities){
+					if(ngrams[i].equals(ent.getName()) || ent.getName().contains(ngrams[i])){
+						double eScore = vocabulary.get(ent.getName());
+						vocabulary.put(ent.getName(), eScore + 1);
+					}
+				}
+				
 				if(!vocabulary.containsKey(ngrams[i])){
 					double score = 0;
 					//check if it is or contains an entity
@@ -347,6 +429,8 @@ public class TrendingSolrQueryBuilder {
 					score += 1;
 					vocabulary.put(ngrams[i], score);
 				}
+				
+			//	System.out.println("word : "+ngrams[i]+" is stored in vocabulary with score : "+vocabulary.get(ngrams[i]));
 			}
 		}
 	}
@@ -359,38 +443,92 @@ public class TrendingSolrQueryBuilder {
 	}
 	
 	private void selectValuableContent(){
-		findMostImportantKeywords();
-		findLessImportantEntities();
-	}
-	
-	private void findMostImportantKeywords(){
+		
+		findMostImportantEntities();
+		
+	/*	System.out.println("---Most Important Entities---");
+		for(Entity ent : mientities){
+			System.out.println(ent.getName());
+		}*/
+		
 		double maxScore = 0;
-		for(Keyword key : keywords){
-			if(vocabulary.get(key) > maxScore)
-				maxScore = vocabulary.get(key);
-		}
+		Map<Double,List<Keyword>> scoresToKeywords = new TreeMap<Double,List<Keyword>>(Collections.reverseOrder());
 		
 		for(Keyword key : keywords){
-			if(vocabulary.get(key) == maxScore)
-				mikeywords.add(key);
+			double score = 0;
+			boolean isEqualToEntiy = false;
+			
+			if(key.getName().length() == 1){
+				score += vocabulary.get(key.getName());
+			}else{
+				String[] words = key.getName().split(" ");
+				
+				for(int i=0;i<words.length;i++){
+					score += vocabulary.get(words[i]);
+				}
+			}
+			
+			String updatedKeywordName = key.getName();
+			for(Entity ent : mientities){
+				if(key.getName().equals(ent.getName())){
+					isEqualToEntiy = true;
+					break;
+				}
+				if(key.getName().contains(ent.getName())){
+			//		System.out.println("keyword : "+key.getName()+" contains entity : "+ent.getName());
+					updatedKeywordName = key.getName().replaceAll(ent.getName(), "");
+				}
+			}
+			
+			if(!isEqualToEntiy){
+				Keyword updatedKeyword = new Keyword(updatedKeywordName,key.getScore());
+				
+				if(scoresToKeywords.containsKey(score)){
+					List<Keyword> alreadyIn = scoresToKeywords.get(score);
+					alreadyIn.add(updatedKeyword);
+					scoresToKeywords.put(score, alreadyIn);
+				}else{
+					List<Keyword> newElement = new ArrayList<Keyword>();
+					newElement.add(updatedKeyword);
+					scoresToKeywords.put(score, newElement);
+				}
+			}
+
 		}
+		
+		//get the first score which is the maximum
+		for(double score : scoresToKeywords.keySet()){
+			maxScore = score;
+			break;
+		}
+			
+		if(scoresToKeywords.get(maxScore) != null)
+			mikeywords = scoresToKeywords.get(maxScore);
+		
+		/*System.out.println("---Most Important Keywords---");
+		if(mikeywords != null)
+			for(Keyword key : mikeywords){
+				System.out.println(key.getName());
+			}*/
 	}
 	
-	private void findLessImportantEntities(){
+	
+	private void findMostImportantEntities(){
 		
 		for(Entity ent : entities){
 			boolean exists = false;
 			
 			for(Keyword key : keywords){
-				if(key.getName().contains(ent.getName())){
+				if(key.getName().contains(ent.getName()) || key.getName().equals(ent.getName())){
+					//System.out.println("Keyword "+key.getName()+" contains entity "+ent.getName());
 					exists = true;
 					break;
 				}
 		
 			}
 			
-			if(!exists){
-				lientities.add(ent);
+			if(exists){
+				mientities.add(ent);
 			}
 		}
 		

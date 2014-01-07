@@ -88,7 +88,7 @@ public class SolrQueryBuilder {
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
 			if(solrNewsFeedHandler != null)
 				trendingBuilder.setHandler(solrNewsFeedHandler);
-			return trendingBuilder.createSolrQuery();
+			return trendingBuilder.createUpdatedSolrQuery();
 		}
 	}
 	
@@ -98,7 +98,7 @@ public class SolrQueryBuilder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+	
 	}
 
 }
