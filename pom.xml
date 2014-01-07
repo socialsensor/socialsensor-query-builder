@@ -50,6 +50,7 @@
     </parent>
     
     <dependencies>
+    	<!-- Social Sensor -->
     	<dependency>
             <groupId>eu.socialsensor</groupId>
             <artifactId>socialsensor-framework-common</artifactId>
