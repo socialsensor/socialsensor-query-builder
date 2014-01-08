@@ -55,10 +55,47 @@ public class DyscoInputReader implements InputReader{
 		
 		this.date = dateUtil.addDays(dysco.getCreationDate(),-2);
 		
-		if(solrQuery == null)
+		if(solrQuery == "")
 			return null;
 		
-		if(solrQuery.contains("title")){
+		int startOne = solrQuery.indexOf("(");
+		int endOne = solrQuery.indexOf(")");
+		String oneString = solrQuery.substring(startOne + ("(").length(),endOne);
+		System.out.println("One String : "+oneString);
+		if(oneString.contains("OR")){
+			
+			String[] splittedKeywords = oneString.split(" OR ");
+			for(int i = 0 ; i<splittedKeywords.length ; i++){
+				System.out.println("keyword : "+splittedKeywords[i]);
+				dyscoKeywords.add(new Keyword(splittedKeywords[i], 0.0f));
+			}
+		}else{
+			System.out.println("keyword : "+oneString);
+			dyscoKeywords.add(new Keyword(oneString,0.0f));
+		}
+		
+		if(solrQuery.contains(" AND ")){
+			
+			String tempString = solrQuery.substring(endOne + (") AND (").length());
+			String secondString = tempString.substring(0, tempString.indexOf(")"));
+			System.out.println("Second String : "+secondString);
+			if(secondString.contains("OR")){
+				String[] splittedKeywords = secondString.split(" OR ");
+				for(int i = 0 ; i<splittedKeywords.length ; i++){
+					System.out.println("keyword : "+splittedKeywords[i]);
+					dyscoKeywords.add(new Keyword(splittedKeywords[i], 0.0f));
+				}
+			}else{
+				System.out.println("keyword : "+secondString);
+				dyscoKeywords.add(new Keyword(secondString,0.0f));
+			}
+			
+		}
+		if(!dyscoKeywords.isEmpty()){
+			inputDataPerType.put(FeedType.KEYWORDS, dyscoKeywords);
+		}
+		
+		/*if(solrQuery.contains("title")){
 			int beginIndex = solrQuery.indexOf("title");
 			String rawString = solrQuery.substring(beginIndex + ("title : (").length());
 			//System.out.println("rawString : "+rawString);
@@ -97,9 +134,9 @@ public class DyscoInputReader implements InputReader{
 			if(!dyscoKeywords.isEmpty()){
 				inputDataPerType.put(FeedType.KEYWORDS, dyscoKeywords);
 			}
-		}
+		}*/
 		
-		if(solrQuery.contains("contributors")){
+		/*if(solrQuery.contains("contributors")){
 			int beginIndex = solrQuery.indexOf("contributors");
 			String rawString = solrQuery.substring(beginIndex + ("contributors : ").length());
 			int endIndex = rawString.indexOf(")");
@@ -123,7 +160,7 @@ public class DyscoInputReader implements InputReader{
 				
 				inputDataPerType.put(FeedType.SOURCE, sources);
 			}
-		}
+		}*/
 		
 		
 		return inputDataPerType;
