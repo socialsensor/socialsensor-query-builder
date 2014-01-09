@@ -216,61 +216,65 @@ public class TrendingSolrQueryBuilder {
 	
 	public String createUpdatedSolrQuery(){
 		String solrQuery = "";
+		String query = "";
+		
 		if(mikeywords.isEmpty() && mientities.isEmpty() && hashtags.isEmpty())
 			return solrQuery;
 		
 		boolean first = true;
-		
-		String hash_ent_part = "";
-		
-		String key_part = "";
-		
+
 		if(!mientities.isEmpty()){
 			for(Entity entity : mientities){
+				for(Keyword key : mikeywords){
+					if(first){
+						query += "(\""+entity.getName()+"\" AND "+ key.getName()+")";
+						first = false;
+					}
+					else
+						query += " OR (\"" + entity.getName()+"\" AND "+ key.getName()+")";
+				}
 				
-				if(first){
-					hash_ent_part += "\""+entity.getName()+"\"";
-					first = false;
-				}	
-				else
-					hash_ent_part += " OR \"" + entity.getName()+"\"";
+				if(mikeywords.isEmpty()){
+					if(first){
+						query += "\""+entity.getName()+"\"";
+						first = false;
+					}	
+					else
+						query += " OR \"" + entity.getName()+"\"";
+				}
+				
 				
 			}
 		}
 		
 		if(!hashtags.isEmpty()){
 			for(Keyword hashtag : hashtags){
-				if(first){
-					hash_ent_part += hashtag.getName();
-					first = false;
-				}	
-				else
-					hash_ent_part += " OR " + hashtag.getName();
+				for(Keyword key : mikeywords){
+					if(first){
+						query += "("+hashtag.getName()+" AND "+ key.getName()+")";
+						first = false;
+					}
+					else
+						query += " OR (" + hashtag.getName()+" AND "+ key.getName()+")";
+				}
+				
+				if(mikeywords.isEmpty()){
+					if(first){
+						query += hashtag.getName();
+						first = false;
+					}	
+					else
+						query += " OR " + hashtag.getName()+"";
+				}
+				
+				
 			}
 		}
-		
-		first = true;
-		
-		if(!mikeywords.isEmpty()){
-			//add keywords to query
-			for(Keyword keyword : mikeywords){
-				if(first){
-					key_part += keyword.getName();
-					first = false;
-				}	
-				else
-					key_part += " OR " + keyword.getName();
-			}
-		}
-		
+	
 		//Final formulation of solr query
 		
-		if(!hash_ent_part.equals(""))
-			solrQuery += "("+hash_ent_part+")";
-		if(!hash_ent_part.equals("") && !key_part.equals(""))
-			solrQuery += " AND ";
-		if(!key_part.equals(""))
-			solrQuery += "("+key_part+")";
+		if(!query.equals(""))
+			solrQuery += "("+query+")";
 		
 		return solrQuery;
 	}
@@ -456,7 +460,7 @@ public class TrendingSolrQueryBuilder {
 		
 		for(Keyword key : keywords){
 			double score = 0;
-			boolean isEqualToEntiy = false;
+			boolean isEqualToEntity = false;
 			
 			if(key.getName().length() == 1){
 				score += vocabulary.get(key.getName());
@@ -471,16 +475,16 @@ public class TrendingSolrQueryBuilder {
 			String updatedKeywordName = key.getName();
 			for(Entity ent : mientities){
 				if(key.getName().equals(ent.getName())){
-					isEqualToEntiy = true;
+					isEqualToEntity = true;
 					break;
 				}
 				if(key.getName().contains(ent.getName())){
 			//		System.out.println("keyword : "+key.getName()+" contains entity : "+ent.getName());
-					updatedKeywordName = key.getName().replaceAll(ent.getName(), "");
+					updatedKeywordName = key.getName().replaceAll(ent.getName(), "").trim();
 				}
 			}
 			
-			if(!isEqualToEntiy){
+			if(!isEqualToEntity){
 				Keyword updatedKeyword = new Keyword(updatedKeywordName,key.getScore());
 				
 				if(scoresToKeywords.containsKey(score)){
@@ -497,13 +501,16 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		//get the first score which is the maximum
+		
 		for(double score : scoresToKeywords.keySet()){
 			maxScore = score;
 			break;
 		}
 			
-		if(scoresToKeywords.get(maxScore) != null)
-			mikeywords = scoresToKeywords.get(maxScore);
+		if(scoresToKeywords.get(maxScore) != null){
+			if(!(mientities.isEmpty() && hashtags.isEmpty()))
+				mikeywords = scoresToKeywords.get(maxScore);
+		}
 		
 		/*System.out.println("---Most Important Keywords---");
 		if(mikeywords != null)
