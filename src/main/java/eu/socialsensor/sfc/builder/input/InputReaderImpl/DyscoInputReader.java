@@ -227,6 +227,41 @@ public class DyscoInputReader implements InputReader{
 		return null;
 	}
 	
+	//accepts small queries in the form of  "Word1 AND Word2"
+	private void splitANDQuery(String query){
+		String [] words = query.split(" AND ");
+		
+ 		//the word on the left must always be an entity or a hashtag
+		System.out.println("entity/hashtag : "+words[0]);
+		System.out.println("keyword : "+words[1]);
+		
+		dyscoKeywords.add(new Keyword(words[0], 0.0f));
+		dyscoKeywords.add(new Keyword(words[0]+" "+words[1], 0.0f));
+	}
+	
+	//accepts small queries in the form of  "Word1 OR Word2"
+	private void splitORQuery(String query){
+		String [] words = query.split(" OR ");
+		
+ 		//the word on the left must always be an entity or a hashtag
+		System.out.println("left part : "+words[0]);
+		System.out.println("right part : "+words[1]);
+		
+		if(words[0].contains("(")){
+			splitORQuery(words[0]);
+		}
+		if(words[1].contains("(")){
+			splitORQuery(words[1]);
+		}
+		if(!words[0].contains("(") && !words[1].contains("(")){
+			dyscoKeywords.add(new Keyword(words[0], 0.0f));
+		}
+		if(!words[1].contains("(") && !words[1].contains("(")){
+			dyscoKeywords.add(new Keyword(words[1], 0.0f));
+		}
+
+	}
+	
 	public class DateUtil
 	{
 	    public Date addDays(Date date, int days)
