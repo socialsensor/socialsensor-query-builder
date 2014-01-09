@@ -58,6 +58,10 @@ public class DyscoInputReader implements InputReader{
 		if(solrQuery == "")
 			return null;
 		
+		//Dysco feeds are created based on the notion that the solr query has the following form : 
+		// query : (Entity AND keyword) OR (Hashtag AND keyword) or query : (Entity OR Hashtag)
+		
+		
 		int startOne = solrQuery.indexOf("(");
 		int endOne = solrQuery.indexOf(")");
 		String oneString = solrQuery.substring(startOne + ("(").length(),endOne);
