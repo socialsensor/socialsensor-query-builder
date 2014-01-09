@@ -271,6 +271,16 @@ public class TrendingSolrQueryBuilder {
 			}
 		}
 	
+		if(mientities.isEmpty() && hashtags.isEmpty()){
+			for(Keyword key : mikeywords){
+				if(first){
+					query += key.getName();
+					first = false;
+				}
+				else
+					query += " OR " + key.getName()+"";
+			}
+		}
 		//Final formulation of solr query
 		
 		if(!query.equals(""))
