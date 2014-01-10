@@ -283,7 +283,7 @@ public class CustomSolrQueryBuilder {
 		if(!contributors.isEmpty()){
 			
 			if(hashtags.isEmpty() && keywords.isEmpty())
-				solrQuery += " OR author : (";
+				solrQuery += "author : (";
 			else
 				solrQuery += " OR author : (";
 			
@@ -307,7 +307,7 @@ public class CustomSolrQueryBuilder {
 		Set<String> filteredHashtags = hashtags;
 		Set<String> filteredKeywords = keywords;
 		
-		List<String> filteredContributors = new ArrayList<String>();
+		List<String> filteredContributors = contributors;
 		
 		
 		for(String hashtag : filteredHashtags){
@@ -325,7 +325,7 @@ public class CustomSolrQueryBuilder {
 		
 		for(String contributor : filteredContributors){
 			if(contributor.equals("")){
-				keywords.remove(contributor);
+				contributors.remove(contributor);
 			}
 		}
 	}
