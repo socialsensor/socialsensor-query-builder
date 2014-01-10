@@ -59,87 +59,74 @@ public class DyscoInputReader implements InputReader{
 			return inputDataPerType;
 		else{
 			System.out.println("Solr Query : "+solrQuery);
-			solrQuery = solrQuery.substring(1);
-			solrQuery = solrQuery.substring(0,solrQuery.length()-1);
+			//solrQuery = solrQuery.substring(1);
+			//solrQuery = solrQuery.substring(0,solrQuery.length()-1);
 			
-			System.out.println("Solr Query after removing parenthesis : "+solrQuery);
+			//System.out.println("Solr Query after removing parenthesis : "+solrQuery);
 		}
 		//Dysco feeds are created based on the notion that the solr query has the following form : 
-		// query : (Entity AND keyword) OR (Hashtag AND keyword) or query : (Entity OR Hashtag)
+		// query : (title : (Entity AND keyword) OR (Hashtag AND keyword)) or query : (title :(Entity OR Hashtag))
+		//followed by the same query for description and tags // in the case of custom dysco there might be author as well
 		
+		String embededQuery = "";
+		if(solrQuery.contains("title")){ 
+			int start = solrQuery.indexOf("(title");
+			int end = solrQuery.indexOf("(description");
+			
+			embededQuery = solrQuery.substring(start,end - (" OR ").length());
+		}
 		
-		String[] embQueries = solrQuery.split(" OR ");
-		
-		if(embQueries.length == 0){
-			if(solrQuery.contains(" AND ")){
-				splitANDQuery(solrQuery);
-			}else{
-				if(solrQuery.contains("\"")){
-					solrQuery = solrQuery.substring(1);
-					solrQuery = solrQuery.substring(0,solrQuery.length()-1);
+		if(embededQuery.length() > 0){
+			String queryToProcess = embededQuery;
+			
+			queryToProcess = queryToProcess.substring(1);
+			queryToProcess = queryToProcess.substring(0,embededQuery.length()-1);
+			
+			System.out.println("Solr Query after removing parenthesis : "+queryToProcess);
+			
+			queryToProcess = queryToProcess.replace("title : ", "");
+			
+			System.out.println("Pure Solr Query : "+queryToProcess);
+			
+			String[] queries = queryToProcess.split(" OR ");
+			
+			if(queries.length == 0){
+				 if(queryToProcess.contains(" AND ")){
+                     splitANDQuery(solrQuery);
+				 }else{
+                     if(queryToProcess.contains("\"")){
+                    	 queryToProcess = queryToProcess.substring(1);
+                    	 queryToProcess = queryToProcess.substring(0,queryToProcess.length()-1);
+                     }
+                     
+                     if(!keywordExists(queryToProcess))
+                    	 dyscoKeywords.add(new Keyword(queryToProcess, 0.0f));
+				 }
+			}
+			else{
+				for(int i=0;i<queries.length;i++){
+					if(queries[i].contains(" AND ")){
+						splitANDQuery(queries[i]);
+					}
+					else if(queries[i].contains(" OR ")){
+						splitORQuery(queries[i]);
+					}
+					else{
+						if(queries[i].contains("\"")){
+							queries[i] = queries[i].substring(1);
+							queries[i] = queries[i].substring(0,queries[i].length()-1);
+						}
+						if(!keywordExists(queries[i]))
+							dyscoKeywords.add(new Keyword(queries[i], 0.0f));
+					}
 				}
 				
-				dyscoKeywords.add(new Keyword(solrQuery, 0.0f));
-			}
-		}else{
-			for(int i=0;i<embQueries.length;i++){
-				if(embQueries[i].contains(" AND ")){
-					splitANDQuery(embQueries[i]);
-				}
-				else if(embQueries[i].contains(" OR ")){
-					splitORQuery(embQueries[i]);
-				}
-				else{
-					if(embQueries[i].contains("\"")){
-						embQueries[i] = embQueries[i].substring(1);
-						embQueries[i] = embQueries[i].substring(0,embQueries[i].length()-1);
-					}
-					
-					dyscoKeywords.add(new Keyword(embQueries[i], 0.0f));
-				}
-			}
-		}
-		
-		/*int startOne = solrQuery.indexOf("(");
-		int endOne = solrQuery.indexOf(")");
-		String oneString = solrQuery.substring(startOne + ("(").length(),endOne);
-		System.out.println("One String : "+oneString);
-		if(oneString.contains("OR")){
-			
-			String[] splittedKeywords = oneString.split(" OR ");
-			for(int i = 0 ; i<splittedKeywords.length ; i++){
-				System.out.println("keyword : "+splittedKeywords[i]);
-				dyscoKeywords.add(new Keyword(splittedKeywords[i], 0.0f));
-			}
-		}else{
-			System.out.println("keyword : "+oneString);
-			dyscoKeywords.add(new Keyword(oneString,0.0f));
-		}
-		
-		if(solrQuery.contains(" AND ")){
-			
-			String tempString = solrQuery.substring(endOne + (") AND (").length());
-			String secondString = tempString.substring(0, tempString.indexOf(")"));
-			System.out.println("Second String : "+secondString);
-			if(secondString.contains("OR")){
-				String[] splittedKeywords = secondString.split(" OR ");
-				for(int i = 0 ; i<splittedKeywords.length ; i++){
-					System.out.println("keyword : "+splittedKeywords[i]);
-					dyscoKeywords.add(new Keyword(splittedKeywords[i], 0.0f));
-				}
-			}else{
-				System.out.println("keyword : "+secondString);
-				dyscoKeywords.add(new Keyword(secondString,0.0f));
 			}
 			
 		}
-		if(!dyscoKeywords.isEmpty()){
-			inputDataPerType.put(FeedType.KEYWORDS, dyscoKeywords);
-		}*/
 		
-
-		
-		/*if(solrQuery.contains("contributors")){
+	
+		/*if(solrQuery.contains("author")){
 			int beginIndex = solrQuery.indexOf("contributors");
 			String rawString = solrQuery.substring(beginIndex + ("contributors : ").length());
 			int endIndex = rawString.indexOf(")");
@@ -249,7 +236,9 @@ public class DyscoInputReader implements InputReader{
 		System.out.println("entity/hashtag : "+words[0]);
 		System.out.println("keyword : "+words[1]);
 		
-		dyscoKeywords.add(new Keyword(words[0], 0.0f));
+		if(!keywordExists(words[0]))
+			dyscoKeywords.add(new Keyword(words[0], 0.0f));
+		if(!keywordExists(words[1]))
 		dyscoKeywords.add(new Keyword(words[0]+" "+words[1], 0.0f));
 	}
 	
@@ -277,18 +266,27 @@ public class DyscoInputReader implements InputReader{
 				words[0] = words[0].substring(1);
 				words[0] = words[0].substring(0,words[0].length()-1);
 			}
-			
-			dyscoKeywords.add(new Keyword(words[0], 0.0f));
+			if(!keywordExists(words[0]))
+				dyscoKeywords.add(new Keyword(words[0], 0.0f));
 		}
 		if(!words[1].contains("(") && !words[1].contains("(")){
 			if(words[0].contains("\"")){
 				words[0] = words[0].substring(1);
 				words[0] = words[0].substring(0,words[0].length()-1);
 			}
-			
-			dyscoKeywords.add(new Keyword(words[1], 0.0f));
+			if(!keywordExists(words[1]))
+				dyscoKeywords.add(new Keyword(words[1], 0.0f));
 		}
 
+	}
+	
+	private boolean keywordExists(String keyword){
+		for(Keyword dKey : dyscoKeywords){
+			if(dKey.getName().equals(keyword))
+				return true;
+		}
+		
+		return false;
 	}
 	
 	public class DateUtil
