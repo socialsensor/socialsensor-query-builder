@@ -281,7 +281,11 @@ public class CustomSolrQueryBuilder {
 			solrQuery += "(title : "+query+") OR (description:"+query+") OR (tags:"+query+")";
 		}
 		if(!contributors.isEmpty()){
-			solrQuery += " OR author : (";
+			
+			if(hashtags.isEmpty() && keywords.isEmpty())
+				solrQuery += " OR author : (";
+			else
+				solrQuery += " OR author : (";
 			
 			first = true;
 			
