@@ -283,8 +283,9 @@ public class TrendingSolrQueryBuilder {
 		}
 		//Final formulation of solr query
 		
-		if(!query.equals(""))
-			solrQuery += "("+query+")";
+		if(!query.equals("")){
+			solrQuery += "(title : "+query+") OR (description:"+query+") OR (tags:"+query+")";
+		}
 		
 		return solrQuery;
 	}

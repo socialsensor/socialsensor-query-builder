@@ -80,7 +80,7 @@ public class SolrQueryBuilder {
 			
 			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(dysco);
 			
-			return customBuilder.createSolrQuery();
+			return customBuilder.createUpdatedSolrQuery();
 		}
 		else{
 			logger.info("Find solr query for trending dysco : "+dysco.getId());
