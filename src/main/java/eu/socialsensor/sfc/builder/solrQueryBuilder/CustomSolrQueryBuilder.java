@@ -280,7 +280,7 @@ public class CustomSolrQueryBuilder {
 		if(!query.equals("")){
 			solrQuery += "(title : "+query+") OR (description:"+query+") OR (tags:"+query+")";
 		}
-		if(!contributors.isEmpty()){
+		/*if(!contributors.isEmpty()){
 			
 			if(hashtags.isEmpty() && keywords.isEmpty())
 				solrQuery += "author : (";
@@ -299,7 +299,7 @@ public class CustomSolrQueryBuilder {
 			}
 			
 			solrQuery += ")";
-		}
+		}*/
 		return solrQuery;
 	}
 	
