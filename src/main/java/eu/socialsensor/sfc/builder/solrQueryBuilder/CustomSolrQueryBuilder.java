@@ -30,7 +30,7 @@ public class CustomSolrQueryBuilder {
 		this.keywords = dysco.getKeywords().keySet();
 		this.hashtags = dysco.getHashtags().keySet();
 		
-		filterDyscosContent();
+		//filterDyscosContent();
 	}
 	
 	/**
@@ -311,20 +311,20 @@ public class CustomSolrQueryBuilder {
 		
 		
 		for(String hashtag : filteredHashtags){
-			if(hashtag.equals("")){
+			if(hashtag.equals(" ")){
 				hashtags.remove(hashtag);
 			}
 		}
 		
 
 		for(String key : filteredKeywords){
-			if(key.equals("")){
+			if(key.equals(" ")){
 				keywords.remove(key);
 			}
 		}
 		
 		for(String contributor : filteredContributors){
-			if(contributor.equals("")){
+			if(contributor.equals(" ")){
 				contributors.remove(contributor);
 			}
 		}
