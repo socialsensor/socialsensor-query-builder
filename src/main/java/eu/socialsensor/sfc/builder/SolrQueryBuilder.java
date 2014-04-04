@@ -35,7 +35,7 @@ public class SolrQueryBuilder {
 	
 	private SolrNewsFeedHandler solrNewsFeedHandler;
 	
-	public SolrQueryBuilder(){
+	public SolrQueryBuilder() throws Exception{
 		logger.info("SolrQueryBuilder instance created");
 		
 //		File configFile = new File("./conf/newsfeed.conf.xml");
@@ -69,7 +69,7 @@ public class SolrQueryBuilder {
 	 * @return the solr query
 	 */
 	public String getSolrQuery(Dysco dysco){
-		
+	
 		if(dysco.getDyscoType() == null){
 			logger.error("Dysco Type is not defined - Cannot extract solr query");
 			return null;
@@ -98,7 +98,17 @@ public class SolrQueryBuilder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+		 SolrDyscoHandler solrdyscoHandler = SolrDyscoHandler.getInstance("http://social1.atc.gr:8080/solr/dyscos");
+	       
+	       Dysco dysco = solrdyscoHandler.findDyscoLight("6932fe50-7317-45f7-9001-2b7069bf6afc");
+	       SolrQueryBuilder builder = null;
+		try {
+			builder = new SolrQueryBuilder();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	        System.out.println(" query : "+builder.getSolrQuery(dysco));
 	}
 
 }

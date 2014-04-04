@@ -127,8 +127,8 @@ public class DyscoInputReader implements InputReader{
 		
 	
 		/*if(solrQuery.contains("author")){
-			int beginIndex = solrQuery.indexOf("contributors");
-			String rawString = solrQuery.substring(beginIndex + ("contributors : ").length());
+			int beginIndex = solrQuery.indexOf("author");
+			String rawString = solrQuery.substring(beginIndex + ("author : ").length());
 			int endIndex = rawString.indexOf(")");
 			String contributorsString = solrQuery.substring(beginIndex, endIndex);
 			

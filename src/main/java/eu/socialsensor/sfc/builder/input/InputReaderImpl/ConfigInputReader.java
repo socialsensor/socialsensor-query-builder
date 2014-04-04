@@ -56,6 +56,7 @@ public class ConfigInputReader implements InputReader{
 	public ConfigInputReader(InputConfiguration config){
 		this.config = config;
 		streams = config.getStreamInputIds();
+
 	}
 	
 	@Override
@@ -76,7 +77,9 @@ public class ConfigInputReader implements InputReader{
 				this.streamType = SocialNetworkSource.Instagram;
 			else if(stream.equals("Tumblr"))
 				this.streamType = SocialNetworkSource.Tumblr;
-			else if(stream.equals("Youtube"))
+			else if(stream.equals("Topsy"))
+				this.streamType = SocialNetworkSource.Topsy;
+			else if(stream.equals("YouTube"))
 				this.streamType = SocialNetworkSource.Youtube;
 			
 			Map<FeedType,Object> inputData = getData();

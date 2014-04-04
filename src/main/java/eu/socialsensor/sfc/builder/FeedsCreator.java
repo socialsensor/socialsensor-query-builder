@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.common.domain.Feed;
 import eu.socialsensor.framework.common.domain.StreamUser.Category;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
@@ -149,6 +150,20 @@ public class FeedsCreator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		SolrDyscoHandler solrdyscoHandler = SolrDyscoHandler.getInstance("http://social1.atc.gr:8080/solr/dyscos");
+	       
+	    Dysco dysco = solrdyscoHandler.findDyscoLight("7b41ac4c-1432-49a4-8a52-c290a76a3c53");
+	
+	    dysco.setSolrQuery("(title : (target AND swiped personal info) OR (target AND hackers swiped personal) OR (target AND personal info 70)) OR (description:(target AND swiped personal info) OR (target AND hackers swiped personal) OR (target AND personal info 70)) OR (tags:(target AND swiped personal info) OR (target AND hackers swiped personal) OR (target AND personal info 70))");
+	    FeedsCreator feedsCreator = new FeedsCreator(DataInputType.DYSCO,dysco);
+		List<Feed> feeds = feedsCreator.getQuery();  
+		
+		System.out.println("------ Feeds -------");
+		System.out.println();
+		for(Feed feed : feeds){
+			System.out.println(feed.toJSONString());
+			System.out.println();
+		}
 	}
 
 }
