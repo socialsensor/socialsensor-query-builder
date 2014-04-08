@@ -132,7 +132,7 @@ public class ConfigInputReader implements InputReader{
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
 		
 		this.stream_config = config.getStreamInputConfig(streamType.toString());
-		
+	
 		String value;
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
