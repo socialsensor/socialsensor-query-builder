@@ -1,15 +1,12 @@
 package eu.socialsensor.sfc.builder;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.xml.sax.SAXException;
 
 import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.client.search.solr.SolrNewsFeedHandler;
+import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Dysco.DyscoType;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.CustomSolrQueryBuilder;
@@ -80,7 +77,35 @@ public class SolrQueryBuilder {
 			
 			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(dysco);
 			
-			return customBuilder.createUpdatedSolrQuery();
+			return customBuilder.createSolrQuery();
+		}
+		else{
+			logger.info("Find solr query for trending dysco : "+dysco.getId());
+			
+			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
+			
+			List<Query> queries = trendingBuilder.createPrimalSolrQueries();
+			
+			logger.info("---Solr Queries---");
+			for(Query q : queries)
+				logger.info("Query Name: "+q.getName()+" Query Score: "+q.getScore());
+			
+			return trendingBuilder.createSolrQuery();
+		}
+	}
+	
+	public List<Query> getSolrQueries(Dysco dysco){
+		if(dysco.getDyscoType() == null){
+			logger.error("Dysco Type is not defined - Cannot extract solr query");
+			return null;
+		}
+		
+		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)){
+			logger.info("Find solr query for custom dysco : "+dysco.getId());
+			
+			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(dysco);
+			
+			return customBuilder.createSolrQueries();
 		}
 		else{
 			logger.info("Find solr query for trending dysco : "+dysco.getId());
@@ -88,10 +113,32 @@ public class SolrQueryBuilder {
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
 			if(solrNewsFeedHandler != null)
 				trendingBuilder.setHandler(solrNewsFeedHandler);
-			return trendingBuilder.createUpdatedSolrQuery();
+			return trendingBuilder.createPrimalSolrQueries();
 		}
 	}
 	
+	public Dysco updateDyscoWithPrimalQueries(Dysco dysco) throws Exception{
+		
+		if(dysco.getDyscoType() == null)
+			throw new Exception("Dysco Type is not defined - Cannot extract solr query");
+
+		
+		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)){
+			logger.info("Find solr query for custom dysco : "+dysco.getId());
+			
+			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(dysco);
+			//needs to be implemented
+		}
+		else{
+			logger.info("Find solr query for trending dysco : "+dysco.getId());
+			
+			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
+			List<Query> queries = trendingBuilder.createPrimalSolrQueries();
+			dysco.setSolrQueries(queries);
+		}
+		
+		return dysco;
+	}
 	
 
 	/**

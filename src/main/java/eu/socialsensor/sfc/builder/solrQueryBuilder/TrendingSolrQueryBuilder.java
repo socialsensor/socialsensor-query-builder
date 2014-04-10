@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import eu.socialsensor.framework.client.search.solr.SolrNewsFeedHandler;
 import eu.socialsensor.framework.common.domain.Keyword;
+import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.Stopwords;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Entity;
@@ -57,164 +58,9 @@ public class TrendingSolrQueryBuilder {
 		this.trendsRanker = new TrendsRanker(handler);
 		
 	}
-	/**
-	 * Creates and returns the solr query. The solr query is created by combining 
-	 * the keywords , entities and hashtags that represent the topic of a trending 
-	 * dysco.
-	 * @return the solr querty
-	 */
+	
+	
 	public String createSolrQuery(){
-		
-		if(keywords.isEmpty() && entities.isEmpty() && hashtags.isEmpty())
-			return null;
-	
-		//call here the method to select best content for quering
-		
-		boolean first = true;
-		
-		String solrQuery = "title : (";
-		
-		if(!keywords.isEmpty()){
-			//add keywords to query
-			for(Keyword keyword : keywords){
-				if(first){
-					solrQuery += keyword.getName();
-					first = false;
-				}	
-				else
-					solrQuery += " OR " + keyword.getName();
-			}
-		}
-		
-		if(!entities.isEmpty()){
-			for(Entity entity : entities){
-				if(first){
-					solrQuery += entity.getName();
-					first = false;
-				}	
-				else
-					solrQuery += " OR " + entity.getName();
-				
-			}
-		}
-		
-		if(!hashtags.isEmpty()){
-			for(Keyword hashtag : hashtags){
-				if(first){
-					solrQuery += hashtag.getName();
-					first = false;
-				}	
-				else
-					solrQuery += " OR " + hashtag.getName();
-			}
-		}
-		solrQuery += ")";
-		first = true;
-		solrQuery += " OR description : (";
-		
-		if(!keywords.isEmpty()){
-			//add keywords to query
-			for(Keyword keyword : keywords){
-				if(first){
-					solrQuery += keyword.getName();
-					first = false;
-				}	
-				else
-					solrQuery += " OR " + keyword.getName();
-			}
-		}
-		
-		if(!entities.isEmpty()){
-			for(Entity entity : entities){
-				if(first){
-					solrQuery += entity.getName();
-					first = false;
-				}	
-				else
-					solrQuery += " OR " + entity.getName();
-				
-			}
-		}
-		
-		if(!hashtags.isEmpty()){
-			for(Keyword hashtag : hashtags){
-				if(first){
-					solrQuery += hashtag.getName();
-					first = false;
-				}	
-				else
-					solrQuery += " OR " + hashtag.getName();
-			}
-		}
-		
-		solrQuery += ")";
-		first = true;
-		solrQuery += " OR tags : (";
-		
-		if(!keywords.isEmpty()){
-			//add keywords to query
-			for(Keyword keyword : keywords){
-					
-				if(first){
-					solrQuery += keyword.getName();
-					first = false;
-				}	
-				else
-					solrQuery += " OR " + keyword.getName();
-			}
-		}
-		
-		if(!entities.isEmpty()){
-			for(Entity entity : entities){
-				String[] parts = null;
-				if(entity.getName().split(" ").length > 1){
-					parts = entity.getName().split(" ");
-				}
-				if(parts != null){
-					String unifiedEntity = "";
-					for(int i=0; i<parts.length;i++){
-						unifiedEntity += parts[i];
-					}
-										
-					if(first){
-						solrQuery += unifiedEntity;
-						first = false;
-					}	
-					else
-						solrQuery += " OR " + unifiedEntity;
-				}else{
-					
-					if(first){
-						solrQuery += entity.getName();
-						first = false;
-					}	
-					else
-						solrQuery += " OR " + entity.getName();
-
-				}
-				
-			}	
-				
-		}
-		
-		if(!hashtags.isEmpty()){
-			for(Keyword hashtag : hashtags){
-				if(first){
-					solrQuery += hashtag.getName();
-					first = false;
-				}	
-				else
-					solrQuery += " OR " + hashtag.getName();
-			}
-		}
-		
-		solrQuery += ")";
-			
-		
-		return solrQuery;
-	}
-	
-	public String createUpdatedSolrQuery(){
 		String solrQuery = "";
 		String query = "";
 		
@@ -288,6 +134,50 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		return solrQuery;
+	}
+	
+	public List<Query> createPrimalSolrQueries(){
+		List<Query> solrQueries = new ArrayList<Query>();
+		
+		for(Keyword key : keywords){
+			Query query = new Query();
+			boolean first = true;
+			if(key.getName().split(" ").length > 1){
+				String[] keys = key.getName().split(" ");
+				String resQuery = "";
+				for(int i=0;i<keys.length;i++){
+					if(first){
+						resQuery += keys[i];
+						first = false;
+					}
+					else
+						resQuery += " AND " + keys[i];
+					
+				}
+				query.setName(resQuery);
+				query.setScore(key.getScore());
+			}
+			else{
+				query.setName(key.getName());
+				query.setScore(key.getScore());
+			}
+			
+		}
+		
+		for(Keyword hash : hashtags){
+			Query query = new Query();
+			query.setName(hash.getName());
+			query.setScore(hash.getScore());
+		}
+		
+		for(Entity ent : entities){
+			Query query = new Query();
+			query.setName("\""+ent.getName()+"\"");
+			query.setScore(ent.getCont());
+		}
+	
+		
+		return solrQueries;
 	}
 	
 	/**
