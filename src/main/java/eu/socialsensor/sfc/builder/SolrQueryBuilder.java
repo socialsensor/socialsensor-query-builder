@@ -86,9 +86,7 @@ public class SolrQueryBuilder {
 			
 			List<Query> queries = trendingBuilder.createPrimalSolrQueries();
 			
-			logger.info("---Solr Queries---");
-			for(Query q : queries)
-				logger.info("Query Name: "+q.getName()+" Query Score: "+q.getScore());
+			
 			
 			return trendingBuilder.createSolrQuery();
 		}
