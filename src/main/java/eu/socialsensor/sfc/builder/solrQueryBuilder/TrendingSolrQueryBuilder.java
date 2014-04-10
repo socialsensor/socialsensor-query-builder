@@ -140,6 +140,7 @@ public class TrendingSolrQueryBuilder {
 		List<Query> solrQueries = new ArrayList<Query>();
 		
 		for(Keyword key : keywords){
+			//System.out.println("key: "+key);
 			Query query = new Query();
 			boolean first = true;
 			if(key.getName().split(" ").length > 1){
@@ -161,19 +162,23 @@ public class TrendingSolrQueryBuilder {
 				query.setName(key.getName());
 				query.setScore(key.getScore());
 			}
-			
+			solrQueries.add(query);
 		}
 		
 		for(Keyword hash : hashtags){
+			//System.out.println("hash: "+hash);
 			Query query = new Query();
 			query.setName(hash.getName());
 			query.setScore(hash.getScore());
+			solrQueries.add(query);
 		}
 		
 		for(Entity ent : entities){
+			//System.out.println("entity: "+ent.getName());
 			Query query = new Query();
 			query.setName("\""+ent.getName()+"\"");
 			query.setScore(ent.getCont());
+			solrQueries.add(query);
 		}
 	
 		
