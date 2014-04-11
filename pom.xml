@@ -66,7 +66,38 @@
             <artifactId>socialsensor-framework-client</artifactId>
             <version>0.2-SNAPSHOT</version>
         </dependency>
+        
+        <dependency>
+        	<groupId>it.uniroma1.dis.wsngroup.gexf4j</groupId>
+			<artifactId>gexf4j</artifactId>
+			<version>0.4.3-BETA</version>
+		</dependency> 
+		
+		<dependency>
+			<groupId>edu.washington.cs.knowitall.nlptools</groupId>
+			<artifactId>nlptools-stem-morpha_2.10</artifactId>
+			<version>2.4.4</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>edu.washington.cs.knowitall.nlptools</groupId>
+			<artifactId>nlptools-core_2.10</artifactId>
+			<version>2.4.4</version>
+		</dependency>
     </dependencies>
+    <repositories>
+    
+    	<repository>
+         	<id>gephi-snapshots</id>
+         	<name>Gephi Snapshots</name>
+         	<url>http://nexus.gephi.org/nexus/content/repositories/snapshots/</url>
+      	</repository>
+      	<repository>
+         	<id>gephi-releases</id>
+         	<name>Gephi Releases</name>
+         	<url>http://nexus.gephi.org/nexus/content/repositories/releases/</url>
+      	</repository>
+    </repositories>
     
     <build>
         <plugins>
