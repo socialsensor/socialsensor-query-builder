@@ -13,6 +13,7 @@ import java.util.UUID;
 import eu.socialsensor.framework.common.domain.Feed;
 import eu.socialsensor.framework.common.domain.Keyword;
 import eu.socialsensor.framework.common.domain.Location;
+import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.Source;
 import eu.socialsensor.framework.common.domain.Feed.FeedType;
 import eu.socialsensor.framework.common.domain.StreamUser.Category;
@@ -48,6 +49,34 @@ public class DyscoInputReader implements InputReader{
 	}
 	
 	@Override
+	public Map<FeedType,Object> getData(){
+		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
+		
+		List<Query> solrQueries = dysco.getSolrQueries();
+		Set<Keyword> queryKeywords = new HashSet<Keyword>();
+		
+		this.date = dateUtil.addDays(dysco.getCreationDate(),-2);
+		
+		if(solrQueries != null){
+			for(Query solrQuery : solrQueries){
+				String queryName = solrQuery.getName();
+				Keyword key = null;
+				if(queryName.contains(" AND ")){
+					key = splitQueryWithAND(queryName);
+					key.setScore(solrQuery.getScore());
+				}
+				else{
+					key = new Keyword(queryName,solrQuery.getScore());
+				}
+				queryKeywords.add(key);
+			}
+		}
+		inputDataPerType.put(FeedType.KEYWORDS, queryKeywords);
+		return inputDataPerType;
+		
+	}
+	
+	/*@Override
 	public Map<FeedType,Object> getData(){
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
 		
@@ -126,7 +155,7 @@ public class DyscoInputReader implements InputReader{
 		}
 		
 	
-		/*if(solrQuery.contains("author")){
+		if(solrQuery.contains("author")){
 			int beginIndex = solrQuery.indexOf("author");
 			String rawString = solrQuery.substring(beginIndex + ("author : ").length());
 			int endIndex = rawString.indexOf(")");
@@ -150,7 +179,7 @@ public class DyscoInputReader implements InputReader{
 				
 				inputDataPerType.put(FeedType.SOURCE, sources);
 			}
-		}*/
+		}
 		
 		if(!dyscoKeywords.isEmpty()){
 			inputDataPerType.put(FeedType.KEYWORDS, dyscoKeywords);
@@ -158,7 +187,7 @@ public class DyscoInputReader implements InputReader{
 		
 		return inputDataPerType;
 	}
-	
+	*/
 	@Override
 	public Map<String,List<Feed>> createFeedsPerStream(){
 
@@ -239,8 +268,39 @@ public class DyscoInputReader implements InputReader{
 		if(!keywordExists(words[0]))
 			dyscoKeywords.add(new Keyword(words[0], 0.0f));
 		if(!keywordExists(words[1]))
-		dyscoKeywords.add(new Keyword(words[0]+" "+words[1], 0.0f));
+			dyscoKeywords.add(new Keyword(words[0]+" "+words[1], 0.0f));
 	}
+	
+	private Keyword splitQueryWithAND(String query){
+		String [] words = query.split(" AND ");
+		
+		for(int i=0;i<words.length;i++){
+			if(words[i].contains("("))
+				words[i] = words[i].substring(1);
+			if(words[i].contains(")"))
+				words[i] = words[i].substring(0,words[i].length()-1);	
+			if(words[i].contains("\"")){
+				words[i] = words[i].substring(1);
+				words[i] = words[i].substring(0,words[i].length()-1);
+			}
+			
+		}
+		String resultKeyword = "";
+		boolean first = true;
+		for(int i=0;i<words.length;i++){
+			if(first){
+				resultKeyword += words[i];
+				first = false;
+			}
+			else{
+				resultKeyword += " "+words[i];
+			}
+			
+		}
+		
+		return new Keyword(resultKeyword, 0.0);
+	}
+	
 	
 	//accepts small queries in the form of  "Word1 OR Word2"
 	private void splitORQuery(String query){
