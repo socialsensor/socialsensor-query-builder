@@ -191,7 +191,7 @@ public class SolrQueryBuilder {
 		graphCreator.createGraph();
 	
 		graphCreator.pruneLowConnectivityNodes();
-		System.out.println(" Nodes created : "+graphCreator.getGraph().getNodes().size());
+		
 		QueryFormulator qFormulator = new QueryFormulator(graphCreator.getGraph(),extractor.getTopHashtags());
 		
 		qFormulator.generateKeywordQueries(NUMBER_OF_KEYWORDS_IN_QUERY);
@@ -202,7 +202,7 @@ public class SolrQueryBuilder {
 		Map<Double, List<String>> scaledRankedKeywords = scaleKeywordsToWeight(qFormulator.getRankedKeywordQueries());
 		Map<Double, List<String>> scaledRankedHashtags = scaleKeywordsToWeight(qFormulator.getRankedHashtagQueries());
 		
-		System.out.println("***Scaled Ranked Keyword Queries ***");
+		/*System.out.println("***Scaled Ranked Keyword Queries ***");
 		System.out.println();
 		
 		for(Double value : scaledRankedKeywords.keySet()){
@@ -224,7 +224,7 @@ public class SolrQueryBuilder {
 				System.out.println("Q : "+rQuery);
 			}
 			System.out.println();
-		}
+		}*/
 		
 		while(formulatedSolrQueries.size() < queryNumberLimit){
 			boolean keyFound = false;

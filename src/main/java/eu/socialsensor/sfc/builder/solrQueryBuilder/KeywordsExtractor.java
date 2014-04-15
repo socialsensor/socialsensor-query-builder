@@ -326,10 +326,7 @@ public class KeywordsExtractor {
 		keywordsDev = Math.sqrt(Calculator.computeVariance(keywordsWeights,keywordsAVG));
 		hashtagsDev = Math.sqrt(Calculator.computeVariance(hashtagsWeights,hashtagsAVG));
 		
-		System.out.println("keywordsAVG : "+keywordsAVG);
-		System.out.println("hashtagsAVG : "+hashtagsAVG);
-		System.out.println("keywordsDev : "+keywordsDev);
-		System.out.println("hashtagsDev : "+hashtagsDev);
+		
 		index = 0;
 		for(int i=keywordsWeights.length-1;i>0;i--){
 			for(Map.Entry<String, Integer> entry : popularKeywords.entrySet()){
