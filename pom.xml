@@ -66,6 +66,13 @@
             <artifactId>socialsensor-framework-client</artifactId>
             <version>0.2-SNAPSHOT</version>
         </dependency>
+
+		<dependency>
+  			<groupId>org.gephi</groupId>
+  			<artifactId>gephi-toolkit</artifactId>
+  			<version>0.8.2</version>
+  			<classifier>all</classifier>
+		</dependency>
         
         <dependency>
         	<groupId>it.uniroma1.dis.wsngroup.gexf4j</groupId>
@@ -90,12 +97,12 @@
     	<repository>
          	<id>gephi-snapshots</id>
          	<name>Gephi Snapshots</name>
-         	<url>http://nexus.gephi.org/nexus/content/repositories/snapshots/</url>
+         	<url>http://nexus.gephi.org/nexus/content/repositories/snapshots</url>
       	</repository>
       	<repository>
          	<id>gephi-releases</id>
          	<name>Gephi Releases</name>
-         	<url>http://nexus.gephi.org/nexus/content/repositories/releases/</url>
+         	<url>http://nexus.gephi.org/nexus/content/repositories/releases</url>
       	</repository>
     </repositories>
     
