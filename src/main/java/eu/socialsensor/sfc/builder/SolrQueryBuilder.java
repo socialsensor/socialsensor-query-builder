@@ -94,7 +94,7 @@ public class SolrQueryBuilder {
 			
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
 			
-			List<Query> queries = trendingBuilder.createPrimalSolrQueries();
+			//List<Query> queries = trendingBuilder.createPrimalSolrQueries();
 			
 			
 			
@@ -124,7 +124,7 @@ public class SolrQueryBuilder {
 			
 			String solrQuery = trendingBuilder.createSolrQuery();
 			
-			updatedDysco.setSolrQuery(solrQuery);
+			updatedDysco.setSolrQueryString(solrQuery);
 			updatedDysco.setSolrQueries(queries);
 		
 		}
@@ -197,8 +197,8 @@ public class SolrQueryBuilder {
 		qFormulator.generateKeywordQueries(NUMBER_OF_KEYWORDS_IN_QUERY);
 		qFormulator.generateHashtagQueries();
 		
-		qFormulator.printRankedKeywordQueries();
-		qFormulator.printRankedHashtagQueries();
+		//qFormulator.printRankedKeywordQueries();
+		//qFormulator.printRankedHashtagQueries();
 		Map<Double, List<String>> scaledRankedKeywords = scaleKeywordsToWeight(qFormulator.getRankedKeywordQueries());
 		Map<Double, List<String>> scaledRankedHashtags = scaleKeywordsToWeight(qFormulator.getRankedHashtagQueries());
 		
