@@ -324,17 +324,7 @@ public class SolrQueryBuilder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		 SolrDyscoHandler solrdyscoHandler = SolrDyscoHandler.getInstance("http://social1.atc.gr:8080/solr/dyscos");
-	       
-	       Dysco dysco = solrdyscoHandler.findDyscoLight("6932fe50-7317-45f7-9001-2b7069bf6afc");
-	       SolrQueryBuilder builder = null;
-		try {
-			builder = new SolrQueryBuilder();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	        System.out.println(" query : "+builder.getSolrQuery(dysco));
+		 
 	}
 
 }
