@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import eu.socialsensor.framework.common.domain.Location;
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 
@@ -22,14 +23,26 @@ public class CustomSolrQueryBuilder {
 	
 	public final Logger logger = Logger.getLogger(CustomSolrQueryBuilder.class);
 
-	private List<String> contributors = new ArrayList<String>();
+	
+	private List<String> users = new ArrayList<String>();
 	
 	private Set<String> keywords =  new HashSet<String>();
 	private Set<String> hashtags = new HashSet<String>();
 	
+	
+	//new fields
+	private Set<String> keyPhrases = new HashSet<String>();
+	private Set<String> wordsToAvoid = new HashSet<String>();
+	private Set<String> twitterUsers = new HashSet<String>();
+	private Set<String> mentionedTwitterUsers = new HashSet<String>();
+	
+	private Set<String> urls = new HashSet<String>();
+	
+	private List<Location> locations = new ArrayList<Location>();
+	
 	public CustomSolrQueryBuilder(Dysco dysco){
 		
-		this.contributors = dysco.getContributors();
+		this.users = dysco.getContributors();
 		this.keywords = dysco.getKeywords().keySet();
 		this.hashtags = dysco.getHashtags().keySet();
 		
@@ -40,7 +53,7 @@ public class CustomSolrQueryBuilder {
 		String solrQuery = "";
 		String query = "";
 		
-		if(keywords.isEmpty() && contributors.isEmpty() && hashtags.isEmpty())
+		if(keywords.isEmpty() && users.isEmpty() && hashtags.isEmpty())
 			return solrQuery;
 		
 		boolean first = true;
@@ -112,6 +125,30 @@ public class CustomSolrQueryBuilder {
 	public List<Query> createSolrQueries(){
 		List<Query> solrQueries = new ArrayList<Query>();
 		
+		for(String key : keywords){
+			Query resQuery = new Query(key,0.0);
+			resQuery.setType(Query.Type.Keywords);
+			solrQueries.add(resQuery);
+		}
+		
+		for(String hash : hashtags){
+			Query resQuery = new Query(hash,0.0);
+			resQuery.setType(Query.Type.Keywords);
+			solrQueries.add(resQuery);
+		}
+		
+		for(String contributor : users){
+			Query resQuery = new Query(contributor,0.0);
+			resQuery.setType(Query.Type.Contributors);
+			solrQueries.add(resQuery);
+		}
+		
+		return solrQueries;
+	}
+	
+	public List<Query> createUpdatedSolrQueries(){
+		List<Query> solrQueries = new ArrayList<Query>();
+		
 		return solrQueries;
 	}
 	
@@ -119,7 +156,7 @@ public class CustomSolrQueryBuilder {
 		Set<String> filteredHashtags = hashtags;
 		Set<String> filteredKeywords = keywords;
 		
-		List<String> filteredContributors = contributors;
+		List<String> filteredContributors = users;
 		
 		
 		for(String hashtag : filteredHashtags){
@@ -137,7 +174,7 @@ public class CustomSolrQueryBuilder {
 		
 		for(String contributor : filteredContributors){
 			if(contributor.equals(" ")){
-				contributors.remove(contributor);
+				users.remove(contributor);
 			}
 		}
 	}

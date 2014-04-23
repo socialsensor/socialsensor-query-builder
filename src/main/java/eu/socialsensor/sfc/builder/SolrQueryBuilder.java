@@ -148,8 +148,7 @@ public class SolrQueryBuilder {
 			logger.info("Find solr query for trending dysco : "+dysco.getId());
 			
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
-			if(solrNewsFeedHandler != null)
-				trendingBuilder.setHandler(solrNewsFeedHandler);
+			
 			return trendingBuilder.createPrimalSolrQueries();
 		}
 	}

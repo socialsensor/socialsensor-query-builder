@@ -37,8 +37,6 @@ public class TrendingSolrQueryBuilder {
 	
 	private Dysco dysco = null;
 	
-	private TrendsRanker trendsRanker = null;
-	
 	Stopwords stopwords = new Stopwords();
 	
 	//at this point every information that remains in the dysco will be used for the creation of the solr query
@@ -51,12 +49,6 @@ public class TrendingSolrQueryBuilder {
 		//printVocabulary();
 		
 		selectValuableContent();
-	}
-	
-	public void setHandler(SolrNewsFeedHandler handler){
-		
-		this.trendsRanker = new TrendsRanker(handler);
-		
 	}
 	
 	
@@ -157,11 +149,13 @@ public class TrendingSolrQueryBuilder {
 				}
 				query.setName(resQuery);
 				query.setScore(key.getScore());
+				
 			}
 			else{
 				query.setName(key.getName());
 				query.setScore(key.getScore());
 			}
+			query.setType(Query.Type.Keywords);
 			solrQueries.add(query);
 		}
 		
@@ -170,6 +164,7 @@ public class TrendingSolrQueryBuilder {
 			Query query = new Query();
 			query.setName(hash.getName());
 			query.setScore(hash.getScore());
+			query.setType(Query.Type.Keywords);
 			solrQueries.add(query);
 		}
 		
@@ -178,6 +173,7 @@ public class TrendingSolrQueryBuilder {
 			Query query = new Query();
 			query.setName("\""+ent.getName()+"\"");
 			query.setScore(ent.getCont());
+			query.setType(Query.Type.Keywords);
 			solrQueries.add(query);
 		}
 	
