@@ -27,6 +27,7 @@ import eu.socialsensor.sfc.builder.input.InputReader;
 public class FileInputReader implements InputReader{
 	protected static final String DATE = "since";
 	protected static final String PATH = "path";
+	protected static final String TYPE = "feedType";
 	
 	private InputConfiguration config;
 	
@@ -45,8 +46,9 @@ public class FileInputReader implements InputReader{
 	
 	public Map<FeedType,Object> getData(){
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
-		List<String> urls = new ArrayList<String>();
+		List<String> input_lines = new ArrayList<String>();
 		String path = stream_config.getParameter(FileInputReader.PATH);
+		String type = stream_config.getParameter(FileInputReader.TYPE);
 		
 		String line;
 		try {
@@ -54,7 +56,7 @@ public class FileInputReader implements InputReader{
 			line = reader.readLine();
 			while (line != null) {
 				
-	        	urls.add(line);
+				input_lines.add(line);
 	            line = reader.readLine();
 	        }
 			
@@ -62,8 +64,8 @@ public class FileInputReader implements InputReader{
 		} catch (IOException e) {
 	
 		}
-		
-		inputDataPerType.put(FeedType.KEYWORDS, urls);
+		if(type.equals("url"))
+			inputDataPerType.put(FeedType.URL, input_lines);
 		
 		return inputDataPerType;
 	}
@@ -92,23 +94,18 @@ public class FileInputReader implements InputReader{
 				}
 			}
 			
-			if(dateToRetrieve == null){
-				System.err.println("No Date to retrieve from");
-				return feeds;
-			}
-			
 			Map<FeedType,Object> inputData = getData();
-			System.out.println("inputData : "+inputData.keySet().size());
+			
 			for(FeedType feedType : inputData.keySet()){
 				switch(feedType){
-					case KEYWORDS :
+					case URL :
 						
 						@SuppressWarnings("unchecked")
 						List<String> urls = (List<String>) inputData.get(feedType);
 						
 						for(String url : urls){
 							String feedId = UUID.randomUUID().toString();
-							KeywordsFeed feed = new KeywordsFeed(new Keyword(url,0.0F),dateToRetrieve,feedId);
+							URLFeed feed = new URLFeed(url,dateToRetrieve,feedId);
 							feedsPerStream.add(feed);
 						}
 						break;
