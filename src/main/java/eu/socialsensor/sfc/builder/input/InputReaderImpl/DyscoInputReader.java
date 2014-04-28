@@ -52,7 +52,7 @@ public class DyscoInputReader implements InputReader{
 	public Map<FeedType,Object> getData(){
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
 		
-		List<Query> solrQueries = dysco.getSolrQueries();
+		List<Query> solrQueries = dysco.getPrimalSolrQueries();
 		Set<Keyword> queryKeywords = new HashSet<Keyword>();
 		
 		this.date = dateUtil.addDays(dysco.getCreationDate(),-2);
