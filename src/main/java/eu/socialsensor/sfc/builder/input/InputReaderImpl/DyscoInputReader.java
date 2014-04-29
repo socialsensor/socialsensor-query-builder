@@ -51,8 +51,12 @@ public class DyscoInputReader implements InputReader{
 	@Override
 	public Map<FeedType,Object> getData(){
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
-		
+
 		List<Query> solrQueries = dysco.getPrimalSolrQueries();
+		System.out.println("SolrQueries size : "+solrQueries.size());
+		for(Query q : solrQueries){
+			System.out.println("Q :"+q.getName());
+		}
 		Set<Keyword> queryKeywords = new HashSet<Keyword>();
 		
 		this.date = dateUtil.addDays(dysco.getCreationDate(),-2);
@@ -63,10 +67,10 @@ public class DyscoInputReader implements InputReader{
 				Keyword key = null;
 				if(queryName.contains(" AND ")){
 					key = splitQueryWithAND(queryName);
-					key.setScore(solrQuery.getScore());
+					//key.setScore(solrQuery.getScore());
 				}
 				else{
-					key = new Keyword(queryName,solrQuery.getScore());
+					key = new Keyword(queryName,0.0);
 				}
 				queryKeywords.add(key);
 			}
