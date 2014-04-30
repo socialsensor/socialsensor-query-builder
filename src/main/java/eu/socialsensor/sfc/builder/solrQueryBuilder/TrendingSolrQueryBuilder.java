@@ -131,7 +131,7 @@ public class TrendingSolrQueryBuilder {
 	public List<Query> createPrimalSolrQueries(){
 		List<Query> solrQueries = new ArrayList<Query>();
 		
-		for(Keyword key : keywords){
+		/*for(Keyword key : keywords){
 			//System.out.println("key: "+key);
 			Query query = new Query();
 			boolean first = true;
@@ -157,7 +157,7 @@ public class TrendingSolrQueryBuilder {
 			}
 			query.setType(Query.Type.Keywords);
 			solrQueries.add(query);
-		}
+		}*/
 		
 		for(Keyword hash : hashtags){
 			//System.out.println("hash: "+hash);
