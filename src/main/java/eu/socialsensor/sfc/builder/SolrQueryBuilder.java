@@ -149,7 +149,18 @@ public class SolrQueryBuilder {
 			
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
 			
-			return trendingBuilder.createPrimalSolrQueries();
+			List<Query> primalSolrQueries = trendingBuilder.createPrimalSolrQueries();
+			
+			if(primalSolrQueries.size() > 10){
+				List<Query> topQueries = new ArrayList<Query>();
+				for(int i=0;i<10;i++)
+					topQueries.add(primalSolrQueries.get(i));
+				
+				return topQueries;
+			}
+			else
+				return primalSolrQueries;
+				
 		}
 	}
 	
@@ -285,7 +296,7 @@ public class SolrQueryBuilder {
 		}
 		
 		for(Query query : formulatedSolrQueries){
-			System.out.println("Selected query : "+query.getName()+" with score : "+query.getScore());
+			System.out.println("Additional query : "+query.getName()+" with score : "+query.getScore());
 		}
 		
 		return formulatedSolrQueries;
@@ -323,7 +334,7 @@ public class SolrQueryBuilder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		 
+		
 		
 	}
 

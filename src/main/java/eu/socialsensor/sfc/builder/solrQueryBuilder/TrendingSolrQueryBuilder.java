@@ -131,33 +131,19 @@ public class TrendingSolrQueryBuilder {
 	public List<Query> createPrimalSolrQueries(){
 		List<Query> solrQueries = new ArrayList<Query>();
 		
-		/*for(Keyword key : keywords){
-			//System.out.println("key: "+key);
-			Query query = new Query();
-			boolean first = true;
-			if(key.getName().split(" ").length > 1){
-				String[] keys = key.getName().split(" ");
-				String resQuery = "";
-				for(int i=0;i<keys.length;i++){
-					if(first){
-						resQuery += keys[i];
-						first = false;
-					}
-					else
-						resQuery += " AND " + keys[i];
-					
-				}
-				query.setName(resQuery);
-				query.setScore(key.getScore());
+		for(Entity ent : entities){
+			for(Keyword key : keywords){
+				//System.out.println("key: "+key);
+				Query query = new Query();
 				
+				String resQuery = ent.getName()+" "+key.getName();
+				
+				query.setName(resQuery);
+				query.setScore(ent.getCont()+key.getScore());
+				query.setType(Query.Type.Keywords);
+				solrQueries.add(query);
 			}
-			else{
-				query.setName(key.getName());
-				query.setScore(key.getScore());
-			}
-			query.setType(Query.Type.Keywords);
-			solrQueries.add(query);
-		}*/
+		}
 		
 		for(Keyword hash : hashtags){
 			//System.out.println("hash: "+hash);
