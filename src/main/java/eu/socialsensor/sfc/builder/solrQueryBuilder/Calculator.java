@@ -1,5 +1,6 @@
 package eu.socialsensor.sfc.builder.solrQueryBuilder;
 
+import java.util.Collection;
 import java.util.Set;
 
 public class Calculator {
@@ -80,6 +81,19 @@ public class Calculator {
 		}
 		
 		return variance /= elements.size();
+	}
+	
+	public static float computeAverageFloat(Collection<Float> elements){
+		float average = 0F;
+		
+		if(elements.size() == 0)
+			return average;
+		
+		for(Float elem : elements){
+			average += elem;
+		}
+		
+		return average/= elements.size();
 	}
 	
 }
