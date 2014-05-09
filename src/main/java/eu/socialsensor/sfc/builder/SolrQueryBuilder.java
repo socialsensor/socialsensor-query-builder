@@ -335,7 +335,7 @@ public class SolrQueryBuilder {
 	 */
 	public static void main(String[] args) {
 		
-		
+	
 	}
 
 }

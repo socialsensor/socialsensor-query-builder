@@ -45,10 +45,7 @@ public class TrendingSolrQueryBuilder {
 		this.dysco = dysco;
 		
 		addfilteredDyscoContent();
-		extractDyscosVocabularyWithWeights();
-		//printVocabulary();
 		
-		selectValuableContent();
 	}
 	
 	
@@ -131,20 +128,7 @@ public class TrendingSolrQueryBuilder {
 	public List<Query> createPrimalSolrQueries(){
 		List<Query> solrQueries = new ArrayList<Query>();
 		
-		for(Entity ent : entities){
-			for(Keyword key : keywords){
-				//System.out.println("key: "+key);
-				Query query = new Query();
-				
-				String resQuery = ent.getName()+" "+key.getName();
-				
-				query.setName(resQuery);
-				query.setScore(ent.getCont()+key.getScore());
-				query.setType(Query.Type.Keywords);
-				solrQueries.add(query);
-			}
-		}
-		
+		//create queries from hashtags
 		for(Keyword hash : hashtags){
 			//System.out.println("hash: "+hash);
 			Query query = new Query();
@@ -154,17 +138,71 @@ public class TrendingSolrQueryBuilder {
 			solrQueries.add(query);
 		}
 		
+		//create queries from entities - keywords combination
 		for(Entity ent : entities){
-			//System.out.println("entity: "+ent.getName());
-			Query query = new Query();
-			query.setName("\""+ent.getName()+"\"");
-			query.setScore(ent.getCont());
-			query.setType(Query.Type.Keywords);
-			solrQueries.add(query);
+			for(Keyword key : keywords){
+				//System.out.println("key: "+key.getName()+" has score : "+key.getScore());
+				Query query = new Query();
+				
+				String resQuery = getRightEntityKeywordCombination(ent.getName(),key.getName());
+				//System.out.println("Entity - Keyword combination : "+resQuery);
+				query.setName(resQuery);
+				query.setScore(ent.getCont()+key.getScore());
+				query.setType(Query.Type.Keywords);
+				solrQueries.add(query);
+			}
 		}
+		
 	
 		
 		return solrQueries;
+	}
+	
+	
+	private String getRightEntityKeywordCombination(String ent, String key){
+		String combination = "";
+		
+		ent = ent.toLowerCase();
+		key = key.toLowerCase();
+		
+		String[] entWords = ent.split(" "); 
+		
+		List<String> wordsFound = new ArrayList<String>();
+		for(String eWord : entWords){
+			if(key.contains(eWord)){
+				wordsFound.add(eWord);
+			}
+		}
+		
+		if(wordsFound.size()==entWords.length){
+			combination = key;
+		}
+		else if(wordsFound.isEmpty()){
+			combination = ent + " " + key;
+		}
+		else{
+			int lastIndex = 0;
+			for(int i=0;i<entWords.length;i++){
+				if(wordsFound.contains(entWords[i])){
+					lastIndex = key.indexOf(entWords[i])+entWords[i].length() + 1;
+				}
+				else{
+					if(lastIndex == 0){
+						key = entWords[i]+" "+key;
+					}
+					else{
+						String part1 = key.substring(0,lastIndex);
+						String part2 = key.substring(lastIndex+1);
+						part1 += entWords[i]+" ";
+						key = part1 + part2;
+					}
+					
+				}
+			}
+			combination = key;
+		}
+		
+		return combination;
 	}
 	
 	/**
