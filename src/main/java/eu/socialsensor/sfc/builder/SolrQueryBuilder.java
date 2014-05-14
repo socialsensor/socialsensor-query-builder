@@ -187,26 +187,29 @@ public class SolrQueryBuilder {
 		return dysco;
 	}
 	
-	public List<Query> getFurtherProcessedSolrQueries(List<Item> items,Integer queryNumberLimit){
+	public List<Query> getFurtherProcessedSolrQueries(List<Item> items,Integer queryNumberLimit,String dyscoId){
 		List<Query> formulatedSolrQueries = new ArrayList<Query>();
 		KeywordsExtractor extractor = new KeywordsExtractor(items);
-		extractor.processMediaItemsText();
+		extractor.processItemsText();
 		
 		List<String> topKeywords = extractor.getTopKeywords();
-		
+		logger.info("Additional Queries - Processed keywords from media items : "+topKeywords.size());
 		Set<String> contentToProcess = extractor.getTextContent();
-		
+		logger.info("Additional Queries - Before Graph Creation");
 		GraphCreator graphCreator = new GraphCreator(contentToProcess,topKeywords);
 		graphCreator.setSubstituteWords(extractor.getWordsToReplace());
 		graphCreator.createGraph();
-	
+		logger.info("Additional Queries - After Graph Creation");
 		graphCreator.pruneLowConnectivityNodes();
-		
+		logger.info("Additional Queries -  Graph Pruning done");
+		logger.info("Additional Queries -  Nodes in the graph : "+graphCreator.getGraph().getNodes().size());
+		graphCreator.exportGephiGraphToFile(dyscoId);
 		QueryFormulator qFormulator = new QueryFormulator(graphCreator.getGraph(),extractor.getTopHashtags());
 		
 		qFormulator.generateKeywordQueries(NUMBER_OF_KEYWORDS_IN_QUERY);
+		logger.info("Additional Queries -  Keywords Generated");
 		qFormulator.generateHashtagQueries();
-		
+		logger.info("Additional Queries -  Hashtags Generated");
 		//qFormulator.printRankedKeywordQueries();
 		//qFormulator.printRankedHashtagQueries();
 		Map<Double, List<String>> scaledRankedKeywords = scaleKeywordsToWeight(qFormulator.getRankedKeywordQueries());
@@ -235,7 +238,7 @@ public class SolrQueryBuilder {
 			}
 			System.out.println();
 		}*/
-		
+		logger.info("Additional Queries -  Generating final Queries");
 		while(formulatedSolrQueries.size() < queryNumberLimit){
 			boolean keyFound = false;
 			boolean done = false;
@@ -244,13 +247,10 @@ public class SolrQueryBuilder {
 			if(scaledRankedKeywords.isEmpty() && scaledRankedHashtags.isEmpty())
 				break;
 			
-			for(Double keyScore : scaledRankedKeywords.keySet()){
-				boolean hashFound = false;
+			
+			if(scaledRankedKeywords.isEmpty()){
 				for(Double hashScore : scaledRankedHashtags.keySet()){
-					//System.out.println("keyScore: "+keyScore+" ** hashScore: "+hashScore);
-					if(keyScore > hashScore){
-						break;
-					}
+					
 					//System.out.println("Number of queries that have "+hashScore+" score are: "+scaledRankedHashtags.get(hashScore).size());
 					for(String solrQuery : scaledRankedHashtags.get(hashScore)){
 						//System.out.println("Add solrquery: "+solrQuery);
@@ -260,39 +260,63 @@ public class SolrQueryBuilder {
 							break;
 						}
 					}
-					elementToRemove = hashScore;
-					hashFound = true;
-					break;
+					if(done)
+						break;
 				}
-				
-				if(done)
-					break;
-				
-				if(!hashFound){
-					//System.out.println("Number of queries that have "+keyScore+" score are: "+scaledRankedKeywords.get(keyScore).size());
-					for(String solrQuery : scaledRankedKeywords.get(keyScore)){
-						//System.out.println("Add solrquery: "+solrQuery);
-						formulatedSolrQueries.add(new Query(solrQuery,keyScore));
-						if(formulatedSolrQueries.size() >= queryNumberLimit){
-							done = true;
+			}
+			else{
+				for(Double keyScore : scaledRankedKeywords.keySet()){
+					boolean hashFound = false;
+					for(Double hashScore : scaledRankedHashtags.keySet()){
+						//System.out.println("keyScore: "+keyScore+" ** hashScore: "+hashScore);
+						if(keyScore > hashScore){
 							break;
 						}
+						//System.out.println("Number of queries that have "+hashScore+" score are: "+scaledRankedHashtags.get(hashScore).size());
+						for(String solrQuery : scaledRankedHashtags.get(hashScore)){
+							//System.out.println("Add solrquery: "+solrQuery);
+							formulatedSolrQueries.add(new Query(solrQuery,hashScore));
+							if(formulatedSolrQueries.size() >= queryNumberLimit){
+								done = true;
+								break;
+							}
+						}
+						elementToRemove = hashScore;
+						hashFound = true;
+						break;
 					}
-					elementToRemove = keyScore;
-					keyFound = true;
-				}
-				else{
-					//System.out.println("Remove hash score: "+elementToRemove);
-					scaledRankedHashtags.remove(elementToRemove);
 					
+					if(done)
+						break;
+					
+					if(!hashFound){
+						//System.out.println("Number of queries that have "+keyScore+" score are: "+scaledRankedKeywords.get(keyScore).size());
+						for(String solrQuery : scaledRankedKeywords.get(keyScore)){
+							//System.out.println("Add solrquery: "+solrQuery);
+							formulatedSolrQueries.add(new Query(solrQuery,keyScore));
+							if(formulatedSolrQueries.size() >= queryNumberLimit){
+								done = true;
+								break;
+							}
+						}
+						elementToRemove = keyScore;
+						keyFound = true;
+					}
+					else{
+						//System.out.println("Remove hash score: "+elementToRemove);
+						scaledRankedHashtags.remove(elementToRemove);
+						
+					}
+					break;
 				}
+				if(keyFound){
+					//System.out.println("Remove key score: "+elementToRemove);
+					scaledRankedKeywords.remove(elementToRemove);
+				}
+			}
+			
+			if(done)
 				break;
-			}
-			if(keyFound){
-				//System.out.println("Remove key score: "+elementToRemove);
-				scaledRankedKeywords.remove(elementToRemove);
-			}
-				
 		}
 		
 		for(Query query : formulatedSolrQueries){

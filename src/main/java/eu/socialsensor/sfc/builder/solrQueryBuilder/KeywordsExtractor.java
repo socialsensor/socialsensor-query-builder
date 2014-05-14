@@ -26,8 +26,11 @@ public class KeywordsExtractor {
 	private Set<String> stemWords = new HashSet<String>();
 	private Set<String> textContent = new HashSet<String>();
 	
-	private String[][] rankedKeywords;
-	private String[][] rankedHashtags;
+	private String[][] rankedKeywords1;
+	private String[][] rankedHashtags1;
+	
+	private Map<String,Double> rankedKeywords = new HashMap<String,Double>();
+	private Map<String,Double> rankedHashtags = new HashMap<String,Double>();
 	
 	private double keywordsDev;
 	private double hashtagsDev;
@@ -60,7 +63,7 @@ public class KeywordsExtractor {
 		return wordsToReplace;
 	}
 	
-	public void processMediaItemsText(){
+	public void processItemsText(){
 		
 		for(Item item : items){
 			String title = item.getTitle();
@@ -117,9 +120,13 @@ public class KeywordsExtractor {
 	public List<String> getTopKeywords(){
 		List<String> topKeywords = new ArrayList<String>();
 		
-		for(int i=0;i<rankedKeywords.length;i++){
-			if(Double.parseDouble(rankedKeywords[i][1])>keywordsAVG)
-				topKeywords.add(rankedKeywords[i][0]);
+//		for(int i=0;i<rankedKeywords.length;i++){
+//			if(Double.parseDouble(rankedKeywords[i][1])>keywordsAVG)
+//				topKeywords.add(rankedKeywords[i][0]);
+//		}
+		for(Map.Entry<String, Double> entry : rankedKeywords.entrySet()){
+			if(entry.getValue() > keywordsAVG)
+				topKeywords.add(entry.getKey());
 		}
 		
 		return topKeywords;
@@ -128,31 +135,36 @@ public class KeywordsExtractor {
 	public Map<String,Double> getTopHashtags(){
 		Map<String,Double> topHashtags = new HashMap<String,Double>();
 
-		for(int i=0;i<rankedHashtags.length;i++){
-			if(rankedHashtags[i][1] != null)
-				if(Double.parseDouble(rankedHashtags[i][1])>hashtagsAVG)
-					topHashtags.put(rankedHashtags[i][0],Double.parseDouble(rankedHashtags[i][1]));
+//		for(int i=0;i<rankedHashtags.length;i++){
+//			if(rankedHashtags[i][1] != null)
+//				if(Double.parseDouble(rankedHashtags[i][1])>hashtagsAVG)
+//					topHashtags.put(rankedHashtags[i][0],Double.parseDouble(rankedHashtags[i][1]));
+//		}
+		
+		for(Map.Entry<String, Double> entry : rankedHashtags.entrySet()){
+			if(entry.getValue() > hashtagsAVG)
+				topHashtags.put(entry.getKey(), entry.getValue());
 		}
 		
 		return topHashtags;
 	}
 	
-	public List<String> getRankedKeywords(){
-		List<String> keywords = new ArrayList<String>();
-		
-		for(int i=0;i<rankedKeywords.length;i++){
-			keywords.add(rankedKeywords[i][0]);
-		}
-		return keywords;
+	public Set<String> getRankedKeywords(){
+	//	List<String> keywords = new ArrayList<String>();
+//		
+//		for(int i=0;i<rankedKeywords.length;i++){
+//			keywords.add(rankedKeywords[i][0]);
+//		}
+		return rankedKeywords.keySet();
 	}
 	
-	public List<String> getRankedHashtags(){
-		List<String> hashtags = new ArrayList<String>();
-		
-		for(int i=0;i<rankedHashtags.length;i++){
-			hashtags.add(rankedHashtags[i][0]);
-		}
-		return hashtags;
+	public Set<String> getRankedHashtags(){
+//		List<String> hashtags = new ArrayList<String>();
+//		
+//		for(int i=0;i<rankedHashtags.length;i++){
+//			hashtags.add(rankedHashtags[i][0]);
+//		}
+		return rankedKeywords.keySet();
 	}
 	
 	private void countWords(String text){
@@ -294,9 +306,6 @@ public class KeywordsExtractor {
 	private void sortElements(){
 		Set<String> alreadyChecked = new HashSet<String>();
 		
-		rankedKeywords = new String[popularKeywords.size()][2];
-		rankedHashtags = new String[popularHashtags.size()][2];
-		
 		int index = 0;
 		int[] keywordsWeights = new int[popularKeywords.size()];
 		for(Integer weight : popularKeywords.values()){
@@ -331,10 +340,16 @@ public class KeywordsExtractor {
 		for(int i=keywordsWeights.length-1;i>0;i--){
 			for(Map.Entry<String, Integer> entry : popularKeywords.entrySet()){
 				if(entry.getValue() == keywordsWeights[i] && !alreadyChecked.contains(entry.getKey())){
-					rankedKeywords[index][0] = entry.getKey();
-					rankedKeywords[index][1] = String.valueOf(keywordsWeights[i]);
-					alreadyChecked.add(entry.getKey());
-					index++;
+					
+					rankedKeywords.put(entry.getKey(),entry.getValue().doubleValue());
+					
+//					rankedKeywords[index][0] = entry.getKey();
+//					if(String.valueOf(keywordsWeights[i]) == null)
+//						rankedKeywords[index][1] = "0.0";
+//					else
+//						rankedKeywords[index][1] = String.valueOf(keywordsWeights[i]);
+//					alreadyChecked.add(entry.getKey());
+//					index++;
 				}
 			}
 		}
@@ -344,10 +359,13 @@ public class KeywordsExtractor {
 		for(int i=hashtagsWeights.length-1;i>0;i--){
 			for(Map.Entry<String, Integer> entry : popularHashtags.entrySet()){
 				if(entry.getValue() == hashtagsWeights[i] && !alreadyChecked.contains(entry.getKey())){
-					rankedHashtags[index][0] = entry.getKey();
-					rankedHashtags[index][1] = String.valueOf(hashtagsWeights[i]);
-					alreadyChecked.add(entry.getKey());
-					index++;
+					
+					rankedHashtags.put(entry.getKey(), entry.getValue().doubleValue());
+					
+//					rankedHashtags[index][0] = entry.getKey();
+//					rankedHashtags[index][1] = String.valueOf(hashtagsWeights[i]);
+//					alreadyChecked.add(entry.getKey());
+//					index++;
 				}
 			}
 		}
@@ -410,17 +428,25 @@ public class KeywordsExtractor {
 	
 	public void printRankedKeywordsANDHashtags(){
 		System.out.println("----Ranked Keywords----");
-		for(int i=0;i<rankedKeywords.length;i++){
 		
-			System.out.println(rankedKeywords[i][0]+","+rankedKeywords[i][1]);
-			
-		}
-		System.out.println("----Ranked Hashtags----");
-		for(int i=0;i<rankedHashtags.length;i++){
-			
-			System.out.println(rankedHashtags[i][0]+","+rankedHashtags[i][1]);
-			
-		}
+		for(Map.Entry<String, Double> entry : rankedKeywords.entrySet())
+			System.out.println(entry.getKey()+" , "+entry.getValue());
+		
+		
+		for(Map.Entry<String, Double> entry : rankedHashtags.entrySet())
+			System.out.println(entry.getKey()+" , "+entry.getValue());
+		
+//		for(int i=0;i<rankedKeywords.length;i++){
+//		
+//			System.out.println(rankedKeywords[i][0]+","+rankedKeywords[i][1]);
+//			
+//		}
+//		System.out.println("----Ranked Hashtags----");
+//		for(int i=0;i<rankedHashtags.length;i++){
+//			
+//			System.out.println(rankedHashtags[i][0]+","+rankedHashtags[i][1]);
+//			
+//		}
 	}
 
 	/**

@@ -155,7 +155,7 @@ public class GraphCreator {
 		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
 		
 		try {
-			ec.exportFile(new File("C:/Users/ailiakop/Dropbox/SocialSensor/gephiFiles/"+gephiFileName+"_gephiGraph.gexf"));
+			ec.exportFile(new File("C:/Users/ailiakop/Desktop/gephiFiles/"+gephiFileName+"_gephiGraph.gexf"));
 		} catch (IOException ex) {
 			ex.printStackTrace();
 			return;
