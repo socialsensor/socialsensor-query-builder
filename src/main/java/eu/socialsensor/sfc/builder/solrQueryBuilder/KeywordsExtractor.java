@@ -329,11 +329,26 @@ public class KeywordsExtractor {
 		hashtagsWeights = quickSort.getResults();
 		
 		//Compute averages - deviations
-		keywordsAVG = Calculator.computeAverage(keywordsWeights);
-		hashtagsAVG = Calculator.computeAverage(hashtagsWeights);
+		if(keywordsWeights == null){
+			keywordsAVG = 0;
+			keywordsDev = 0;
+		}
+		else{
+			keywordsAVG = Calculator.computeAverage(keywordsWeights);
+			keywordsDev = Math.sqrt(Calculator.computeVariance(keywordsWeights,keywordsAVG));
+		}
+			
 		
-		keywordsDev = Math.sqrt(Calculator.computeVariance(keywordsWeights,keywordsAVG));
-		hashtagsDev = Math.sqrt(Calculator.computeVariance(hashtagsWeights,hashtagsAVG));
+		if(hashtagsWeights == null){
+			hashtagsAVG = 0;
+			hashtagsDev = 0;
+		}	
+		else{
+			hashtagsAVG = Calculator.computeAverage(hashtagsWeights);
+			hashtagsDev = Math.sqrt(Calculator.computeVariance(hashtagsWeights,hashtagsAVG));
+		}
+		
+		
 		
 		
 		index = 0;
