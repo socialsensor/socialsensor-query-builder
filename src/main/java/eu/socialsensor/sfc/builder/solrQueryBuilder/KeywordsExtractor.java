@@ -336,54 +336,59 @@ public class KeywordsExtractor {
 		else{
 			keywordsAVG = Calculator.computeAverage(keywordsWeights);
 			keywordsDev = Math.sqrt(Calculator.computeVariance(keywordsWeights,keywordsAVG));
+			
+			index = 0;
+			for(int i=keywordsWeights.length-1;i>0;i--){
+				for(Map.Entry<String, Integer> entry : popularKeywords.entrySet()){
+					if(entry.getValue() == keywordsWeights[i] && !alreadyChecked.contains(entry.getKey())){
+						
+						rankedKeywords.put(entry.getKey(),entry.getValue().doubleValue());
+						
+//						rankedKeywords[index][0] = entry.getKey();
+//						if(String.valueOf(keywordsWeights[i]) == null)
+//							rankedKeywords[index][1] = "0.0";
+//						else
+//							rankedKeywords[index][1] = String.valueOf(keywordsWeights[i]);
+//						alreadyChecked.add(entry.getKey());
+//						index++;
+					}
+				}
+			}
 		}
 			
 		
 		if(hashtagsWeights == null){
 			hashtagsAVG = 0;
 			hashtagsDev = 0;
+			
 		}	
 		else{
 			hashtagsAVG = Calculator.computeAverage(hashtagsWeights);
 			hashtagsDev = Math.sqrt(Calculator.computeVariance(hashtagsWeights,hashtagsAVG));
-		}
-		
-		
-		
-		
-		index = 0;
-		for(int i=keywordsWeights.length-1;i>0;i--){
-			for(Map.Entry<String, Integer> entry : popularKeywords.entrySet()){
-				if(entry.getValue() == keywordsWeights[i] && !alreadyChecked.contains(entry.getKey())){
-					
-					rankedKeywords.put(entry.getKey(),entry.getValue().doubleValue());
-					
-//					rankedKeywords[index][0] = entry.getKey();
-//					if(String.valueOf(keywordsWeights[i]) == null)
-//						rankedKeywords[index][1] = "0.0";
-//					else
-//						rankedKeywords[index][1] = String.valueOf(keywordsWeights[i]);
-//					alreadyChecked.add(entry.getKey());
-//					index++;
+			
+			index = 0;
+			alreadyChecked.clear();
+			for(int i=hashtagsWeights.length-1;i>0;i--){
+				for(Map.Entry<String, Integer> entry : popularHashtags.entrySet()){
+					if(entry.getValue() == hashtagsWeights[i] && !alreadyChecked.contains(entry.getKey())){
+						
+						rankedHashtags.put(entry.getKey(), entry.getValue().doubleValue());
+						
+//						rankedHashtags[index][0] = entry.getKey();
+//						rankedHashtags[index][1] = String.valueOf(hashtagsWeights[i]);
+//						alreadyChecked.add(entry.getKey());
+//						index++;
+					}
 				}
 			}
 		}
 		
-		index = 0;
-		alreadyChecked.clear();
-		for(int i=hashtagsWeights.length-1;i>0;i--){
-			for(Map.Entry<String, Integer> entry : popularHashtags.entrySet()){
-				if(entry.getValue() == hashtagsWeights[i] && !alreadyChecked.contains(entry.getKey())){
-					
-					rankedHashtags.put(entry.getKey(), entry.getValue().doubleValue());
-					
-//					rankedHashtags[index][0] = entry.getKey();
-//					rankedHashtags[index][1] = String.valueOf(hashtagsWeights[i]);
-//					alreadyChecked.add(entry.getKey());
-//					index++;
-				}
-			}
-		}
+		
+		
+		
+		
+		
+		
 	}
 	
 	public void printKeywordsANDHashtags(){
