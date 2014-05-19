@@ -216,6 +216,20 @@ public class KeywordsExtractor {
 			while(text.contains(link))
 				text = text.replace(link, "");
 		}
+		
+		String regex2 = "http";
+		Pattern p2 = Pattern.compile(regex2);
+		Matcher m2 = p2.matcher(text);
+		while(m2.find()) {
+			String urlStr = m2.group();
+		
+			links.add(urlStr);
+		}
+		
+		for(String link : links){
+			while(text.contains(link))
+				text = text.replace(link, "");
+		}
 			
 		return text;	
 	}

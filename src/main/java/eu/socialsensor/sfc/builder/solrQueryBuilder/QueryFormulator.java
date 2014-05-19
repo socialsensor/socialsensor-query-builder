@@ -230,6 +230,7 @@ public class QueryFormulator {
 	private void eliminateDoubleKeywordQueries(){
 		String[] queriesToProcess = new String[keywordQueries.size()];
 		Map<String, Double> queriesToChange = new HashMap<String,Double>();
+		List<String> queriesToRemove = new ArrayList<String>();
 		queriesToChange.putAll(keywordQueries);
 		int index=0;
 		for(String query : keywordQueries.keySet()){
@@ -257,8 +258,9 @@ public class QueryFormulator {
 								
 						}
 					}
-					if(times == parts.length && times ==otherParts.length)
+					if(times == parts.length || times ==otherParts.length){
 						similarity = 1.0;
+					}
 					else
 						similarity /= maxLength;
 					
@@ -281,6 +283,9 @@ public class QueryFormulator {
 		
 		for(String queryToChange : queriesToChange.keySet()){
 			keywordQueries.put(queryToChange, queriesToChange.get(queryToChange));
+		}
+		for(String queryToRemove : queriesToRemove){
+			keywordQueries.remove(queryToRemove);
 		}
 		
 	}
@@ -349,6 +354,7 @@ public class QueryFormulator {
 		for(Double score : scores.keySet()){
 			for(String nodeId : scores.get(score)){
 				startingNodes.add(nodeId);
+				
 				if(startingNodes.size()>5){
 					finished = true;
 					break;
@@ -357,7 +363,7 @@ public class QueryFormulator {
 			if(finished)
 				break;
 		}
-	
+		
 	}
 	
 	private void traverseQueryGraph(String query,Double score,Node currentNode,int currentSteps,int maxSteps){
@@ -365,10 +371,11 @@ public class QueryFormulator {
 		for(String neighId : currentNode.getOutNeighbors()){
 			String queryToProcess = query;
 			Double scoreToProcess = score;
-	
+			
 			if(queryToProcess.contains(neighId)){
 				scoreToProcess /= currentSteps;
 				keywordQueries.put(queryToProcess, scoreToProcess);
+				
 				continue;
 			}
 			if(currentNode.getOutNeighborsWeight(neighId)>1){
@@ -378,6 +385,7 @@ public class QueryFormulator {
 			if((currentSteps + 1) >= maxSteps){
 				scoreToProcess /= maxSteps;
 				keywordQueries.put(queryToProcess, scoreToProcess);
+				
 				continue;
 			}
 			traverseQueryGraph(queryToProcess,scoreToProcess,graph.getNode(neighId),currentSteps+1,maxSteps);	
@@ -387,7 +395,7 @@ public class QueryFormulator {
 	}
 	
 	private void createQuery(Node startNode,int numberOfSteps){
-		
+	
 		String query = startNode.getId();
 		Double score = 0.0;
 		traverseQueryGraph(query,score,startNode,1,numberOfSteps);

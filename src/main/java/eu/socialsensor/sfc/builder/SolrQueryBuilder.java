@@ -10,9 +10,13 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import eu.socialsensor.framework.client.dao.DyscoDAO;
+import eu.socialsensor.framework.client.dao.impl.DyscoDAOImpl;
+import eu.socialsensor.framework.client.search.SearchEngineResponse;
 import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.client.search.solr.SolrNewsFeedHandler;
 import eu.socialsensor.framework.common.domain.Item;
+import eu.socialsensor.framework.common.domain.MediaItem;
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Dysco.DyscoType;
@@ -210,34 +214,35 @@ public class SolrQueryBuilder {
 		logger.info("Additional Queries -  Keywords Generated");
 		qFormulator.generateHashtagQueries();
 		logger.info("Additional Queries -  Hashtags Generated");
+		
 		//qFormulator.printRankedKeywordQueries();
 		//qFormulator.printRankedHashtagQueries();
 		Map<Double, List<String>> scaledRankedKeywords = scaleKeywordsToWeight(qFormulator.getRankedKeywordQueries());
 		Map<Double, List<String>> scaledRankedHashtags = scaleKeywordsToWeight(qFormulator.getRankedHashtagQueries());
 		
-		/*System.out.println("***Scaled Ranked Keyword Queries ***");
+		System.out.println("***Scaled Ranked Keyword Queries ***");
 		System.out.println();
 		
-		for(Double value : scaledRankedKeywords.keySet()){
-			System.out.println("---- SCALED SCORE "+value+" ----");
-			System.out.println();
-			for(String rQuery : scaledRankedKeywords.get(value)){
-				System.out.println("Q : "+rQuery);
-			}
-			System.out.println();
-		}
-		
-		System.out.println("***Scaled Ranked Hashtag Queries ***");
-		System.out.println();
-		
-		for(Double value : scaledRankedHashtags.keySet()){
-			System.out.println("---- SCALED SCORE "+value+" ----");
-			System.out.println();
-			for(String rQuery : scaledRankedHashtags.get(value)){
-				System.out.println("Q : "+rQuery);
-			}
-			System.out.println();
-		}*/
+//		for(Double value : scaledRankedKeywords.keySet()){
+//			System.out.println("---- SCALED SCORE "+value+" ----");
+//			System.out.println();
+//			for(String rQuery : scaledRankedKeywords.get(value)){
+//				System.out.println("Q : "+rQuery);
+//			}
+//			System.out.println();
+//		}
+//		
+//		System.out.println("***Scaled Ranked Hashtag Queries ***");
+//		System.out.println();
+//		
+//		for(Double value : scaledRankedHashtags.keySet()){
+//			System.out.println("---- SCALED SCORE "+value+" ----");
+//			System.out.println();
+//			for(String rQuery : scaledRankedHashtags.get(value)){
+//				System.out.println("Q : "+rQuery);
+//			}
+//			System.out.println();
+//		}
 		logger.info("Additional Queries -  Generating final Queries");
 		while(formulatedSolrQueries.size() < queryNumberLimit){
 			boolean keyFound = false;
@@ -359,7 +364,7 @@ public class SolrQueryBuilder {
 	 */
 	public static void main(String[] args) {
 		
-	
+		
 	}
 
 }
