@@ -151,9 +151,9 @@ public class SolrQueryBuilder {
 			
 			List<Query> primalSolrQueries = trendingBuilder.createPrimalSolrQueries();
 			
-			if(primalSolrQueries.size() > 10){
+			if(primalSolrQueries.size() > 5){
 				List<Query> topQueries = new ArrayList<Query>();
-				for(int i=0;i<10;i++)
+				for(int i=0;i<5;i++)
 					topQueries.add(primalSolrQueries.get(i));
 				
 				return topQueries;
