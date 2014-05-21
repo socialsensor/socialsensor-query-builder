@@ -164,7 +164,7 @@ public class TrendingSolrQueryBuilder {
 		
 		ent = ent.toLowerCase();
 		key = key.toLowerCase();
-		
+		//System.out.println("Entity: "+ent+" Keyword: "+key);
 		String[] entWords = ent.split(" "); 
 		
 		List<String> wordsFound = new ArrayList<String>();
@@ -181,13 +181,15 @@ public class TrendingSolrQueryBuilder {
 			combination = ent + " " + key;
 		}
 		else{
+			//System.out.println("Entity and Keyword are partly similar");
 			int lastIndex = 0;
 			for(int i=0;i<entWords.length;i++){
 				if(wordsFound.contains(entWords[i])){
 					lastIndex = key.indexOf(entWords[i])+entWords[i].length() + 1;
+					//System.out.println("Last Index of existed word: "+entWords[i]+" is: "+lastIndex);
 				}
 				else{
-					if(lastIndex == 0){
+					if(lastIndex == 0 || lastIndex > key.length()){
 						key = entWords[i]+" "+key;
 					}
 					else{
