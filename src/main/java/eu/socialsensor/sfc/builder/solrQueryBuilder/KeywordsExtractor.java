@@ -125,8 +125,11 @@ public class KeywordsExtractor {
 //				topKeywords.add(rankedKeywords[i][0]);
 //		}
 		for(Map.Entry<String, Double> entry : rankedKeywords.entrySet()){
-			if(entry.getValue() > keywordsAVG)
+			if(entry.getValue() > keywordsAVG) 
 				topKeywords.add(entry.getKey());
+			
+			if(topKeywords.size() >= 500)//used to be only keywordsAVG - SWITCHED TO STATIC VALUE FOR SAFETY - REEVALUATE
+				break;
 		}
 		
 		return topKeywords;
