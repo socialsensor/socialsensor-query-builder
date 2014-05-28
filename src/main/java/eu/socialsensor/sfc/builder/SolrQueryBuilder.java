@@ -359,7 +359,7 @@ public class SolrQueryBuilder {
 			return scaledData;
 		
 		double max = 0.0;
-		double min = 100000000000000000.0;
+		double min = 1000000.0;
 		
 		for(Double score : inputData.keySet()){
 			if(score>max){
@@ -369,11 +369,14 @@ public class SolrQueryBuilder {
 				min = score;
 			}
 		}
-		
+
 		for(Map.Entry<Double, List<String>> entry : inputData.entrySet()){
-			Double value = (entry.getKey() - min)/(max - min);
-			scaledData.put(value, entry.getValue());
-		
+			if(min == max)
+				scaledData.put(1.0, entry.getValue());
+			else{
+				Double value = (entry.getKey() - min)/(max - min);
+				scaledData.put(value, entry.getValue());
+			}
 		}
 		
 		return scaledData; 
