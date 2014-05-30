@@ -396,7 +396,7 @@ public class QueryFormulator {
 	}
 	
 	private void createQuery(Node startNode,int numberOfSteps){
-	
+		
 		String query = startNode.getId();
 		Double score = 0.0;
 		traverseQueryGraph(query,score,startNode,1,numberOfSteps);

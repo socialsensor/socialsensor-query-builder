@@ -126,6 +126,8 @@ public class TrendingSolrQueryBuilder {
 	}
 	
 	public List<Query> createPrimalSolrQueries(){
+		Map<Double, List<Query>> rankedQueries = new TreeMap<Double,List<Query>>();
+		
 		List<Query> solrQueries = new ArrayList<Query>();
 		
 		//create queries from hashtags
@@ -135,21 +137,68 @@ public class TrendingSolrQueryBuilder {
 			query.setName(hash.getName());
 			query.setScore(hash.getScore());
 			query.setType(Query.Type.Keywords);
-			solrQueries.add(query);
+			logger.info("Hashtag : "+hash.getName()+" Score : "+hash.getScore());
+			if(rankedQueries.get(hash.getScore()) == null){
+				List<Query> alreadyIn = new ArrayList<Query>();
+				alreadyIn.add(query);
+				
+				rankedQueries.put(hash.getScore(), alreadyIn);
+			}else{
+				List<Query> alreadyIn = rankedQueries.get(hash.getScore());
+				alreadyIn.add(query);
+				
+				rankedQueries.put(hash.getScore(), alreadyIn);
+			}
+			
 		}
 		
 		//create queries from entities - keywords combination
 		for(Entity ent : entities){
+			logger.info("Entity : "+ent.getName()+" Score : "+ent.getCont());
 			for(Keyword key : keywords){
 				//System.out.println("key: "+key.getName()+" has score : "+key.getScore());
 				Query query = new Query();
-				
+				logger.info("Keyword : "+key.getName()+" Score : "+key.getScore());
 				String resQuery = getRightEntityKeywordCombination(ent.getName(),key.getName());
 				//System.out.println("Entity - Keyword combination : "+resQuery);
 				query.setName(resQuery);
-				query.setScore(ent.getCont()+key.getScore());
+				double aggScore = ent.getCont()+key.getScore();
+				query.setScore(aggScore);
 				query.setType(Query.Type.Keywords);
-				solrQueries.add(query);
+
+				if(rankedQueries.get(aggScore) == null){
+					List<Query> alreadyIn = new ArrayList<Query>();
+					alreadyIn.add(query);
+					
+					rankedQueries.put(aggScore, alreadyIn);
+				}else{
+					List<Query> alreadyIn = rankedQueries.get(aggScore);
+					alreadyIn.add(query);
+					
+					rankedQueries.put(aggScore, alreadyIn);
+				}
+				
+			}
+			
+			
+			Query query = new Query();
+			logger.info("Keyword : "+ent.getName()+" Score : "+ent.getCont());
+			
+			query.setName(ent.getName());
+			
+			query.setScore(ent.getCont());
+			query.setType(Query.Type.Keywords);
+
+			if(rankedQueries.get(ent.getCont()) == null){
+				List<Query> alreadyIn = new ArrayList<Query>();
+				alreadyIn.add(query);
+				
+				rankedQueries.put(ent.getCont(), alreadyIn);
+			}else{
+				List<Query> alreadyIn = rankedQueries.get(ent.getCont());
+				alreadyIn.add(query);
+				
+				rankedQueries.put(ent.getCont(), alreadyIn);
 			}
 		}
 		
@@ -160,16 +209,39 @@ public class TrendingSolrQueryBuilder {
 			for(Keyword key : keywords){
 				if(key.getName().split(" ").length>= minimumKeywordLenght){
 					Query query = new Query();
-					
+					logger.info("Keyword : "+key.getName()+" Score : "+key.getScore());
 					query.setName(key.getName());
 					query.setScore(key.getScore());
 					query.setType(Query.Type.Keywords);
-					solrQueries.add(query);
+
+					if(rankedQueries.get(key.getScore()) == null){
+						List<Query> alreadyIn = new ArrayList<Query>();
+						alreadyIn.add(query);
+						
+						rankedQueries.put(key.getScore(), alreadyIn);
+					}else{
+						List<Query> alreadyIn = rankedQueries.get(key.getScore());
+						alreadyIn.add(query);
+						
+						rankedQueries.put(key.getScore(), alreadyIn);
+					}
+					
 				}
 				
 			}
 		}
-	
+		
+		int limit = 5;
+		for(Map.Entry<Double, List<Query>> entry : rankedQueries.entrySet()){
+			
+			for(Query q : entry.getValue()){
+				if(solrQueries.size() == limit)
+					break;
+				
+				solrQueries.add(q);
+			}
+			
+		}
 		
 		return solrQueries;
 	}

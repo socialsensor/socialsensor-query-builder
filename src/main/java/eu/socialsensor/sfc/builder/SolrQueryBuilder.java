@@ -155,16 +155,8 @@ public class SolrQueryBuilder {
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
 			
 			List<Query> primalSolrQueries = trendingBuilder.createPrimalSolrQueries();
-			
-			if(primalSolrQueries.size() > 5){
-				List<Query> topQueries = new ArrayList<Query>();
-				for(int i=0;i<5;i++)
-					topQueries.add(primalSolrQueries.get(i));
-				
-				return topQueries;
-			}
-			else
-				return primalSolrQueries;
+
+			return primalSolrQueries;
 				
 		}
 	}
@@ -192,7 +184,7 @@ public class SolrQueryBuilder {
 		return dysco;
 	}
 	
-	public List<Query> getFurtherProcessedSolrQueries(List<Item> items,Integer queryNumberLimit,String dyscoId){
+	public List<Query> getFurtherProcessedSolrQueries(List<Item> items,Integer queryNumberLimit,Dysco dysco){
 		List<Query> formulatedSolrQueries = new ArrayList<Query>();
 		KeywordsExtractor extractor = new KeywordsExtractor(items);
 		extractor.processItemsText();
@@ -208,7 +200,7 @@ public class SolrQueryBuilder {
 		graphCreator.pruneLowConnectivityNodes();
 		//System.out.println("Additional Queries -  Graph Pruning done");
 		//System.out.println("Additional Queries -  Nodes in the graph : "+graphCreator.getGraph().getNodes().size());
-		graphCreator.exportGephiGraphToFile(dyscoId);
+		graphCreator.exportGephiGraphToFile(dysco.getId());
 		
 		if(graphCreator.getGraph().getNodes().size() == 0)
 			return formulatedSolrQueries;
@@ -220,34 +212,34 @@ public class SolrQueryBuilder {
 		qFormulator.generateHashtagQueries();
 		//System.out.println("Additional Queries -  Hashtags Generated");
 		
-		//qFormulator.printRankedKeywordQueries();
+		qFormulator.printRankedKeywordQueries();
 		//qFormulator.printRankedHashtagQueries();
 		Map<Double, List<String>> scaledRankedKeywords = scaleKeywordsToWeight(qFormulator.getRankedKeywordQueries());
 		Map<Double, List<String>> scaledRankedHashtags = scaleKeywordsToWeight(qFormulator.getRankedHashtagQueries());
 		
-//		System.out.println("***Scaled Ranked Keyword Queries ***");
-//		System.out.println();
+		System.out.println("***Scaled Ranked Keyword Queries ***");
+		System.out.println();
 		
-//		for(Double value : scaledRankedKeywords.keySet()){
-//			System.out.println("---- SCALED SCORE "+value+" ----");
-//			System.out.println();
-//			for(String rQuery : scaledRankedKeywords.get(value)){
-//				System.out.println("Q : "+rQuery);
-//			}
-//			System.out.println();
-//		}
-//		
-//		System.out.println("***Scaled Ranked Hashtag Queries ***");
-//		System.out.println();
-//		
-//		for(Double value : scaledRankedHashtags.keySet()){
-//			System.out.println("---- SCALED SCORE "+value+" ----");
-//			System.out.println();
-//			for(String rQuery : scaledRankedHashtags.get(value)){
-//				System.out.println("Q : "+rQuery);
-//			}
-//			System.out.println();
-//		}
+		for(Double value : scaledRankedKeywords.keySet()){
+			System.out.println("---- SCALED SCORE "+value+" ----");
+			System.out.println();
+			for(String rQuery : scaledRankedKeywords.get(value)){
+				System.out.println("Q : "+rQuery);
+			}
+			System.out.println();
+		}
+		
+		System.out.println("***Scaled Ranked Hashtag Queries ***");
+		System.out.println();
+		
+		for(Double value : scaledRankedHashtags.keySet()){
+			System.out.println("---- SCALED SCORE "+value+" ----");
+			System.out.println();
+			for(String rQuery : scaledRankedHashtags.get(value)){
+				System.out.println("Q : "+rQuery);
+			}
+			System.out.println();
+		}
 		logger.info("Additional Queries -  Generating final Queries");
 		while(formulatedSolrQueries.size() < queryNumberLimit){
 			boolean keyFound = false;
@@ -260,6 +252,11 @@ public class SolrQueryBuilder {
 			
 			if(scaledRankedKeywords.isEmpty()){
 				for(Double hashScore : scaledRankedHashtags.keySet()){
+					
+					if(hashScore<1.5){
+						done = true;
+						break;
+					}
 					
 					System.out.println("Number of hashtag queries that have "+hashScore+" score are: "+scaledRankedHashtags.get(hashScore).size());
 					for(String solrQuery : scaledRankedHashtags.get(hashScore)){
@@ -277,6 +274,11 @@ public class SolrQueryBuilder {
 			else if(scaledRankedHashtags.isEmpty()){
 				for(Double keyScore : scaledRankedKeywords.keySet()){
 					
+					if(keyScore<1.5){
+						done = true;
+						break;
+					}
+						
 					System.out.println("Number of keyword queries that have "+keyScore+" score are: "+scaledRankedKeywords.get(keyScore).size());
 					for(String solrQuery : scaledRankedKeywords.get(keyScore)){
 						System.out.println("Add key query: "+solrQuery);
@@ -294,6 +296,10 @@ public class SolrQueryBuilder {
 				for(Double keyScore : scaledRankedKeywords.keySet()){
 					boolean hashFound = false;
 					for(Double hashScore : scaledRankedHashtags.keySet()){
+						if(keyScore<1.5 && hashScore<1.5){
+							done = true;
+							break;
+						}
 						System.out.println("keyScore: "+keyScore+" ** hashScore: "+hashScore);
 						if(keyScore > hashScore){
 							break;
