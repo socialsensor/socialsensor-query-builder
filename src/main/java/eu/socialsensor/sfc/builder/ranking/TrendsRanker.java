@@ -43,17 +43,17 @@ public class TrendsRanker {
 		
 		for(Query sQuery : solrQueries){
 			float queryLength = sQuery.getName().length();
-			System.out.println("Query Length : "+queryLength);
+			//System.out.println("Query Length : "+queryLength);
 			String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
-			System.out.println("Query : "+query);
+			//System.out.println("Query : "+query);
 			Map<Item,Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
-			System.out.println();
+			//System.out.println();
 			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values());
-			System.out.println("Average score for query : "+query + " ->> "+avgScore);
+			//System.out.println("Average score for query : "+query + " ->> "+avgScore);
 			avgScore *= (queryLength/10);
 			
-			System.out.println("Average score for query : "+query + " ->> "+avgScore);
-			System.out.println();
+			//System.out.println("Average score for query : "+query + " ->> "+avgScore);
+			//System.out.println();
 			queriesScores.add(avgScore);
 		}
 		
@@ -63,11 +63,11 @@ public class TrendsRanker {
 		double timeDiff = (double) Math.abs(dateTimeOfDysco - currentDateTime)/DAY_IN_MILLISECONDS;
 		
 		double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
-		System.out.println("Time diff : "+timeDiff);
-		System.out.println("Time eval : "+timeEval);
+		//System.out.println("Time diff : "+timeDiff);
+		//System.out.println("Time eval : "+timeEval);
 		
 		score = Calculator.computeAverageFloat(queriesScores) * timeEval;
-		System.out.println("Total Average score for dysco : "+score);
+		//System.out.println("Total Average score for dysco : "+score);
 		return score;
 	}
 	

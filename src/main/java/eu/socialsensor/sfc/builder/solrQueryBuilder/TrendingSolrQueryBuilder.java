@@ -153,6 +153,22 @@ public class TrendingSolrQueryBuilder {
 			}
 		}
 		
+		
+		if(entities.isEmpty()){
+			int minimumKeywordLenght = 3;
+			
+			for(Keyword key : keywords){
+				if(key.getName().split(" ").length>= minimumKeywordLenght){
+					Query query = new Query();
+					
+					query.setName(key.getName());
+					query.setScore(key.getScore());
+					query.setType(Query.Type.Keywords);
+					solrQueries.add(query);
+				}
+				
+			}
+		}
 	
 		
 		return solrQueries;
