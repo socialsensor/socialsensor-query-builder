@@ -44,8 +44,8 @@ public class TrendingSolrQueryBuilder {
 	public TrendingSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
 		
-		addfilteredDyscoContent();
-		eliminateRepeatedKeywords();
+		//addfilteredDyscoContent();
+		//eliminateRepeatedKeywords();
 	}
 	
 	
@@ -257,7 +257,7 @@ public class TrendingSolrQueryBuilder {
 		
 		for(String key : keywords.split(" "))
 			splittedKeywords.add(key);
-		//System.out.println("Entity: "+ent+" Keyword: "+key);
+		System.out.println("Entity: "+ent+" Keyword: "+keywords);
 		String[] entWords = ent.split(" "); 
 			
 		List<String> wordsFound = new ArrayList<String>();
@@ -268,18 +268,22 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		if(wordsFound.size()==entWords.length){
-			combination = "\""+ent +"\"";
+			String resQuery = keywords.replace(ent, "");
+			if(resQuery.length() == 0)
+				combination = "\""+ent +"\"";
+			else
+				combination = "\""+ent +"\""+resQuery;
 		}
 		else if(wordsFound.isEmpty()){
 			combination = "\""+ent +"\" " + keywords;
 		}
 		else{
-			//System.out.println("Entity and Keyword are partly similar");
+			System.out.println("Entity and Keyword are partly similar");
 			int lastIndex = 0;
 			for(int i=0;i<entWords.length;i++){
 				if(wordsFound.contains(entWords[i])){
 					lastIndex = keywords.indexOf(entWords[i])+entWords[i].length() + 1;
-					//System.out.println("Last Index of existed word: "+entWords[i]+" is: "+lastIndex);
+					System.out.println("Last Index of existed word: "+entWords[i]+" is: "+lastIndex);
 				}
 				else{
 					if(lastIndex == 0 || lastIndex > keywords.length()){
@@ -586,7 +590,7 @@ public class TrendingSolrQueryBuilder {
 	public static void main(String[] args) {
 		TrendingSolrQueryBuilder builder = new TrendingSolrQueryBuilder(null);
 		
-		String res  = builder.getRightEntityKeywordCombination("el nuevo herald", "los nuevos");
+		String res  = builder.getRightEntityKeywordCombination("henrik lundqvist", "henrik lundqvist show");
 		
 		System.out.println("res: "+res);
 	}
