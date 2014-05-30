@@ -126,7 +126,7 @@ public class TrendingSolrQueryBuilder {
 	}
 	
 	public List<Query> createPrimalSolrQueries(){
-		Map<Double, List<Query>> rankedQueries = new TreeMap<Double,List<Query>>();
+		Map<Double, List<Query>> rankedQueries = new TreeMap<Double,List<Query>>(Collections.reverseOrder());
 		
 		List<Query> solrQueries = new ArrayList<Query>();
 		
