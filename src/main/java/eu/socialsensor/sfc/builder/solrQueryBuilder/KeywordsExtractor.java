@@ -189,7 +189,7 @@ public class KeywordsExtractor {
 					
 				}
 				else{
-					if(parts[i].length() > 2){
+					if(parts[i].length() > 1){
 
 						if(popularKeywords.containsKey(parts[i]))
 							popularKeywords.put(parts[i], popularKeywords.get(parts[i])+1);
