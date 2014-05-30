@@ -194,7 +194,7 @@ public class TrendingSolrQueryBuilder {
 			combination = key;
 		}
 		else if(wordsFound.isEmpty()){
-			combination = ent + " " + key;
+			combination = "\""+ent +"\" " + key;
 		}
 		else{
 			//System.out.println("Entity and Keyword are partly similar");
@@ -206,12 +206,12 @@ public class TrendingSolrQueryBuilder {
 				}
 				else{
 					if(lastIndex == 0 || lastIndex > key.length()){
-						key = entWords[i]+" "+key;
+						key = "\""+entWords[i]+"\" "+key;
 					}
 					else{
 						String part1 = key.substring(0,lastIndex);
 						String part2 = key.substring(lastIndex+1);
-						part1 += entWords[i]+" ";
+						part1 +="\""+entWords[i]+"\" ";
 						key = part1 + part2;
 					}
 					
