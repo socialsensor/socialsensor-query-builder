@@ -268,7 +268,7 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		if(wordsFound.size()==entWords.length){
-			combination = "\""+ent +"\" ";
+			combination = "\""+ent +"\"";
 		}
 		else if(wordsFound.isEmpty()){
 			combination = "\""+ent +"\" " + keywords;
