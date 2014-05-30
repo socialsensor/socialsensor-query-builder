@@ -45,7 +45,7 @@ public class TrendingSolrQueryBuilder {
 		this.dysco = dysco;
 		
 		addfilteredDyscoContent();
-		
+		eliminateRepeatedKeywords();
 	}
 	
 	
@@ -182,7 +182,7 @@ public class TrendingSolrQueryBuilder {
 			
 			
 			Query query = new Query();
-			logger.info("Keyword : "+ent.getName()+" Score : "+ent.getCont());
+			logger.info("Entity : "+ent.getName()+" Score : "+ent.getCont());
 			
 			query.setName(ent.getName());
 			
@@ -247,49 +247,54 @@ public class TrendingSolrQueryBuilder {
 	}
 	
 	
-	private String getRightEntityKeywordCombination(String ent, String key){
+	private String getRightEntityKeywordCombination(String ent, String keywords){
 		String combination = "";
 		
+		List<String> splittedKeywords = new ArrayList<String>();
+		
 		ent = ent.toLowerCase();
-		key = key.toLowerCase();
+		keywords = keywords.toLowerCase();
+		
+		for(String key : keywords.split(" "))
+			splittedKeywords.add(key);
 		//System.out.println("Entity: "+ent+" Keyword: "+key);
 		String[] entWords = ent.split(" "); 
-		
+			
 		List<String> wordsFound = new ArrayList<String>();
 		for(String eWord : entWords){
-			if(key.contains(eWord)){
+			if(splittedKeywords.contains(eWord)){
 				wordsFound.add(eWord);
 			}
 		}
 		
 		if(wordsFound.size()==entWords.length){
-			combination = key;
+			combination = "\""+ent +"\" ";
 		}
 		else if(wordsFound.isEmpty()){
-			combination = "\""+ent +"\" " + key;
+			combination = "\""+ent +"\" " + keywords;
 		}
 		else{
 			//System.out.println("Entity and Keyword are partly similar");
 			int lastIndex = 0;
 			for(int i=0;i<entWords.length;i++){
 				if(wordsFound.contains(entWords[i])){
-					lastIndex = key.indexOf(entWords[i])+entWords[i].length() + 1;
+					lastIndex = keywords.indexOf(entWords[i])+entWords[i].length() + 1;
 					//System.out.println("Last Index of existed word: "+entWords[i]+" is: "+lastIndex);
 				}
 				else{
-					if(lastIndex == 0 || lastIndex > key.length()){
-						key = "\""+entWords[i]+"\" "+key;
+					if(lastIndex == 0 || lastIndex > keywords.length()){
+						keywords = "\""+entWords[i]+"\" "+keywords;
 					}
 					else{
-						String part1 = key.substring(0,lastIndex);
-						String part2 = key.substring(lastIndex+1);
+						String part1 = keywords.substring(0,lastIndex);
+						String part2 = keywords.substring(lastIndex+1);
 						part1 +="\""+entWords[i]+"\" ";
-						key = part1 + part2;
+						keywords = part1 + part2;
 					}
 					
 				}
 			}
-			combination = key;
+			combination = keywords;
 		}
 		
 		return combination;
@@ -397,6 +402,27 @@ public class TrendingSolrQueryBuilder {
 			}
 		}
 			
+	}
+	
+	private void eliminateRepeatedKeywords(){
+		List<Keyword> keywordsToEliminate = new ArrayList<Keyword>();
+		for(Keyword key : keywords){
+			for(Entity ent : entities){
+				if(ent.getName().equals(key.getName())){
+					keywordsToEliminate.add(key);
+					ent.setCont(ent.getCont()+key.getScore());
+				}
+			}
+			for(Keyword hash : hashtags){
+				if(hash.getName().equals(key.getName())){
+					keywordsToEliminate.add(key);
+					hash.setScore(hash.getScore()+key.getScore());
+				}
+			}
+		}
+		
+		for(Keyword key : keywordsToEliminate)
+			keywords.remove(key);
 	}
 	
 	private void extractDyscosVocabularyWithWeights(){
@@ -555,5 +581,13 @@ public class TrendingSolrQueryBuilder {
 			}
 		}
 		
+	}
+	
+	public static void main(String[] args) {
+		TrendingSolrQueryBuilder builder = new TrendingSolrQueryBuilder(null);
+		
+		String res  = builder.getRightEntityKeywordCombination("el nuevo herald", "los nuevos");
+		
+		System.out.println("res: "+res);
 	}
 }
