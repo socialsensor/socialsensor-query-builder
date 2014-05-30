@@ -184,7 +184,7 @@ public class TrendingSolrQueryBuilder {
 			Query query = new Query();
 			logger.info("Entity : "+ent.getName()+" Score : "+ent.getCont());
 			
-			query.setName(ent.getName());
+			query.setName("\""+ent.getName()+"\"");
 			
 			query.setScore(ent.getCont());
 			query.setType(Query.Type.Keywords);
