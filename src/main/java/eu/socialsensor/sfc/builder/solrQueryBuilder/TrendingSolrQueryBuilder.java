@@ -44,8 +44,8 @@ public class TrendingSolrQueryBuilder {
 	public TrendingSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
 		
-		//addfilteredDyscoContent();
-		//eliminateRepeatedKeywords();
+		addfilteredDyscoContent();
+		eliminateRepeatedKeywords();
 	}
 	
 	
