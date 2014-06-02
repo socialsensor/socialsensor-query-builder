@@ -31,8 +31,6 @@ public class CustomSolrQueryBuilder {
 	
 	
 	//new fields
-	private Set<String> keyPhrases = new HashSet<String>();
-	private Set<String> wordsToAvoid = new HashSet<String>();
 	private Set<String> twitterUsers = new HashSet<String>();
 	private Set<String> mentionedTwitterUsers = new HashSet<String>();
 	
@@ -136,13 +134,7 @@ public class CustomSolrQueryBuilder {
 			resQuery.setType(Query.Type.Keywords);
 			solrQueries.add(resQuery);
 		}
-		
-		for(String contributor : users){
-			Query resQuery = new Query(contributor,0.0);
-			resQuery.setType(Query.Type.Contributors);
-			solrQueries.add(resQuery);
-		}
-		
+
 		return solrQueries;
 	}
 	

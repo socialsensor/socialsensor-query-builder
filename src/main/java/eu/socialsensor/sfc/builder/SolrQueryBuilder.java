@@ -200,7 +200,7 @@ public class SolrQueryBuilder {
 		graphCreator.pruneLowConnectivityNodes();
 		//System.out.println("Additional Queries -  Graph Pruning done");
 		//System.out.println("Additional Queries -  Nodes in the graph : "+graphCreator.getGraph().getNodes().size());
-		graphCreator.exportGephiGraphToFile(dysco.getId());
+		//graphCreator.exportGephiGraphToFile(dysco.getId());
 		
 		if(graphCreator.getGraph().getNodes().size() == 0)
 			return formulatedSolrQueries;
@@ -426,7 +426,19 @@ public class SolrQueryBuilder {
 		SolrQueryBuilder builder;
 		try {
 			builder = new SolrQueryBuilder();
+			
+			for(Entity ent : dysco.getEntities()){
+				System.out.println("Ent : "+ent.getName());
+			}
+			for(String key : dysco.getKeywords().keySet()){
+				System.out.println("Keyword : "+key);
+			}
+			
+			for(String hash : dysco.getHashtags().keySet()){
+				System.out.println("Hashtag : "+hash);
+			}
 			List<Query> queries = builder.getSolrQueries(dysco);
+			System.out.println("created "+queries.size()+" queries");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
