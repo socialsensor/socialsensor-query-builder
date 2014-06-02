@@ -375,7 +375,7 @@ public class QueryFormulator {
 			if(queryToProcess.contains(neighId)){
 				scoreToProcess /= currentSteps;
 				keywordQueries.put(queryToProcess, scoreToProcess);
-				System.out.println("Added query:"+queryToProcess+" with score: "+scoreToProcess+"--current steps:"+currentSteps);
+				//System.out.println("Added query:"+queryToProcess+" with score: "+scoreToProcess+"--current steps:"+currentSteps);
 				continue;
 			}
 			if(currentNode.getOutNeighborsWeight(neighId)>1){
@@ -386,7 +386,7 @@ public class QueryFormulator {
 			if((currentSteps + 1) >= maxSteps){
 				scoreToProcess /= maxSteps;
 				keywordQueries.put(queryToProcess, scoreToProcess);
-				System.out.println("Added query:"+queryToProcess+" with score: "+scoreToProcess+"--current steps:"+currentSteps);
+				//System.out.println("Added query:"+queryToProcess+" with score: "+scoreToProcess+"--current steps:"+currentSteps);
 				continue;
 			}
 			traverseQueryGraph(queryToProcess,scoreToProcess,graph.getNode(neighId),currentSteps+1,maxSteps);	

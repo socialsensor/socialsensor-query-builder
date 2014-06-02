@@ -257,7 +257,7 @@ public class TrendingSolrQueryBuilder {
 		
 		for(String key : keywords.split(" "))
 			splittedKeywords.add(key);
-		System.out.println("Entity: "+ent+" Keyword: "+keywords);
+		//System.out.println("Entity: "+ent+" Keyword: "+keywords);
 		String[] entWords = ent.split(" "); 
 			
 		List<String> wordsFound = new ArrayList<String>();
@@ -278,12 +278,12 @@ public class TrendingSolrQueryBuilder {
 			combination = "\""+ent +"\" " + keywords;
 		}
 		else{
-			System.out.println("Entity and Keyword are partly similar");
+			//System.out.println("Entity and Keyword are partly similar");
 			int lastIndex = 0;
 			for(int i=0;i<entWords.length;i++){
 				if(wordsFound.contains(entWords[i])){
 					lastIndex = keywords.indexOf(entWords[i])+entWords[i].length() + 1;
-					System.out.println("Last Index of existed word: "+entWords[i]+" is: "+lastIndex);
+					//System.out.println("Last Index of existed word: "+entWords[i]+" is: "+lastIndex);
 				}
 				else{
 					if(lastIndex == 0 || lastIndex > keywords.length()){
