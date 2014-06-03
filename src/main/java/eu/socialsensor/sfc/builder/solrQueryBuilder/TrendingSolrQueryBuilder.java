@@ -310,7 +310,6 @@ public class TrendingSolrQueryBuilder {
 	private void addfilteredDyscoContent(){
 		
 		List<Entity> filteredEntities = new ArrayList<Entity>();
-		List<String> filteredKeywords = new ArrayList<String>();
 		
 		//Filter entities
 		if(dysco.getEntities() != null){
@@ -354,10 +353,7 @@ public class TrendingSolrQueryBuilder {
 						
 					filteredEntities.get(index).setName(filteredEntities.get(index).getName().toLowerCase());
 					filteredEntities.get(index).setName(filteredEntities.get(index).getName().replaceAll("'s", ""));
-					filteredEntities.get(index).setName(filteredEntities.get(index).getName().replaceAll("\\(", ""));
-					filteredEntities.get(index).setName(filteredEntities.get(index).getName().replaceAll("\\)", ""));
-					filteredEntities.get(index).setName(filteredEntities.get(index).getName().replaceAll("'", ""));
-					filteredEntities.get(index).setName(filteredEntities.get(index).getName().replaceAll("[:.,?!;&'#-]+",""));
+					filteredEntities.get(index).setName(filteredEntities.get(index).getName().replaceAll("[^A-Za-z0-9 ]", ""));
 					filteredEntities.get(index).setName(filteredEntities.get(index).getName().replaceAll("\\s+", " "));
 	       		 	
 				}
@@ -368,31 +364,35 @@ public class TrendingSolrQueryBuilder {
 			
 		//Filter keywords
 		if(dysco.getKeywords() != null){
-			filteredKeywords.addAll(dysco.getKeywords().keySet());
+			Map<String,Double> keywordsToFilter = new HashMap<String,Double>();
+			
+			keywordsToFilter.putAll(dysco.getKeywords());
+			
+		
 			for(String key : dysco.getKeywords().keySet()){
-				int index = filteredKeywords.indexOf(key);
 			
 				if(key.contains("@")||key.contains("#") 
 						|| stopwords.is(key)
 						|| key.split(" ").length > 3){
-					filteredKeywords.remove(key);
+					keywordsToFilter.remove(key);
 					continue;
 				}
 				if(key.contains("http")){
 					String newKey = key.substring(0,key.indexOf("http"));
-					filteredKeywords.get(index).replace(filteredKeywords.get(index), newKey);
+					keywordsToFilter.put(newKey, dysco.getKeywords().get(key));
+					keywordsToFilter.remove(key);
 				}
 				
-				filteredKeywords.get(index).toLowerCase();
-				filteredKeywords.get(index).replaceAll("'s", "");
-				filteredKeywords.get(index).replaceAll("\\(", "");
-				filteredKeywords.get(index).replaceAll("\\)", "");
-				filteredKeywords.get(index).replaceAll("'", "");
-				filteredKeywords.get(index).replaceAll("[:.,?!;&'#]+-","");
-				filteredKeywords.get(index).replaceAll("\\s+", " ");
+				String keyToFilter = key;
 				
+				keyToFilter = keyToFilter.toLowerCase();
+				
+				keyToFilter = keyToFilter.replaceAll("'s", "");
+				keyToFilter = keyToFilter.replaceAll("[^A-Za-z0-9 ]", "");
+				keyToFilter = keyToFilter.replaceAll("\\s+", " ");
+				System.out.println("keyToFilter:"+keyToFilter);
 				//Create the keyword to use
-				Keyword keyword = new Keyword(filteredKeywords.get(index).toLowerCase(),dysco.getKeywords().get(key).floatValue());
+				Keyword keyword = new Keyword(keyToFilter,dysco.getKeywords().get(key).floatValue());
 				keywords.add(keyword);
 			}
 			
