@@ -137,7 +137,7 @@ public class TrendingSolrQueryBuilder {
 			query.setName(hash.getName());
 			query.setScore(hash.getScore());
 			query.setType(Query.Type.Keywords);
-			logger.info("Hashtag : "+hash.getName()+" Score : "+hash.getScore());
+			//logger.info("Hashtag : "+hash.getName()+" Score : "+hash.getScore());
 			if(rankedQueries.get(hash.getScore()) == null){
 				List<Query> alreadyIn = new ArrayList<Query>();
 				alreadyIn.add(query);
@@ -154,11 +154,11 @@ public class TrendingSolrQueryBuilder {
 		
 		//create queries from entities - keywords combination
 		for(Entity ent : entities){
-			logger.info("Entity : "+ent.getName()+" Score : "+ent.getCont());
+			//logger.info("Entity : "+ent.getName()+" Score : "+ent.getCont());
 			for(Keyword key : keywords){
 				//System.out.println("key: "+key.getName()+" has score : "+key.getScore());
 				Query query = new Query();
-				logger.info("Keyword : "+key.getName()+" Score : "+key.getScore());
+				//logger.info("Keyword : "+key.getName()+" Score : "+key.getScore());
 				String resQuery = getRightEntityKeywordCombination(ent.getName(),key.getName());
 				//System.out.println("Entity - Keyword combination : "+resQuery);
 				query.setName(resQuery);
@@ -179,10 +179,9 @@ public class TrendingSolrQueryBuilder {
 				}
 				
 			}
-			
-			
+
 			Query query = new Query();
-			logger.info("Entity : "+ent.getName()+" Score : "+ent.getCont());
+			//logger.info("Entity : "+ent.getName()+" Score : "+ent.getCont());
 			
 			query.setName("\""+ent.getName()+"\"");
 			
@@ -207,9 +206,9 @@ public class TrendingSolrQueryBuilder {
 			int minimumKeywordLenght = 3;
 			
 			for(Keyword key : keywords){
-				if(key.getName().split(" ").length>= minimumKeywordLenght){
+				if(key.getName().split("//s+").length>= minimumKeywordLenght){
 					Query query = new Query();
-					logger.info("Keyword : "+key.getName()+" Score : "+key.getScore());
+					//logger.info("Keyword : "+key.getName()+" Score : "+key.getScore());
 					query.setName(key.getName());
 					query.setScore(key.getScore());
 					query.setType(Query.Type.Keywords);
@@ -237,7 +236,7 @@ public class TrendingSolrQueryBuilder {
 			for(Query q : entry.getValue()){
 				if(solrQueries.size() == limit)
 					break;
-				
+				q.setScore(entry.getKey());
 				solrQueries.add(q);
 			}
 			
@@ -372,13 +371,14 @@ public class TrendingSolrQueryBuilder {
 			for(String key : dysco.getKeywords().keySet()){
 			
 				if(key.contains("@")||key.contains("#") 
-						|| stopwords.is(key)
+						|| stopwords.is(key) || key.equals("http")
 						|| key.split(" ").length > 3){
 					keywordsToFilter.remove(key);
 					continue;
 				}
+				
 				if(key.contains("http")){
-					String newKey = key.substring(0,key.indexOf("http"));
+					String newKey = key.replaceAll("http","");
 					keywordsToFilter.put(newKey, dysco.getKeywords().get(key));
 					keywordsToFilter.remove(key);
 				}
