@@ -236,7 +236,7 @@ public class TrendingSolrQueryBuilder {
 			for(Query q : entry.getValue()){
 				if(solrQueries.size() == limit)
 					break;
-				q.setScore(entry.getKey());
+				logger.info("Adding to primal solr queries : "+q.getName()+" with score:"+q.getScore());
 				solrQueries.add(q);
 			}
 			
