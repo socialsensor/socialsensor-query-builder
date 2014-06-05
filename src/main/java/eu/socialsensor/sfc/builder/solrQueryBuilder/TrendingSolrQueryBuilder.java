@@ -401,7 +401,7 @@ public class TrendingSolrQueryBuilder {
 		if(dysco.getHashtags() != null){
 			for(String hashtag : dysco.getHashtags().keySet()){
 				//Create the keyword to use
-				Keyword keyword = new Keyword(hashtag,dysco.getHashtags().get(hashtag).floatValue());
+				Keyword keyword = new Keyword(hashtag.toLowerCase().replace("#", ""),dysco.getHashtags().get(hashtag).floatValue());
 				hashtags.add(keyword);
 			}
 		}
