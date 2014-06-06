@@ -90,6 +90,12 @@ public class TrendsRanker {
 			}
 		}
 		
+		for(Map.Entry<Double, List<Dysco>> entry : dyscosByValues.entrySet()){
+			for(Dysco dysco : entry.getValue()){
+				rankedDyscos.add(dysco);
+			}
+		}
+		
 		return rankedDyscos;
 	}
 	
