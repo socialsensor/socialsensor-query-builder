@@ -236,7 +236,7 @@ public class TrendingSolrQueryBuilder {
 			for(Query q : entry.getValue()){
 				if(solrQueries.size() == limit)
 					break;
-				logger.info("Adding to primal solr queries : "+q.getName()+" with score:"+q.getScore());
+				//logger.info("Adding to primal solr queries : "+q.getName()+" with score:"+q.getScore());
 				solrQueries.add(q);
 			}
 			
@@ -401,7 +401,7 @@ public class TrendingSolrQueryBuilder {
 		if(dysco.getHashtags() != null){
 			for(String hashtag : dysco.getHashtags().keySet()){
 				//Create the keyword to use
-				Keyword keyword = new Keyword(hashtag.toLowerCase().replace("#", ""),dysco.getHashtags().get(hashtag).floatValue());
+				Keyword keyword = new Keyword(hashtag.replace("#", ""),dysco.getHashtags().get(hashtag).floatValue());
 				hashtags.add(keyword);
 			}
 		}
