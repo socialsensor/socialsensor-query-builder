@@ -33,6 +33,7 @@ public class TrendsRanker {
 	public TrendsRanker(String solrCollection){
 		try {
 			solrItemHandler = SolrItemHandler.getInstance(solrCollection);
+			logger.info("SolrItemHandler initialized.. ");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -52,7 +53,7 @@ public class TrendsRanker {
 			String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
 			logger.info("Query : "+query);
 			Map<Item,Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
-			//System.out.println();
+			logger.info("Found "+itemsByRelevance.size());
 			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values());
 			logger.info("Average score for query : "+query + " ->> "+avgScore);
 			avgScore *= (queryLength/10);
@@ -109,7 +110,7 @@ public class TrendsRanker {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-	
+		
 	}	
 
 }
