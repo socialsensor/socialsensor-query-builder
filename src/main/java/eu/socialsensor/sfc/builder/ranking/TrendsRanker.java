@@ -37,7 +37,7 @@ public class TrendsRanker {
 	public Double getScore(Dysco dysco){
 		Double score = 0.0;
 		
-		List<Query> solrQueries = dysco.getPrimalSolrQueries();
+		List<Query> solrQueries = dysco.getSolrQueries();
 		
 		List<Float> queriesScores = new ArrayList<Float>();
 		
@@ -104,7 +104,7 @@ public class TrendsRanker {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+	
 	}	
 
 }
