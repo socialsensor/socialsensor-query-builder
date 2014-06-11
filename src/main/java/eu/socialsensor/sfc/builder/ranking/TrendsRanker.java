@@ -104,12 +104,7 @@ public class TrendsRanker {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		SolrDyscoHandler solrDyscoHandler = SolrDyscoHandler.getInstance("http://social1.atc.gr:8080/solr/dyscos");
-
-		Dysco testDysco = solrDyscoHandler.findDyscoLight("4adac785-2f1e-4941-b518-9f2bfa93b35a");
 		
-		TrendsRanker ranker = new TrendsRanker("http://160.40.50.230:8080/solr/NewsFeed");
-		ranker.getScore(testDysco);
 	}	
 
 }
