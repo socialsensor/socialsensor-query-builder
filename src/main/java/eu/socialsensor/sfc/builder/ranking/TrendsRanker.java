@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
+
 
 import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.client.search.solr.SolrItemHandler;
@@ -15,7 +17,10 @@ import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.Calculator;
 
+
 public class TrendsRanker {
+	
+	public final Logger logger = Logger.getLogger(TrendsRanker.class);
 	
 	private static Long DAY_IN_MILLISECONDS = 86400000L;
 	
@@ -43,16 +48,16 @@ public class TrendsRanker {
 		
 		for(Query sQuery : solrQueries){
 			float queryLength = sQuery.getName().length();
-			//System.out.println("Query Length : "+queryLength);
+			logger.info("Query Length : "+queryLength);
 			String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
-			//System.out.println("Query : "+query);
+			logger.info("Query : "+query);
 			Map<Item,Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
 			//System.out.println();
 			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values());
-			//System.out.println("Average score for query : "+query + " ->> "+avgScore);
+			logger.info("Average score for query : "+query + " ->> "+avgScore);
 			avgScore *= (queryLength/10);
 			
-			//System.out.println("Average score for query : "+query + " ->> "+avgScore);
+			logger.info("Average score for query : "+query + " ->> "+avgScore);
 			//System.out.println();
 			queriesScores.add(avgScore);
 		}
@@ -63,11 +68,11 @@ public class TrendsRanker {
 		double timeDiff = (double) Math.abs(dateTimeOfDysco - currentDateTime)/DAY_IN_MILLISECONDS;
 		
 		double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
-		//System.out.println("Time diff : "+timeDiff);
-		//System.out.println("Time eval : "+timeEval);
+		logger.info("Time diff : "+timeDiff);
+		logger.info("Time eval : "+timeEval);
 		
 		score = Calculator.computeAverageFloat(queriesScores) * timeEval;
-		//System.out.println("Total Average score for dysco : "+score);
+		logger.info("Total Average score for dysco : "+score);
 		return score;
 	}
 	
