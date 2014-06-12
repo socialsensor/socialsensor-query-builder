@@ -390,7 +390,7 @@ public class TrendingSolrQueryBuilder {
 				keyToFilter = keyToFilter.replaceAll("'s", "");
 				keyToFilter = keyToFilter.replaceAll("[^A-Za-z0-9 ]", "");
 				keyToFilter = keyToFilter.replaceAll("\\s+", " ");
-				System.out.println("keyToFilter:"+keyToFilter);
+			
 				//Create the keyword to use
 				Keyword keyword = new Keyword(keyToFilter,dysco.getKeywords().get(key).floatValue());
 				keywords.add(keyword);
