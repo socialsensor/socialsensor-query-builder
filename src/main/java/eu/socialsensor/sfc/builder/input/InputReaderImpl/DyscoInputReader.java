@@ -17,8 +17,11 @@ import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.Source;
 import eu.socialsensor.framework.common.domain.Feed.FeedType;
 import eu.socialsensor.framework.common.domain.StreamUser.Category;
+import eu.socialsensor.framework.common.domain.dysco.CustomDysco;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
+import eu.socialsensor.framework.common.domain.dysco.Dysco.DyscoType;
 import eu.socialsensor.framework.common.domain.feeds.KeywordsFeed;
+import eu.socialsensor.framework.common.domain.feeds.ListFeed;
 import eu.socialsensor.framework.common.domain.feeds.LocationFeed;
 import eu.socialsensor.framework.common.domain.feeds.SourceFeed;
 import eu.socialsensor.sfc.builder.input.InputReader;
@@ -34,11 +37,12 @@ public class DyscoInputReader implements InputReader{
 	
 	private Dysco dysco;
 	
+	private CustomDysco customDysco;
+	
 	private String solrQuery;
 	
 	private Set<Keyword> dyscoKeywords = new HashSet<Keyword>();
 	
-	private List<String> contributors = new ArrayList<String>();
 	private List<Feed> feeds = new ArrayList<Feed>();
 	
 	private Date date;
@@ -46,34 +50,90 @@ public class DyscoInputReader implements InputReader{
 	
 	public DyscoInputReader(Dysco dysco){
 		this.dysco = dysco;
+		
+		if(dysco.getDyscoType().equals(DyscoType.CUSTOM))
+			this.customDysco = (CustomDysco) dysco;
 	}
 	
 	@Override
 	public Map<FeedType,Object> getData(){
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
-
-		List<Query> solrQueries = dysco.getPrimalSolrQueries();
-		
-		Set<Keyword> queryKeywords = new HashSet<Keyword>();
 		
 		this.date = dateUtil.addDays(dysco.getCreationDate(),-2);
+		
+		//standard for trending dysco 
+		Set<Keyword> queryKeywords = new HashSet<Keyword>();
+		Set<Source> querySources = new HashSet<Source>();
+		Set<Location> queryLocations = new HashSet<Location>();
+		Set<String> queryLists = new HashSet<String>();
+		
+		List<Query> solrQueries = dysco.getSolrQueries();
+		
+		if(customDysco != null){
+			List<String> twitterUsers = customDysco.getTwitterUsers();
+			List<String> mentionedUsers = customDysco.getMentionedUsers();
+			List<String> listsOfUsers = customDysco.getListsOfUsers();
+			List<Location> locations = customDysco.getNearLocations();
+			
+			Map<String,String> otherUsers = customDysco.getOtherSocialNetworks();
+			
+			if(twitterUsers != null || otherUsers != null){
+				for(String user : twitterUsers){
+					Source source = new Source(user,0f);
+					source.setNetwork("Twitter");
+					querySources.add(source);
+				}
+				
+				for(String user : otherUsers.keySet()){
+					Source source = new Source(user,0f);
+					source.setNetwork(otherUsers.get(user));
+					querySources.add(source);
+				}
+			}
+			if(mentionedUsers != null){
+				for(String user : mentionedUsers){
+					
+					Keyword key = new Keyword(user,0f);
+					queryKeywords.add(key);
+				}
+				
+			}
+			
+			if(listsOfUsers != null){
+				for(String list : listsOfUsers){
+					queryLists.add(list);
+				}
+			}
+			if(locations != null){
+				for(Location location : locations){
+					queryLocations.add(location);
+				}
+			}
+			
+		}
 		
 		if(solrQueries != null){
 			for(Query solrQuery : solrQueries){
 				String queryName = solrQuery.getName();
-				Keyword key = null;
-				if(queryName.contains(" AND ")){
-					key = splitQueryWithAND(queryName);
-					//key.setScore(solrQuery.getScore());
-				}
-				else{
-					
-					key = new Keyword(queryName,0.0);
-				}
+				double score = 0.0;
+				if(solrQuery.getScore() != null)
+					score = solrQuery.getScore();
+				
+				Keyword key = new Keyword(queryName,score);
+			
 				queryKeywords.add(key);
 			}
 		}
-		inputDataPerType.put(FeedType.KEYWORDS, queryKeywords);
+		
+		if(!queryKeywords.isEmpty())
+			inputDataPerType.put(FeedType.KEYWORDS, queryKeywords);
+		if(!querySources.isEmpty())
+			inputDataPerType.put(FeedType.SOURCE, querySources);
+		if(!queryLocations.isEmpty())
+			inputDataPerType.put(FeedType.LOCATION, queryLocations);
+		if(!queryLists.isEmpty())
+			inputDataPerType.put(FeedType.LIST, queryLists);
+		
 		return inputDataPerType;
 		
 	}
@@ -230,6 +290,14 @@ public class DyscoInputReader implements InputReader{
 					feeds.add(locationFeed);
 				}
 				break;
+			case LIST :
+				@SuppressWarnings("unchecked")
+				List<String> lists = (List<String>) inputData.get(feedType);
+				for(String list : lists){
+					String feedID = UUID.randomUUID().toString();
+					ListFeed listFeed = new ListFeed(list,date,feedID);
+					feeds.add(listFeed);
+				}
 			}
 		}
 		
@@ -264,8 +332,8 @@ public class DyscoInputReader implements InputReader{
 			words[0] = words[0].substring(0,words[0].length()-1);
 		}
 		
-		System.out.println("entity/hashtag : "+words[0]);
-		System.out.println("keyword : "+words[1]);
+		//System.out.println("entity/hashtag : "+words[0]);
+		//System.out.println("keyword : "+words[1]);
 		
 		if(!keywordExists(words[0]))
 			dyscoKeywords.add(new Keyword(words[0], 0.0f));
