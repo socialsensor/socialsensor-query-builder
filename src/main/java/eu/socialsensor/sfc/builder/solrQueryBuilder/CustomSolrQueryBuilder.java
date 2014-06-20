@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import eu.socialsensor.framework.common.domain.Query;
+import eu.socialsensor.framework.common.domain.dysco.CustomDysco;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 
 /**
@@ -24,8 +25,8 @@ public class CustomSolrQueryBuilder {
 	private Set<String> keywords =  new HashSet<String>();
 	private Set<String> hashtags = new HashSet<String>();
 
-	public CustomSolrQueryBuilder(Dysco dysco){
-		
+	public CustomSolrQueryBuilder(CustomDysco dysco){
+	     
 		this.keywords = dysco.getKeywords().keySet();
 		this.hashtags = dysco.getHashtags().keySet();
 		

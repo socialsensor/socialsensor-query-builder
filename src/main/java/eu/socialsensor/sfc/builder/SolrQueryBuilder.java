@@ -10,7 +10,6 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.common.domain.Item;
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.dysco.CustomDysco;
@@ -36,7 +35,7 @@ public class SolrQueryBuilder {
 	//the more complicated the query turns out to be
 	private static final Integer NUMBER_OF_KEYWORDS_IN_QUERY = 4;
 	
-	public SolrQueryBuilder() throws Exception{
+	public SolrQueryBuilder(){
 		logger.info("SolrQueryBuilder instance created");
 		
 	}
@@ -56,7 +55,9 @@ public class SolrQueryBuilder {
 		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)){
 			logger.info("Find solr query for custom dysco : "+dysco.getId());
 			
-			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(dysco);
+			CustomDysco customDysco = (CustomDysco) dysco;
+			
+			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(customDysco);
 			
 			return customBuilder.createSolrQuery();
 		}
@@ -398,7 +399,6 @@ public class SolrQueryBuilder {
 				
 				if(!exists){
 					alreadyIn.add(entry.getValue());
-					//System.out.println("Add to list query:"+entry.getKey()+" with score:"+entry.getValue());
 					allRankedQueries.put(entry.getValue().getScore(), alreadyIn);
 				}
 				
@@ -496,7 +496,6 @@ public class SolrQueryBuilder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
 		
 	}
 
