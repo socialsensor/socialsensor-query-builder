@@ -77,13 +77,14 @@ public class DyscoInputReader implements InputReader{
 	    	
 			Map<String,String> otherUsers = customDysco.getOtherSocialNetworks();
 			
-			if(twitterUsers != null || otherUsers != null){
+			if(twitterUsers != null){
 				for(String user : twitterUsers){
 					Source source = new Source(user,0f);
 					source.setNetwork("Twitter");
 					querySources.add(source);
 				}
-				
+			}
+			if(otherUsers != null){
 				for(String user : otherUsers.keySet()){
 					Source source = new Source(user,0f);
 					source.setNetwork(otherUsers.get(user));
@@ -92,7 +93,6 @@ public class DyscoInputReader implements InputReader{
 			}
 			if(mentionedUsers != null){
 				for(String user : mentionedUsers){
-					
 					Keyword key = new Keyword(user,0f);
 					queryKeywords.add(key);
 				}
