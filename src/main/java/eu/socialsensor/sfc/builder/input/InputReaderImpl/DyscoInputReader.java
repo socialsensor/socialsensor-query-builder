@@ -66,9 +66,9 @@ public class DyscoInputReader implements InputReader{
 		
 		if(customDysco != null){
 			
-			Set<Source> querySources = new HashSet<Source>();
-			Set<Location> queryLocations = new HashSet<Location>();
-			Set<String> queryLists = new HashSet<String>();
+			List<Source> querySources = new ArrayList<Source>();
+			List<Location> queryLocations = new ArrayList<Location>();
+			List<String> queryLists = new ArrayList<String>();
 			
 			List<String> twitterUsers = customDysco.getTwitterUsers();
 			List<String> mentionedUsers = customDysco.getMentionedUsers();
