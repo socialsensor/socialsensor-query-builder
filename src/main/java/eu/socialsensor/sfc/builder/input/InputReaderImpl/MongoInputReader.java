@@ -150,6 +150,8 @@ public class MongoInputReader implements InputReader{
 						feedsPerStream.add(locationFeed);
 					}
 					break;
+				default:
+					break;
 				}
 			}
 			feeds.put(stream, feedsPerStream);

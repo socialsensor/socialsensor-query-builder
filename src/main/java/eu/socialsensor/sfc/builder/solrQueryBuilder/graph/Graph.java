@@ -4,14 +4,23 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The Data structure of a graph 
+ * @author ailiakop
+ * @email ailiakop@iti.gr
+ */
 public class Graph {
 	
 	private Map<String,Node> nodes = new HashMap<String,Node>();
 	
 	public Graph(){
-		
+		//empty constructor
 	}
 	
+	/**
+	 * Adds a node to the graph
+	 * @param node
+	 */
 	public void addNode(Node node){
 		nodes.put(node.getId(), node);
 
@@ -36,6 +45,9 @@ public class Graph {
 		nodes.remove(id);
 	}
 	
+	/**
+	 * Prints the graph structure
+	 */
 	public void printGraph(){
 		for(Node node : nodes.values()){
 			System.out.println();

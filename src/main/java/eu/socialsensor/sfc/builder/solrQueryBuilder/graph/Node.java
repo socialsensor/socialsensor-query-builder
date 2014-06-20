@@ -12,6 +12,11 @@ import com.google.gson.annotations.SerializedName;
 
 import eu.socialsensor.framework.common.domain.JSONable;
 
+/**
+ * The data structure of a node in a graph
+ * @author ailiakop
+ * @email ailiakop@iti.gr
+ */
 public class Node implements JSONable{
 	
 	public Node(String id){
@@ -169,6 +174,11 @@ public class Node implements JSONable{
 		this.value = value;
 	}
 	
+	/**
+	 * Calculates the outgoing neighbor node with the maximum weight
+	 * 
+	 * @return the maximum weight of the node
+	 */
 	public int computeMaxOutNeighborsWeight(){
 		int maxWeight = 0;
 		for(String neighId : outNeighbors.keySet()){

@@ -9,7 +9,6 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import eu.socialsensor.framework.client.search.solr.SolrNewsFeedHandler;
 import eu.socialsensor.framework.common.domain.Keyword;
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.Stopwords;
@@ -18,11 +17,13 @@ import eu.socialsensor.framework.common.domain.dysco.Entity;
 
 /**
  * @brief The class that creates the solr query based on the 
- * information of a trending dysco (keywords,entities,hashtags)
+ * the content of a trending DySco (keywords,entities,hashtags)
  * @author ailiakop
  * @email  ailiakop@iti.gr
  */
 public class TrendingSolrQueryBuilder {
+	public static final int NUMBER_OF_QUERIES = 5;
+	public static final int MIN_KEYWORD_LENGTH = 3;
 	
 	public final Logger logger = Logger.getLogger(TrendingSolrQueryBuilder.class);
 	
@@ -33,13 +34,9 @@ public class TrendingSolrQueryBuilder {
 	private List<Keyword> mikeywords = new ArrayList<Keyword>();
 	private List<Entity> mientities = new ArrayList<Entity>();
 	
-	private Map<String,Double> vocabulary = new HashMap<String,Double>();
-	
 	private Dysco dysco = null;
 	
 	Stopwords stopwords = new Stopwords();
-	
-	//at this point every information that remains in the dysco will be used for the creation of the solr query
 	
 	public TrendingSolrQueryBuilder(Dysco dysco){
 		this.dysco = dysco;
@@ -48,7 +45,11 @@ public class TrendingSolrQueryBuilder {
 		eliminateRepeatedKeywords();
 	}
 	
-	
+	/**
+	 * Formulates one solr query connected with AND's and OR's
+	 * ready to be used directly for retrieval from solr.
+	 * @return
+	 */
 	public String createSolrQuery(){
 		String solrQuery = "";
 		String query = "";
@@ -125,6 +126,14 @@ public class TrendingSolrQueryBuilder {
 		return solrQuery;
 	}
 	
+	/**
+	 * Formulates primal solr queries out of DySco content (keywords/entities/hashtags).
+	 * The formulated queries are the product of the combination of keywords and entities, whereas
+	 * hashtags are used independently. Queries are ranked by their calculated scores, which are produced 
+	 * by processing the frequency scores of keywords,entities and hashtags in the DySco. The formulated queries
+	 * need to be aggregated to be used for solr retrieval.
+	 * @return the list of queries
+	 */
 	public List<Query> createPrimalSolrQueries(){
 		Map<Double, List<Query>> rankedQueries = new TreeMap<Double,List<Query>>(Collections.reverseOrder());
 		
@@ -132,12 +141,11 @@ public class TrendingSolrQueryBuilder {
 		
 		//create queries from hashtags
 		for(Keyword hash : hashtags){
-			//System.out.println("hash: "+hash);
 			Query query = new Query();
 			query.setName(hash.getName());
 			query.setScore(hash.getScore());
 			query.setType(Query.Type.Keywords);
-			//logger.info("Hashtag : "+hash.getName()+" Score : "+hash.getScore());
+
 			if(rankedQueries.get(hash.getScore()) == null){
 				List<Query> alreadyIn = new ArrayList<Query>();
 				alreadyIn.add(query);
@@ -154,13 +162,11 @@ public class TrendingSolrQueryBuilder {
 		
 		//create queries from entities - keywords combination
 		for(Entity ent : entities){
-			//logger.info("Entity : "+ent.getName()+" Score : "+ent.getCont());
-			for(Keyword key : keywords){
-				//System.out.println("key: "+key.getName()+" has score : "+key.getScore());
+			for(Keyword key : keywords){	
 				Query query = new Query();
-				//logger.info("Keyword : "+key.getName()+" Score : "+key.getScore());
+			
 				String resQuery = getRightEntityKeywordCombination(ent.getName(),key.getName());
-				//System.out.println("Entity - Keyword combination : "+resQuery);
+		
 				query.setName(resQuery);
 				double aggScore = ent.getCont()+key.getScore();
 				query.setScore(aggScore);
@@ -181,8 +187,7 @@ public class TrendingSolrQueryBuilder {
 			}
 
 			Query query = new Query();
-			//logger.info("Entity : "+ent.getName()+" Score : "+ent.getCont());
-			
+	
 			query.setName("\""+ent.getName()+"\"");
 			
 			query.setScore(ent.getCont());
@@ -203,12 +208,10 @@ public class TrendingSolrQueryBuilder {
 		
 		
 		if(entities.isEmpty()){
-			int minimumKeywordLenght = 3;
-			
+		
 			for(Keyword key : keywords){
-				if(key.getName().split("//s+").length>= minimumKeywordLenght){
+				if(key.getName().split("//s+").length>= TrendingSolrQueryBuilder.MIN_KEYWORD_LENGTH){
 					Query query = new Query();
-					//logger.info("Keyword : "+key.getName()+" Score : "+key.getScore());
 					query.setName(key.getName());
 					query.setScore(key.getScore());
 					query.setType(Query.Type.Keywords);
@@ -230,13 +233,12 @@ public class TrendingSolrQueryBuilder {
 			}
 		}
 		
-		int limit = 5;
 		for(Map.Entry<Double, List<Query>> entry : rankedQueries.entrySet()){
 			
 			for(Query q : entry.getValue()){
-				if(solrQueries.size() == limit)
+				if(solrQueries.size() == TrendingSolrQueryBuilder.NUMBER_OF_QUERIES)
 					break;
-				//logger.info("Adding to primal solr queries : "+q.getName()+" with score:"+q.getScore());
+				
 				solrQueries.add(q);
 			}
 			
@@ -245,7 +247,13 @@ public class TrendingSolrQueryBuilder {
 		return solrQueries;
 	}
 	
-	
+	/**
+	 * Combines an entity string with a keywords string, detecting an overlap between the two
+	 * if exists.
+	 * @param ent
+	 * @param keywords
+	 * @return the combination of the entity and the keyword as string
+	 */
 	private String getRightEntityKeywordCombination(String ent, String keywords){
 		String combination = "";
 		
@@ -277,12 +285,11 @@ public class TrendingSolrQueryBuilder {
 			combination = "\""+ent +"\" " + keywords;
 		}
 		else{
-			//System.out.println("Entity and Keyword are partly similar");
+
 			int lastIndex = 0;
 			for(int i=0;i<entWords.length;i++){
 				if(wordsFound.contains(entWords[i])){
 					lastIndex = keywords.indexOf(entWords[i])+entWords[i].length() + 1;
-					//System.out.println("Last Index of existed word: "+entWords[i]+" is: "+lastIndex);
 				}
 				else{
 					if(lastIndex == 0 || lastIndex > keywords.length()){
@@ -304,7 +311,8 @@ public class TrendingSolrQueryBuilder {
 	}
 	
 	/**
-	 * Filters dysco's content 
+	 * Filters DySco's content from stopwords, urls, emails and
+	 * other unnecessary features.
 	 */
 	private void addfilteredDyscoContent(){
 		
@@ -407,7 +415,10 @@ public class TrendingSolrQueryBuilder {
 		}
 			
 	}
-	
+	/**
+	 * Eliminates duplicate keywords that may exist both in hashtag or entity list 
+	 * and the keywords list 
+	 */
 	private void eliminateRepeatedKeywords(){
 		List<Keyword> keywordsToEliminate = new ArrayList<Keyword>();
 		for(Keyword key : keywords){
@@ -429,169 +440,8 @@ public class TrendingSolrQueryBuilder {
 			keywords.remove(key);
 	}
 	
-	private void extractDyscosVocabularyWithWeights(){
-		
-		for(Entity entity : entities){
-			if(!vocabulary.containsKey(entity.getName())){
-				vocabulary.put(entity.getName(), entity.getCont()+1);
-			}
-		}
-		
-		for(Keyword hashtag : hashtags){
-			if(!vocabulary.containsKey(hashtag.getName())){
-				vocabulary.put(hashtag.getName(), new Double(hashtag.getScore()+1));
-			}
-		}
-		
-		for(Keyword keyword : keywords){
-			
-			for(Entity ent : entities){
-				if(keyword.getName().equals(ent.getName())){
-					double eScore = vocabulary.get(ent.getName());
-				//	System.out.println("keyword equal to entity");
-					vocabulary.put(ent.getName(), eScore+1);
-					
-				}
-			}
-			
-			String[] ngrams = keyword.getName().split(" ");
-			for(int i=0;i<ngrams.length;i++){
-			//	System.out.println("Handling word : "+ngrams[i]);
-				for(Entity ent : entities){
-					if(ngrams[i].equals(ent.getName()) || ent.getName().contains(ngrams[i])){
-						double eScore = vocabulary.get(ent.getName());
-						vocabulary.put(ent.getName(), eScore + 1);
-					}
-				}
-				
-				if(!vocabulary.containsKey(ngrams[i])){
-					double score = 0;
-					//check if it is or contains an entity
-					for(Entity ent : entities){
-						if(ngrams[i].equals(ent.getName()) || ent.getName().contains(ngrams[i]))
-							score += ent.getCont() + 1;
-					} 
-					score += keyword.getScore()+1;
-					vocabulary.put(ngrams[i], score);
-				}
-				else{
-					double score = vocabulary.get(ngrams[i]);
-					score += 1;
-					vocabulary.put(ngrams[i], score);
-				}
-				
-			//	System.out.println("word : "+ngrams[i]+" is stored in vocabulary with score : "+vocabulary.get(ngrams[i]));
-			}
-		}
-	}
-	
-	public void printVocabulary(){
-		System.out.println("---Vocabulary---");
-		for(String word : vocabulary.keySet()){
-			System.out.println(word + " - "+vocabulary.get(word));
-		}
-	}
-	
-	private void selectValuableContent(){
-		
-		findMostImportantEntities();
-		
-	/*	System.out.println("---Most Important Entities---");
-		for(Entity ent : mientities){
-			System.out.println(ent.getName());
-		}*/
-		
-		double maxScore = 0;
-		Map<Double,List<Keyword>> scoresToKeywords = new TreeMap<Double,List<Keyword>>(Collections.reverseOrder());
-		
-		for(Keyword key : keywords){
-			double score = 0;
-			boolean isEqualToEntity = false;
-			
-			if(key.getName().length() == 1){
-				score += vocabulary.get(key.getName());
-			}else{
-				String[] words = key.getName().split(" ");
-				
-				for(int i=0;i<words.length;i++){
-					score += vocabulary.get(words[i]);
-				}
-			}
-			
-			String updatedKeywordName = key.getName();
-			for(Entity ent : mientities){
-				if(key.getName().equals(ent.getName())){
-					isEqualToEntity = true;
-					break;
-				}
-				if(key.getName().contains(ent.getName())){
-			//		System.out.println("keyword : "+key.getName()+" contains entity : "+ent.getName());
-					updatedKeywordName = key.getName().replaceAll(ent.getName(), "").trim();
-				}
-			}
-			
-			if(!isEqualToEntity){
-				Keyword updatedKeyword = new Keyword(updatedKeywordName,key.getScore());
-				
-				if(scoresToKeywords.containsKey(score)){
-					List<Keyword> alreadyIn = scoresToKeywords.get(score);
-					alreadyIn.add(updatedKeyword);
-					scoresToKeywords.put(score, alreadyIn);
-				}else{
-					List<Keyword> newElement = new ArrayList<Keyword>();
-					newElement.add(updatedKeyword);
-					scoresToKeywords.put(score, newElement);
-				}
-			}
 
-		}
-		
-		//get the first score which is the maximum
-		
-		for(double score : scoresToKeywords.keySet()){
-			maxScore = score;
-			break;
-		}
-			
-		if(scoresToKeywords.get(maxScore) != null){
-			if(!(mientities.isEmpty() && hashtags.isEmpty()))
-				mikeywords = scoresToKeywords.get(maxScore);
-		}
-		
-		/*System.out.println("---Most Important Keywords---");
-		if(mikeywords != null)
-			for(Keyword key : mikeywords){
-				System.out.println(key.getName());
-			}*/
-	}
-	
-	
-	private void findMostImportantEntities(){
-		
-		for(Entity ent : entities){
-			boolean exists = false;
-			
-			for(Keyword key : keywords){
-				if(key.getName().contains(ent.getName()) || key.getName().equals(ent.getName())){
-					//System.out.println("Keyword "+key.getName()+" contains entity "+ent.getName());
-					exists = true;
-					break;
-				}
-		
-			}
-			
-			if(exists){
-				mientities.add(ent);
-			}
-		}
-		
-	}
-	
 	public static void main(String[] args) {
-		TrendingSolrQueryBuilder builder = new TrendingSolrQueryBuilder(null);
-		
-		String res  = builder.getRightEntityKeywordCombination("henrik lundqvist", "henrik lundqvist show");
-		
-		System.out.println("res: "+res);
+	
 	}
 }

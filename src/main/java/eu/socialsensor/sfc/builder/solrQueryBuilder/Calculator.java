@@ -3,6 +3,12 @@ package eu.socialsensor.sfc.builder.solrQueryBuilder;
 import java.util.Collection;
 import java.util.Set;
 
+/**
+ * Class that contains methods for performing basic calculations such as
+ * computing the average/variance of a set of number
+ * @author ailiakop
+ * @email  ailiakop@iti.gr
+ */
 public class Calculator {
 	
 	public static double computeAverage(int[] elements){
@@ -95,5 +101,5 @@ public class Calculator {
 		
 		return average/= elements.size();
 	}
-	
+
 }

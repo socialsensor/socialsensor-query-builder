@@ -23,11 +23,15 @@ import org.openide.util.Lookup;
 
 import eu.socialsensor.framework.common.domain.Stopwords;
 
+/**
+ * Class responsible for the creation of the graph of keywords 
+ * which will be used for the detection of additional queries 
+ * for a topic (DySco)
+ * @author ailiakop
+ * @email ailiakop@iti.gr
+ */
 public class GraphCreator {
 	private Graph graph = new Graph();
-	
-//	private String model = "conf/english.all.3class.caseless.distsim.crf.ser.gz";
-//	private EntitiesExtractor extractor = new EntitiesExtractor(model);
 	
 	private List<String> keywords = new ArrayList<String>();
 	private List<String> hashtags = new ArrayList<String>();
@@ -69,15 +73,25 @@ public class GraphCreator {
 		
 	}
 	
-	
+	/**
+	 * Returns the graph
+	 * @return the graph
+	 */
 	public Graph getGraph(){
 		return graph;
 	}
 	
+	/**
+	 * Set mapping of substitute words to candidate node-keywords
+	 * @param words
+	 */
 	public void setSubstituteWords(Map<String,String> words){
 		this.substituteWords = words;
 	}
 	
+	/**
+	 * Creates the graph of keywords
+	 */
 	public void createGraph(){
 		
 		addNodesToGraph(keywords);
@@ -86,7 +100,11 @@ public class GraphCreator {
 		
 	}
 	
-	
+	/**
+	 * Formulates a graph based on the gephi library out of the graph structure
+	 * Gephi graph makes the graph handling easier by automatically computing outgoing
+	 * and incoming edges in the directed graph structure.
+	 */
 	public void createGephiGraph(){
 		pc.newProject();
 		workspace = pc.getCurrentWorkspace();
@@ -126,10 +144,18 @@ public class GraphCreator {
 		
 	}
 	
+	/**
+	 * Exporst the gephi graph to a file
+	 * @param gephiFileName
+	 */
 	public void exportGephiGraphToFile(String gephiFileName){
 		exportGraphToFile(gephiFileName);
 	}
 	
+	/**
+	 * Detects the degrees of incoming neighbor nodes 
+	 * and outgoing neighbor nodes for all nodes in the graph
+	 */
 	public void detectInAndOutDegrees(){
 		for(org.gephi.graph.api.Node gNode : gephiGraph.getNodes()){
 			int inDegree = gephiGraph.getInDegree(gNode);
@@ -147,7 +173,7 @@ public class GraphCreator {
 	}
 	
 	/**
-	 * @brief Method for graph extraction to a file (can be gefx,pdf etc)
+	 * @brief Method for gephi graph extraction to a file (can be gefx,pdf etc)
 	 *
 	 */
 	private void exportGraphToFile(String gephiFileName){
@@ -162,25 +188,17 @@ public class GraphCreator {
 		}
 	}
 	
-	/*private void extractEntities(){
-		
-		for(MediaItem mediaItem : mediaItems){
-			if(mediaItem.getTitle() != null){
-				List<Entity> extEntities = extractor.getEntities(mediaItem.getTitle().toLowerCase());
-				for(Entity ent : extEntities){
-					entities.add(ent.getName());
-				}
-			}
-			
-			if(mediaItem.getDescription() != null){
-				List<Entity> extEntities = extractor.getEntities(mediaItem.getDescription().toLowerCase());
-				for(Entity ent : extEntities){
-					entities.add(ent.getName());
-				}
-			}
-			
-		}
-	}*/
+
+	/**
+	 * Processes a list of words as candidate nodes to a graph. 
+	 * Words are processed in combination to a text content.
+	 * Neighbor keywords-nodes of the examined word are determined
+	 * on the basis of their co-occurrence in the text content with the 
+	 * word. The nodes and their neighbors are added to the primary
+	 * graph structure.
+	 * 
+	 * @param words
+	 */
 	private void addNodesToGraph(List<String> words){
 		for(String word : words){
 			List<String> neighbors = new ArrayList<String>();
@@ -236,6 +254,12 @@ public class GraphCreator {
 		}
 	}
 	
+	/**
+	 * Returns the substitute of the word if exists, else the
+	 * method returns the word itself. 
+	 * @param word
+	 * @return a word as string
+	 */
 	private String getRightWord(String word){
 		String res = substituteWords.get(word);
 		if(res != null)
@@ -244,6 +268,12 @@ public class GraphCreator {
 		return word;
 	}
 	
+	/**
+	 * Detects the adjacent words to a word in several pieces of texts. 
+	 * @param word
+	 * @param text
+	 * @return list of the adjacent words
+	 */
 	private List<String> detectAdjacentWords(String word,String text){
 		List<String> adjacentWords = new ArrayList<String>();
 		
@@ -263,6 +293,11 @@ public class GraphCreator {
 		return adjacentWords;
 	}
 	
+	/**
+	 * Prunes the nodes that are lightly weighted in the graph to reduce
+	 * noise and increase the possibility of producing highly relevant
+	 * queries
+	 */
 	public void pruneLowConnectivityNodes(){
 		Set<String> nodesToPrune = new HashSet<String>();
 		
@@ -315,8 +350,6 @@ public class GraphCreator {
 			detectInAndOutDegrees();
 			nodesToPrune.clear();
 		}
-		
-		//graph.printGraph();
 		
 	}
 	

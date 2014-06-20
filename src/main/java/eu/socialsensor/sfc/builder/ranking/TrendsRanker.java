@@ -9,15 +9,19 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-
-import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.client.search.solr.SolrItemHandler;
 import eu.socialsensor.framework.common.domain.Item;
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.Calculator;
 
-
+/**
+ * Class responsible for calculating a score for a DySco on the basis of
+ * an updated RSS collection. The score reflects the quality of the information
+ * the DySco entails as a news worthy event. 
+ * @author ailiakop
+ * @email ailiakop@iti.gr
+ */
 public class TrendsRanker {
 	
 	public final Logger logger = Logger.getLogger(TrendsRanker.class);
@@ -25,10 +29,6 @@ public class TrendsRanker {
 	private static Long DAY_IN_MILLISECONDS = 86400000L;
 	
 	private SolrItemHandler solrItemHandler;
-	
-	private Dysco dysco;
-
-	private List<Dysco> dyscos;
 	
 	public TrendsRanker(String solrCollection){
 		try {
@@ -40,6 +40,12 @@ public class TrendsRanker {
 		}
 	}
 	
+	/**
+	 * Returns the score that was calculated for a DySco from 
+	 * comparing its content to an updated RSS collection
+	 * @param dysco
+	 * @return a double number
+	 */
 	public Double getScore(Dysco dysco){
 		Double score = 0.0;
 		
@@ -49,17 +55,15 @@ public class TrendsRanker {
 		
 		for(Query sQuery : solrQueries){
 			float queryLength = sQuery.getName().length();
-			//logger.info("Query Length : "+queryLength);
-			String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
-			//logger.info("Query : "+query);
-			Map<Item,Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
-			//logger.info("Found "+itemsByRelevance.size());
-			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values());
-			//logger.info("Average score for query : "+query + " ->> "+avgScore);
-			avgScore *= (queryLength/10);
 			
-			//logger.info("Average score for query : "+query + " ->> "+avgScore);
-			//System.out.println();
+			String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
+		
+			Map<Item,Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
+		
+			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values()) * sQuery.getScore().floatValue();
+		
+			avgScore *= (queryLength/10);
+		
 			queriesScores.add(avgScore);
 		}
 		
@@ -69,14 +73,19 @@ public class TrendsRanker {
 		double timeDiff = (double) Math.abs(dateTimeOfDysco - currentDateTime)/DAY_IN_MILLISECONDS;
 		
 		double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
-		//logger.info("Time diff : "+timeDiff);
-		//logger.info("Time eval : "+timeEval);
-		
+	
 		score = Calculator.computeAverageFloat(queriesScores) * timeEval;
-		//logger.info("Total Average score for dysco : "+score);
+	
 		return score;
 	}
 	
+	/**
+	 * Returns a ranked lists of DyScos. The DyScos are ranked on the basis
+	 * of the calculated scores from comparing their content to the updated
+	 * RSS collection
+	 * @param dyscos
+	 * @return
+	 */
 	public List<Dysco> rankDyscos(List<Dysco> dyscos){
 		List<Dysco> rankedDyscos = new LinkedList<Dysco>();
 		
@@ -104,13 +113,12 @@ public class TrendsRanker {
 		
 		return rankedDyscos;
 	}
-	
-	
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+
 	}	
 
 }

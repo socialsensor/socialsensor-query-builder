@@ -14,16 +14,19 @@ import java.util.Set;
 import java.util.UUID;
 
 import eu.socialsensor.framework.common.domain.Feed;
-import eu.socialsensor.framework.common.domain.Keyword;
 import eu.socialsensor.framework.common.domain.NewsFeedSource;
 import eu.socialsensor.framework.common.domain.Feed.FeedType;
 import eu.socialsensor.framework.common.domain.StreamUser.Category;
-import eu.socialsensor.framework.common.domain.feeds.KeywordsFeed;
 import eu.socialsensor.framework.common.domain.feeds.URLFeed;
 import eu.socialsensor.sfc.builder.InputConfiguration;
 import eu.socialsensor.sfc.builder.StreamInputConfiguration;
 import eu.socialsensor.sfc.builder.input.InputReader;
 
+/**
+ * Class responsible for the creation of input feeds from a txt file.
+ * @author ailiakop
+ * @email ailiakop@iti.gr
+ */
 public class FileInputReader implements InputReader{
 	protected static final String DATE = "since";
 	protected static final String PATH = "path";
@@ -44,6 +47,7 @@ public class FileInputReader implements InputReader{
 		streams = config.getStreamInputIds();
 	}
 	
+	@Override
 	public Map<FeedType,Object> getData(){
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
 		List<String> input_lines = new ArrayList<String>();
@@ -70,7 +74,7 @@ public class FileInputReader implements InputReader{
 		return inputDataPerType;
 	}
 	
-	
+	@Override
 	public Map<String,List<Feed>> createFeedsPerStream(){
 		for(String stream : streams){
 			List<Feed> feedsPerStream = new ArrayList<Feed>();
@@ -78,9 +82,7 @@ public class FileInputReader implements InputReader{
 			if(stream.equals("RSS"))
 				this.streamType = NewsFeedSource.RSS;
 			
-			this.stream_config = config.getStreamInputConfig(stream);
-			
-			String value;
+			this.stream_config = config.getStreamInputConfig(streamType.toString());
 			
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
 			String since = stream_config.getParameter(FileInputReader.DATE);
@@ -109,6 +111,8 @@ public class FileInputReader implements InputReader{
 							feedsPerStream.add(feed);
 						}
 						break;
+				default:
+					break;
 				}
 
 			}

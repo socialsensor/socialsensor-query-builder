@@ -1,7 +1,11 @@
 package eu.socialsensor.sfc.builder.solrQueryBuilder;
 
 
-
+/**
+ * Class for applying quicksort algorithm
+ * @author ailiakop
+ *
+ */
 public class QuickSort  {
 	  private int[] numbers;
 	  private int number;

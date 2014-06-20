@@ -1,21 +1,19 @@
 package eu.socialsensor.sfc.builder.solrQueryBuilder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import eu.socialsensor.framework.common.domain.Location;
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 
 /**
  * @brief The class that creates the solr query based on the 
- * information of a custom dysco (keywords,hashtags,contributors)
+ * the content of a custom DySco (twitter users, keywords, hashtags, mentioned users,
+ * list of users and urls)
  * @author ailiakop
  * @email  ailiakop@iti.gr
  */
@@ -23,35 +21,25 @@ public class CustomSolrQueryBuilder {
 	
 	public final Logger logger = Logger.getLogger(CustomSolrQueryBuilder.class);
 
-	
-	private List<String> users = new ArrayList<String>();
-	
 	private Set<String> keywords =  new HashSet<String>();
 	private Set<String> hashtags = new HashSet<String>();
-	
-	
-	//new fields
-	private Set<String> twitterUsers = new HashSet<String>();
-	private Set<String> mentionedTwitterUsers = new HashSet<String>();
-	
-	private Set<String> urls = new HashSet<String>();
-	
-	private List<Location> locations = new ArrayList<Location>();
-	
+
 	public CustomSolrQueryBuilder(Dysco dysco){
 		
-		this.users = dysco.getContributors();
 		this.keywords = dysco.getKeywords().keySet();
 		this.hashtags = dysco.getHashtags().keySet();
 		
-		//filterDyscosContent();
 	}
-	
+	/**
+	 * Formulates one solr query connected with AND's and OR's
+	 * ready to be used directly for retrieval from solr.
+	 * @return
+	 */
 	public String createSolrQuery(){
 		String solrQuery = "";
 		String query = "";
 		
-		if(keywords.isEmpty() && users.isEmpty() && hashtags.isEmpty())
+		if(keywords.isEmpty() && hashtags.isEmpty())
 			return solrQuery;
 		
 		boolean first = true;
@@ -97,29 +85,15 @@ public class CustomSolrQueryBuilder {
 		if(!query.equals("")){
 			solrQuery += "(title : "+query+") OR (description:"+query+") OR (tags:"+query+")";
 		}
-		/*if(!contributors.isEmpty()){
-			
-			if(hashtags.isEmpty() && keywords.isEmpty())
-				solrQuery += "author : (";
-			else
-				solrQuery += " OR author : (";
-			
-			first = true;
-			
-			for(String contributor : contributors){
-				if(first){
-					solrQuery += contributor;
-					first = false;
-				}	
-				else
-					solrQuery += " OR " + contributor;
-			}
-			
-			solrQuery += ")";
-		}*/
+		
 		return solrQuery;
 	}
-	
+	/**
+	 * Formulates solr queries out of DySco content (keywords and hashtags).
+	 * The formulated queries are the product of using  keywords and hashtags independently.
+	 * The formulated queries need to be aggregated to be used for solr retrieval.
+	 * @return the list of queries
+	 */
 	public List<Query> createSolrQueries(){
 		List<Query> solrQueries = new ArrayList<Query>();
 		
@@ -137,37 +111,5 @@ public class CustomSolrQueryBuilder {
 
 		return solrQueries;
 	}
-	
-	public List<Query> createUpdatedSolrQueries(){
-		List<Query> solrQueries = new ArrayList<Query>();
-		
-		return solrQueries;
-	}
-	
-	private void filterDyscosContent(){
-		Set<String> filteredHashtags = hashtags;
-		Set<String> filteredKeywords = keywords;
-		
-		List<String> filteredContributors = users;
-		
-		
-		for(String hashtag : filteredHashtags){
-			if(hashtag.equals(" ")){
-				hashtags.remove(hashtag);
-			}
-		}
-		
 
-		for(String key : filteredKeywords){
-			if(key.equals(" ")){
-				keywords.remove(key);
-			}
-		}
-		
-		for(String contributor : filteredContributors){
-			if(contributor.equals(" ")){
-				users.remove(contributor);
-			}
-		}
-	}
 }

@@ -30,7 +30,7 @@ import eu.socialsensor.sfc.builder.input.InputReader;
 
 /**
  * @brief The class that is responsible for the creation of input feeds
- * from a configuration file
+ * from a configuration file 
  * @author ailiakop
  * @email  ailiakop@iti.gr
  */
@@ -113,6 +113,8 @@ public class ConfigInputReader implements InputReader{
 						feedsPerStream.add(locationFeed);
 					}
 					break;
+				default:
+					break;
 				}
 			}
 			feeds.put(stream, feedsPerStream);
@@ -165,7 +167,6 @@ public class ConfigInputReader implements InputReader{
 		            line = br.readLine();
 		            if(line != null){
 		            	users.add(line);
-		            	//System.out.println("user : "+line);
 		            }
 		        }
 			} catch (FileNotFoundException e) {

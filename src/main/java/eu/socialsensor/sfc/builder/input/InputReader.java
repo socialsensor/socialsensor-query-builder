@@ -17,33 +17,33 @@ import eu.socialsensor.framework.common.domain.StreamUser.Category;
 public interface InputReader {
 	/**
 	 * Maps the data from the source to feedtypes according to their type : (Keyword,Source, Location)
-	 * @return the mapping of each object to its feedtype
+	 * @return the map of each object to its feedtype
 	 */
 	public Map<FeedType,Object> getData();
 	
 	/**
-	 * Creates the feeds for every stream separately
-	 * @return the mapping of the created feeds to each stream
+	 * Creates the mapping of the input feeds to each stream 
+	 * @return the map of the created feeds to each stream
 	 */
 	public Map<String,List<Feed>> createFeedsPerStream();
 	
 	/**
 	 * Creates the feeds for all streams together
-	 * @return the input feeds 
+	 * @return A list of feeds 
 	 */
 	public List<Feed> createFeeds();
 	
 	/**
 	 * Maps the users to follow to the newshounds lists they
 	 * are included
-	 * @return the map of the user to the newshounds lists that 
-	 * he is included
+	 * @return the map of the user to the newshounds lists
+	 * he is included in
 	 */
 	public Map<String,Set<String>> getUsersToLists();
 	
 	/**
 	 * Maps the users to follow to a category 
-	 * @return the map of the user to the category that he corresponds to
+	 * @return the map of the user to the category he corresponds to
 	 */
 	public Map<String,Category> getUsersToCategories();
 	

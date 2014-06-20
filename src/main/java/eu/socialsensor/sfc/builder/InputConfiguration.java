@@ -17,6 +17,15 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+
+/**
+ * Class for the configuration of the input stream. 
+ * The data from the input stream are further processed by the InputReader
+ * to form appropriate feeds that the StreamsManager will utilize for
+ * searching content in Social Media.
+ * @author ailiakop
+ * @email ailiakop@iti.gr
+ */
 public class InputConfiguration extends Configuration{
 	private static final long serialVersionUID = 5269944272731808440L;
 

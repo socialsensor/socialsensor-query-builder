@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.common.domain.Feed;
 import eu.socialsensor.framework.common.domain.StreamUser.Category;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
@@ -16,9 +15,9 @@ import eu.socialsensor.sfc.builder.input.InputReaderImpl.FileInputReader;
 import eu.socialsensor.sfc.builder.input.InputReaderImpl.MongoInputReader;
 
 /**
- * @brief  The class responsible for the creation of input feeds
+ * @brief  The class is responsible for the creation of input feeds
  * that can result either from a configuration file input, 
- * a storage input(currently only mongo db is supported) and a dysco input. 
+ * a storage input(currently only mongo db is supported), a DySco or a txt file. 
  * @author ailiakop
  * @email  ailiakop@iti.gr
  */
@@ -108,8 +107,8 @@ public class FeedsCreator {
 	}
 	
 	/**
-	 * Returns the input feeds created for every stream seperately
-	 * @return a map of the input feeds to each stream
+	 * Returns the input feeds created mapped to each stream 
+	 * @return A map of the input feeds to each stream
 	 */
 	public Map<String,List<Feed>> getQueryPerStream(){
 		if(reader == null)
@@ -119,7 +118,7 @@ public class FeedsCreator {
 	}
 	
 	/**
-	 * Returns the unput feeds created for all streams together
+	 * Returns the input feeds created for all streams together
 	 * @return the input feeds
 	 */
 	public List<Feed> getQuery(){
@@ -132,15 +131,15 @@ public class FeedsCreator {
 	/**
 	 * Returns the mapping of the users to follow to 
 	 * newhounds lists
-	 * @return the map of the user to the newshounds lists that 
-	 * he is included
+	 * @return the map of the user to the newshounds lists 
+	 * he is included in
 	 */
 	public Map<String,Set<String>> getUsersToLists(){
 		return reader.getUsersToLists();
 	}
 	/**
 	 * Returns the mapping of the users to follow to categories
-	 * @return the map of the user to the category that he corresponds to
+	 * @return the map of the user to the category he corresponds to
 	 */
 	public Map<String,Category> getUsersToCategories(){
 		return reader.getUsersToCategories();

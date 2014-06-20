@@ -15,7 +15,13 @@ import eu.socialsensor.sfc.builder.solrQueryBuilder.graph.Graph;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.graph.Node;
 
 
-
+/**
+ * Class responsible for formulating queries when a graph is given as input.
+ * The algorithm calculates the most heavily connected nodes in the graph
+ * to detect popular additional queries to a topic. 
+ * @author ailiakop
+ * @email ailiakop@iti.gr
+ */
 public class QueryFormulator {
 	
 	private Graph graph;
@@ -32,7 +38,6 @@ public class QueryFormulator {
 
 	public QueryFormulator(Graph graph){
 		this.graph = graph;
-	
 	}
 	
 	public QueryFormulator(Graph graph,Map<String,Double> hashtags){
@@ -40,7 +45,9 @@ public class QueryFormulator {
 		this.hashtags = hashtags;
 	
 	}
-	
+	/**
+	 * Prints keyword queries produced by the algorithm
+	 */
 	public void printQueries(){
 		System.out.println("*** Queries ***");
 		for(Entry<String,Double> entry : keywordQueries.entrySet()){
@@ -50,6 +57,9 @@ public class QueryFormulator {
 		}
 	}
 	
+	/**
+	 * Prints ranked keyword queries by their weight.
+	 */
 	public void printRankedKeywordQueries(){
 		System.out.println("*** Ranked Keyword Queries ***");
 		System.out.println();
@@ -62,7 +72,9 @@ public class QueryFormulator {
 			System.out.println();
 		}
 	}
-	
+	/**
+	 * Prints ranked hashtag queries by their weight.
+	 */
 	public void printRankedHashtagQueries(){
 		System.out.println("*** Ranked Hashtag Queries ***");
 		System.out.println();
@@ -83,7 +95,9 @@ public class QueryFormulator {
 	public Double getMaxHashtagQueryScore(){
 		return this.maxHashtagsQueryScore;
 	}
-	
+	/**
+	 * Prints nodes out and in degrees. 
+	 */
 	public void printDegrees(){
 		Map<Integer,List<Node>> topInDegreeNodes = new HashMap<Integer,List<Node>>();
 		Map<Integer,List<Node>> topOutDegreeNodes = new HashMap<Integer,List<Node>>();
@@ -139,7 +153,11 @@ public class QueryFormulator {
 			System.out.println();
 		}
 	}
-	
+	/**
+	 * Create keywords queries containing a maximum number of words
+	 * by traversing the graph of keywords
+	 * @param numberOfWords
+	 */
 	public void generateKeywordQueries(int numberOfWords){
 	
 		detectStartingNodes();
@@ -151,7 +169,12 @@ public class QueryFormulator {
 		rankKeywordQueries();
 
 	}
-	
+	/**
+	 * Returns a maximum number of keyword queries produced by the algorithm 
+	 * and ranked according to their weight. 
+	 * @param numberOfQueries
+	 * @return the list of keyword queries
+	 */
 	public List<String> getKeywordQueries(int numberOfQueries){
 		List<String> queries = new ArrayList<String>();
 		
@@ -169,7 +192,12 @@ public class QueryFormulator {
 	public Map<Double,List<String>> getRankedKeywordQueries(){
 		return rankedKeywordQueries;
 	}
-	
+	/**
+	 * Returns a maximum number of hashtag queries produced by the algorithm
+	 * and ranked according to their weight.
+	 * @param numberOfQueries
+	 * @return the list of hashtag queries
+	 */
 	public List<String> getHashtagQueries(int numberOfQueries){
 		List<String> queries = new ArrayList<String>();
 		
@@ -187,7 +215,10 @@ public class QueryFormulator {
 	public Map<Double,List<String>> getRankedHashtagQueries(){
 		return rankedHashtagQueries;
 	}
-	
+	/**
+	 * Creates hashtag queries by traversing the graph and examining hashtag's connections
+	 * with other words
+	 */
 	public void generateHashtagQueries(){
 
 		for(String tag : hashtags.keySet()){
@@ -226,7 +257,12 @@ public class QueryFormulator {
 			}
 		}
 	}
-	
+	/**
+	 * Eliminates double keyword queries that might be produced by
+	 * the keyword queries formulation process. The method detects queries 
+	 * that are identical or contain the same words in a different order.
+	 * It downgrades very similar queries and upgrades the original ones.
+	 */
 	private void eliminateDoubleKeywordQueries(){
 		String[] queriesToProcess = new String[keywordQueries.size()];
 		Map<String, Double> queriesToChange = new HashMap<String,Double>();
@@ -267,13 +303,11 @@ public class QueryFormulator {
 					double score = keywordQueries.get(query);
 					double otherScore = keywordQueries.get(otherQuery);
 					if(score > otherScore){
-						//System.out.println("Q1 : "+query +" Q2 : "+otherQuery+" --- similarity : "+similarity);
-						//System.out.println(" Downgraded query : "+otherQuery+" with similarity : "+otherScore * (1-similarity));
+				
 						queriesToChange.put(otherQuery, queriesToChange.get(otherQuery) * (1-similarity));
 					}
 					else{
-						//System.out.println("Q1 : "+query +" Q2 : "+otherQuery+" --- similarity : "+similarity);
-						//System.out.println(" Downgraded query : "+query+" with similarity : "+score * (1-similarity));
+					
 						queriesToChange.put(query, queriesToChange.get(query) * (1-similarity));
 					}
 				}
@@ -289,7 +323,9 @@ public class QueryFormulator {
 		}
 		
 	}
-	
+	/**
+	 * Ranks keyword queries by their weights
+	 */
 	private void rankKeywordQueries(){
 		for(Entry<String,Double> entry : keywordQueries.entrySet()){
 			if(entry.getValue() > maxKeywordsQueryScore)
@@ -307,20 +343,12 @@ public class QueryFormulator {
 			}
 		}
 	}
-	
+	/**
+	 * Detects the starting nodes in the graph to start traversing it 
+	 * for queries detection
+	 */
 	private void detectStartingNodes(){
-		/*Set<Integer> outDegrees = new TreeSet<Integer>(Collections.reverseOrder());
 	
-		for(Node node : graph.getNodes()){
-			int res = node.getOutDegree() + node.computeMaxOutNeighborsWeight();
-			node.setOutWeightedDegree(res);
-			//System.out.println("node : "+node.getId()+" res : "+res);
-			outDegrees.add(res);
-		}
-		
-		
-		}*/
-		
 		Map<Double,List<String>> scores = new TreeMap<Double,List<String>>(Collections.reverseOrder());
 		for(Node node : graph.getNodes()){
 			double score = 0.0;
@@ -348,7 +376,7 @@ public class QueryFormulator {
 				alreadyIn.add(node.getId());
 				scores.put(score, alreadyIn);
 			}
-			//System.out.println(node.getId()+" : "+score);
+		
 		}
 		boolean finished = false;
 		for(Double score : scores.keySet()){
@@ -365,7 +393,14 @@ public class QueryFormulator {
 		}
 		
 	}
-	
+	/**
+	 * Traverses the directed graph to form queries on the basis of graph's directed weighted nodes
+	 * @param query
+	 * @param score
+	 * @param currentNode
+	 * @param currentSteps
+	 * @param maxSteps
+	 */
 	private void traverseQueryGraph(String query,Double score,Node currentNode,int currentSteps,int maxSteps){
 	
 		for(String neighId : currentNode.getOutNeighbors()){
@@ -375,7 +410,7 @@ public class QueryFormulator {
 			if(queryToProcess.contains(neighId)){
 				scoreToProcess /= currentSteps;
 				keywordQueries.put(queryToProcess, scoreToProcess);
-				//System.out.println("Added query:"+queryToProcess+" with score: "+scoreToProcess+"--current steps:"+currentSteps);
+		
 				continue;
 			}
 			if(currentNode.getOutNeighborsWeight(neighId)>1){
@@ -386,7 +421,7 @@ public class QueryFormulator {
 			if((currentSteps + 1) >= maxSteps){
 				scoreToProcess /= maxSteps;
 				keywordQueries.put(queryToProcess, scoreToProcess);
-				//System.out.println("Added query:"+queryToProcess+" with score: "+scoreToProcess+"--current steps:"+currentSteps);
+			
 				continue;
 			}
 			traverseQueryGraph(queryToProcess,scoreToProcess,graph.getNode(neighId),currentSteps+1,maxSteps);	
@@ -394,16 +429,19 @@ public class QueryFormulator {
 		}
 
 	}
-	
+	/**
+	 * Creates all possible keyword queries starting from a cerain node in the graph
+	 * for a limited number of steps, which reflects the number of words in the query.
+	 * @param startNode
+	 * @param numberOfSteps
+	 */
 	private void createQuery(Node startNode,int numberOfSteps){
 		
 		String query = startNode.getId();
 		Double score = 0.0;
 		traverseQueryGraph(query,score,startNode,1,numberOfSteps);
 	}
-	
-	
-	
+
 	/**
 	 * @param args
 	 */

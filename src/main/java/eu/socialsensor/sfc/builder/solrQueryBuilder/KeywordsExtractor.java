@@ -13,7 +13,17 @@ import edu.washington.cs.knowitall.morpha.MorphaStemmer;
 import eu.socialsensor.framework.common.domain.Item;
 import eu.socialsensor.framework.common.domain.Stopwords;
 
+/**
+ * Class responsible for extracting unique keywords from 
+ * the text content of an items collection
+ * @author ailiakop
+ * @email  ailiakop@iti.gr
+ */
 public class KeywordsExtractor {
+	
+	//This limit is used to ensure algorithm's response time will stay low
+	public static final int EXTRACTED_KEYWORDS_LIMIT = 500;
+	
 	private List<Item> items;
 	
 	private Stopwords stopwords = new Stopwords();
@@ -22,12 +32,8 @@ public class KeywordsExtractor {
 	private Map<String,Integer> popularHashtags = new HashMap<String,Integer>();
 	private Map<String,String>  wordsToReplace = new HashMap<String,String>();
 	
-	private Set<String> dictionary = new HashSet<String>();
 	private Set<String> stemWords = new HashSet<String>();
 	private Set<String> textContent = new HashSet<String>();
-	
-	private String[][] rankedKeywords1;
-	private String[][] rankedHashtags1;
 	
 	private Map<String,Double> rankedKeywords = new HashMap<String,Double>();
 	private Map<String,Double> rankedHashtags = new HashMap<String,Double>();
@@ -40,29 +46,19 @@ public class KeywordsExtractor {
 	
 	public KeywordsExtractor(List<Item> items){
 		this.items = items;
-		
-	/*	BufferedReader reader;
-		try {
-			reader = new BufferedReader(new FileReader("./conf/american-english.txt"));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-			    dictionary.add(line);
-			}
-			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
 	}
 	
 	public Map<String,String> getWordsToReplace(){
 		return wordsToReplace;
 	}
 	
+	/**
+	 * Processes the text content of an items collection. 
+	 * First the algorithm filters the title and decription fields
+	 * of an item from web links, email addresses and other unnecessary
+	 * features. Second, the filtered text is saved to a list for future use
+	 * and most frequent keywords and hashtags are computed and ranked accordingly. 
+	 */
 	public void processItemsText(){
 		
 		for(Item item : items){
@@ -78,7 +74,7 @@ public class KeywordsExtractor {
 			if(title != null && !title.isEmpty()){
 				title = title.toLowerCase();
 				title = eraseWebLinks(title);
-				title = eraseEmailAdresses(title);
+				title = eraseEmailAddresses(title);
 				title = eraseReferences(title);
 				title = eraseAccounts(title);
 			
@@ -93,7 +89,7 @@ public class KeywordsExtractor {
 			if(description != null && !description.isEmpty()){
 				description = description.toLowerCase();
 				description = eraseWebLinks(description);
-				description = eraseEmailAdresses(description);
+				description = eraseEmailAddresses(description);
 				description = eraseReferences(description);
 				description = eraseAccounts(description);
 				
@@ -117,32 +113,30 @@ public class KeywordsExtractor {
 		return textContent;
 	}
 	
+	/**
+	 * Returns the top ranked keywords by frequency
+	 * @return a list of keywords
+	 */
 	public List<String> getTopKeywords(){
 		List<String> topKeywords = new ArrayList<String>();
-		
-//		for(int i=0;i<rankedKeywords.length;i++){
-//			if(Double.parseDouble(rankedKeywords[i][1])>keywordsAVG)
-//				topKeywords.add(rankedKeywords[i][0]);
-//		}
+
 		for(Map.Entry<String, Double> entry : rankedKeywords.entrySet()){
+			if(topKeywords.size() >= KeywordsExtractor.EXTRACTED_KEYWORDS_LIMIT)
+				break;
+			
 			if(entry.getValue() > keywordsAVG) 
 				topKeywords.add(entry.getKey());
-			
-			if(topKeywords.size() >= 500)//used to be only keywordsAVG - SWITCHED TO STATIC VALUE FOR SAFETY - REEVALUATE
-				break;
 		}
 		
 		return topKeywords;
 	}
 	
+	/**
+	 * Returns the top ranked hastags by frequency
+	 * @return
+	 */
 	public Map<String,Double> getTopHashtags(){
 		Map<String,Double> topHashtags = new HashMap<String,Double>();
-
-//		for(int i=0;i<rankedHashtags.length;i++){
-//			if(rankedHashtags[i][1] != null)
-//				if(Double.parseDouble(rankedHashtags[i][1])>hashtagsAVG)
-//					topHashtags.put(rankedHashtags[i][0],Double.parseDouble(rankedHashtags[i][1]));
-//		}
 		
 		for(Map.Entry<String, Double> entry : rankedHashtags.entrySet()){
 			if(entry.getValue() > hashtagsAVG)
@@ -153,23 +147,19 @@ public class KeywordsExtractor {
 	}
 	
 	public Set<String> getRankedKeywords(){
-	//	List<String> keywords = new ArrayList<String>();
-//		
-//		for(int i=0;i<rankedKeywords.length;i++){
-//			keywords.add(rankedKeywords[i][0]);
-//		}
+	
 		return rankedKeywords.keySet();
 	}
 	
 	public Set<String> getRankedHashtags(){
-//		List<String> hashtags = new ArrayList<String>();
-//		
-//		for(int i=0;i<rankedHashtags.length;i++){
-//			hashtags.add(rankedHashtags[i][0]);
-//		}
+
 		return rankedKeywords.keySet();
 	}
 	
+	/**
+	 * Detects unique non-stopwords keywords and hashtags in text
+	 * @param text
+	 */
 	private void countWords(String text){
 		
 		String[] parts = text.split("[^a-zA-Z0-9#'][^a-zA-Z0-9#']*");
@@ -201,7 +191,11 @@ public class KeywordsExtractor {
 		}
 		
 	}
-	
+	/**
+	 * Erases web links in text
+	 * @param text
+	 * @return text without web links
+	 */
 	private String eraseWebLinks(String text){
 		
 		List<String> links = new ArrayList<String>();
@@ -237,7 +231,12 @@ public class KeywordsExtractor {
 		return text;	
 	}
 	
-	private String eraseEmailAdresses(String text){
+	/**
+	 * Erases email addresses
+	 * @param text
+	 * @return text without email addresses
+	 */
+	private String eraseEmailAddresses(String text){
 		
 		List<String> emails = new ArrayList<String>();
 		
@@ -258,6 +257,11 @@ public class KeywordsExtractor {
 		return text;	
 	}
 	
+	/**
+	 * Erases references to accounts 
+	 * @param text
+	 * @return text without references
+	 */
 	private String eraseReferences(String text){
 		
 		List<String> refs = new ArrayList<String>();
@@ -279,6 +283,11 @@ public class KeywordsExtractor {
 		return text;	
 	}
 	
+	/**
+	 * Erase twitter account names from text
+	 * @param text
+	 * @return text without twitter account names
+	 */
 	private String eraseAccounts(String text){
 		List<String> accounts = new ArrayList<String>();
 		
@@ -298,28 +307,10 @@ public class KeywordsExtractor {
 		return text;	
 	}
 	
-	private void formStemWords(){
-		Set<String> firstStemCollection = new HashSet<String>();
-		
-		//only from keywords
-		for(String key : popularKeywords.keySet()){
-			firstStemCollection.add(MorphaStemmer.stemToken(key));
-		}
-		
-		for(String stemWord : firstStemCollection){
-			stemWords.add(stemWord.replaceAll("[^a-zA-Z0-9#][^a-zA-Z0-9#]*",""));
-		}
-		Set<String> wordsToRemove = new HashSet<String>();
-		//remove one-char strings and non-english words
-		for(String stemWord : stemWords){
-			if(stemWord.length() == 1)
-				wordsToRemove.add(stemWord);
-		}
-		for(String rWord : wordsToRemove){
-			stemWords.remove(rWord);
-		}
-	}
-	
+	/**
+	 * Sorts popular keywords and popular hashtags by frequency
+	 * using Quicksort
+	 */
 	private void sortElements(){
 		Set<String> alreadyChecked = new HashSet<String>();
 		
@@ -361,13 +352,6 @@ public class KeywordsExtractor {
 						
 						rankedKeywords.put(entry.getKey(),entry.getValue().doubleValue());
 						
-//						rankedKeywords[index][0] = entry.getKey();
-//						if(String.valueOf(keywordsWeights[i]) == null)
-//							rankedKeywords[index][1] = "0.0";
-//						else
-//							rankedKeywords[index][1] = String.valueOf(keywordsWeights[i]);
-//						alreadyChecked.add(entry.getKey());
-//						index++;
 					}
 				}
 			}
@@ -391,23 +375,16 @@ public class KeywordsExtractor {
 						
 						rankedHashtags.put(entry.getKey(), entry.getValue().doubleValue());
 						
-//						rankedHashtags[index][0] = entry.getKey();
-//						rankedHashtags[index][1] = String.valueOf(hashtagsWeights[i]);
-//						alreadyChecked.add(entry.getKey());
-//						index++;
 					}
 				}
 			}
 		}
 		
-		
-		
-		
-		
-		
-		
 	}
 	
+	/**
+	 * Prints keywords and hashtags
+	 */
 	public void printKeywordsANDHashtags(){
 		System.out.println("----Keywords----");
 		for(Map.Entry<String, Integer> entry : popularKeywords.entrySet()){
@@ -422,6 +399,10 @@ public class KeywordsExtractor {
 		}
 	}
 	
+	/**
+	 * Finds similar words after stemming in popular keywords list and eliminates them after 
+	 * increasing the frequency score of the original word.
+	 */
 	private void processPopularKeywords(){
 		for(String pKey : popularKeywords.keySet()){
 			for(String checkKey : popularKeywords.keySet()){
@@ -453,6 +434,9 @@ public class KeywordsExtractor {
 		}
 	}
 	
+	/**
+	 * Recalculates the score of hashtags in case there is an overlap with popular keywords
+	 */
 	private void processPopularHashtags(){
 		for(String pHash : popularHashtags.keySet()){
 			for(String pKey : popularKeywords.keySet()){
@@ -463,6 +447,9 @@ public class KeywordsExtractor {
 		}
 	}
 	
+	/**
+	 * Prints ranked keywords and hashtags
+	 */
 	public void printRankedKeywordsANDHashtags(){
 		System.out.println("----Ranked Keywords----");
 		
@@ -472,18 +459,7 @@ public class KeywordsExtractor {
 		
 		for(Map.Entry<String, Double> entry : rankedHashtags.entrySet())
 			System.out.println(entry.getKey()+" , "+entry.getValue());
-		
-//		for(int i=0;i<rankedKeywords.length;i++){
-//		
-//			System.out.println(rankedKeywords[i][0]+","+rankedKeywords[i][1]);
-//			
-//		}
-//		System.out.println("----Ranked Hashtags----");
-//		for(int i=0;i<rankedHashtags.length;i++){
-//			
-//			System.out.println(rankedHashtags[i][0]+","+rankedHashtags[i][1]);
-//			
-//		}
+
 	}
 
 	/**
