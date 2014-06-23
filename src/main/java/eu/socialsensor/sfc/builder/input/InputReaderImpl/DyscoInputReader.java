@@ -65,7 +65,7 @@ public class DyscoInputReader implements InputReader{
 		List<Query> solrQueries = dysco.getSolrQueries();
 		
 		if(customDysco != null){
-			
+			this.date = new Date(0l);
 			List<Source> querySources = new ArrayList<Source>();
 			List<Location> queryLocations = new ArrayList<Location>();
 			List<String> queryLists = new ArrayList<String>();
