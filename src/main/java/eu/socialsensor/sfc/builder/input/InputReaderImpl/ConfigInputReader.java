@@ -79,7 +79,7 @@ public class ConfigInputReader implements InputReader{
 				this.streamType = SocialNetworkSource.Tumblr;
 			else if(stream.equals("Topsy"))
 				this.streamType = SocialNetworkSource.Topsy;
-			else if(stream.equals("YouTube"))
+			else if(stream.equals("Youtube"))
 				this.streamType = SocialNetworkSource.Youtube;
 			
 			Map<FeedType,Object> inputData = getData();
@@ -90,6 +90,7 @@ public class ConfigInputReader implements InputReader{
 					@SuppressWarnings("unchecked")
 					List<Source> sources = (List<Source>) inputData.get(feedType);
 					for(Source source : sources){
+						source.setNetwork(streamType.toString());
 						String feedID = UUID.randomUUID().toString();
 						SourceFeed sourceFeed = new SourceFeed(source,sinceDate,feedID);
 						feedsPerStream.add(sourceFeed);
@@ -185,7 +186,7 @@ public class ConfigInputReader implements InputReader{
 		    }
 			
 			for(String user : users) {
-				sources.add(new Source(user.toLowerCase(), 0.0f)); 	
+				sources.add(new Source(user, 0.0f)); 	
 			}
 			
 		}
@@ -200,12 +201,12 @@ public class ConfigInputReader implements InputReader{
 				String[] users = value.split(",");
 			
 				for(String user : users) {
-					sources.add(new Source(user.toLowerCase(), 0.0f)); 	
+					sources.add(new Source(user, 0.0f)); 	
 				}
 			}
 			else{
 				String user = value;
-				sources.add(new Source(user.toLowerCase(), 0.0f)); 	
+				sources.add(new Source(user, 0.0f)); 	
 			}
 		}
 	

@@ -3,6 +3,7 @@ package eu.socialsensor.sfc.builder.input.InputReaderImpl;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,9 +13,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import eu.socialsensor.framework.client.dao.ExpertDAO;
+import eu.socialsensor.framework.client.dao.KeywordDAO;
 import eu.socialsensor.framework.client.dao.RssSourceDAO;
 import eu.socialsensor.framework.client.dao.SourceDAO;
 import eu.socialsensor.framework.client.dao.impl.ExpertDAOImpl;
+import eu.socialsensor.framework.client.dao.impl.KeywordDAOImpl;
 import eu.socialsensor.framework.client.dao.impl.RssSourceDAOImpl;
 import eu.socialsensor.framework.client.dao.impl.SourceDAOImpl;
 import eu.socialsensor.framework.common.domain.Feed;
@@ -26,7 +29,6 @@ import eu.socialsensor.framework.common.domain.feeds.URLFeed;
 import eu.socialsensor.framework.common.domain.Expert;
 import eu.socialsensor.framework.common.domain.Keyword;
 import eu.socialsensor.framework.common.domain.Location;
-import eu.socialsensor.framework.common.domain.NewsFeedSource;
 import eu.socialsensor.framework.common.domain.SocialNetworkSource;
 import eu.socialsensor.framework.common.domain.Source;
 import eu.socialsensor.framework.common.domain.StreamUser.Category;
@@ -48,6 +50,7 @@ public class MongoInputReader implements InputReader{
 	protected static final String SOURCES_COLLECTION = "sources.collection";
 	protected static final String RSS_SOURCES_COLLECTION = "rss_sources.collection";
 	protected static final String EXPERTS_COLLECTION = "experts.collection";
+	protected static final String KEYWORDS_COLLECTION = "keywords.collection";
 	
 	private StorageInputConfiguration storage_config;
 	
@@ -57,6 +60,7 @@ public class MongoInputReader implements InputReader{
 	private String db = null;
 	private String newsHoundsCollection = null;
 	private String expertsCollection = null;
+	private String keywordsCollection;
 	
 	private String streamType = null;
 	
@@ -76,12 +80,12 @@ public class MongoInputReader implements InputReader{
 		
 		streams.add("Twitter");
 		streams.add("Facebook");
-		streams.add("RSS");
+		//streams.add("RSS");
 		//streams.add("Tumblr");
-		//streams.add("Instagram");
-		//streams.add("GooglePlus");
-		//streams.add("Youtube");
-		//streams.add("Flickr");
+		streams.add("Instagram");
+		streams.add("GooglePlus");
+		streams.add("Youtube");
+		streams.add("Flickr");
 	}
 	
 	@Override
@@ -94,20 +98,18 @@ public class MongoInputReader implements InputReader{
 				this.streamType = SocialNetworkSource.Twitter.name();
 			else if(stream.equals("Facebook"))
 				this.streamType = SocialNetworkSource.Facebook.name();
-			else if(stream.equals("RSS"))
-				this.streamType = NewsFeedSource.RSS.name();
-			
-//			else if(stream.equals("Flickr"))
-//				this.streamType = SocialNetworkSource.Flickr;
-//			else if(stream.equals("GooglePlus"))
-//				this.streamType = SocialNetworkSource.GooglePlus;
-//			else if(stream.equals("Instagram"))
-//				this.streamType = SocialNetworkSource.Instagram;
-//			else if(stream.equals("Tumblr"))
-//				this.streamType = SocialNetworkSource.Tumblr;
-//			else if(stream.equals("Youtube"))
-//				this.streamType = SocialNetworkSource.Youtube;
-			
+			else if(stream.equals("Flickr"))
+				this.streamType = SocialNetworkSource.Flickr.name();
+			else if(stream.equals("GooglePlus"))
+				this.streamType = SocialNetworkSource.GooglePlus.name();
+			else if(stream.equals("Instagram"))
+				this.streamType = SocialNetworkSource.Instagram.name();
+			//else if(stream.equals("Tumblr"))
+			//	this.streamType = SocialNetworkSource.Tumblr.name();
+			else if(stream.equals("Youtube"))
+				this.streamType = SocialNetworkSource.Youtube.name();
+			//else if(stream.equals("RSS"))
+			//	this.streamType = NewsFeedSource.RSS.name();
 	
 			Map<FeedType,Object> inputData = getData();
 			
@@ -120,6 +122,7 @@ public class MongoInputReader implements InputReader{
 					for(Source source : sources){
 						String feedID = source.getNetwork() + "#" + source.getName(); //UUID.randomUUID().toString();
 						SourceFeed sourceFeed = new SourceFeed(source,sinceDate,feedID);
+						sourceFeed.setLabel(source.getList());				
 						feedsPerStream.add(sourceFeed);
 					}
 					break;
@@ -138,6 +141,7 @@ public class MongoInputReader implements InputReader{
 					for(Keyword keyword : keywords){
 						String feedID = UUID.randomUUID().toString();
 						KeywordsFeed keywordsFeed = new KeywordsFeed(keyword,sinceDate,feedID);
+						keywordsFeed.setLabel(keyword.getLabel());
 						feedsPerStream.add(keywordsFeed);
 					}
 					break;
@@ -185,6 +189,7 @@ public class MongoInputReader implements InputReader{
 		this.newsHoundsCollection = storage_config.getParameter(MongoInputReader.SOURCES_COLLECTION, "Sources");
 		this.rssSourcesCollection = storage_config.getParameter(MongoInputReader.RSS_SOURCES_COLLECTION, "Rss_Sources");
 		this.expertsCollection = storage_config.getParameter(MongoInputReader.EXPERTS_COLLECTION,"Experts");
+		this.keywordsCollection = storage_config.getParameter(MongoInputReader.KEYWORDS_COLLECTION, "Keywords");
 		
 		if(host == null || db == null || newsHoundsCollection == null || expertsCollection == null){
 			System.out.println("News hounds collection needs to be configured correctly");
@@ -199,12 +204,15 @@ public class MongoInputReader implements InputReader{
 		SourceDAO sourceDao = new SourceDAOImpl(host, db, newsHoundsCollection);
 		RssSourceDAO rssSourceDao = new RssSourceDAOImpl(host, db, rssSourcesCollection);
 		ExpertDAO expertsDao = new ExpertDAOImpl(host,db,expertsCollection);
+		KeywordDAO keywordDao = new KeywordDAOImpl(host,db,keywordsCollection);
 		
 		if(streamType.equals("RSS")) {
 			rssSources.addAll(rssSourceDao.getRssSources());
 		}
 		else {
-			sources.addAll(sourceDao.findTopSources(5000, SocialNetworkSource.valueOf(streamType)));
+			List<Source> streamSources = sourceDao.findTopSources(5000, SocialNetworkSource.valueOf(streamType));
+			Collections.shuffle(streamSources);
+			sources.addAll(streamSources);
 		}
 		
 		
@@ -232,6 +240,11 @@ public class MongoInputReader implements InputReader{
 			String user = streamType+"#"+expert.getId();
 			usersToCategories.put(user, expert.getCategory());
 		}
+		
+		// extract keywords
+		List<Keyword> keywords = keywordDao.findKeywords(SocialNetworkSource.valueOf(streamType));
+		if(!keywords.isEmpty())
+			inputDataPerType.put(FeedType.KEYWORDS, keywords);
 		
 		if(!sources.isEmpty())
 			inputDataPerType.put(FeedType.SOURCE,sources);
