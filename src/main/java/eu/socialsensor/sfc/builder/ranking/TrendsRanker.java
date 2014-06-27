@@ -1,18 +1,25 @@
 package eu.socialsensor.sfc.builder.ranking;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.client.search.solr.SolrItemHandler;
 import eu.socialsensor.framework.common.domain.Item;
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
+import eu.socialsensor.framework.common.domain.dysco.Entity;
 import eu.socialsensor.sfc.builder.solrQueryBuilder.Calculator;
 
 /**
@@ -92,7 +99,7 @@ public class TrendsRanker {
 		Map<Double,List<Dysco>> dyscosByValues = new TreeMap<Double,List<Dysco>>(Collections.reverseOrder());
 		
 		for(Dysco dysco : dyscos){
-			Double score = getScore(dysco);
+			Double score = dysco.getRankerScore();
 			if(dyscosByValues.get(score) == null){
 				List<Dysco> alreadyIn = new ArrayList<Dysco>();
 				alreadyIn.add(dysco);
@@ -113,12 +120,73 @@ public class TrendsRanker {
 		
 		return rankedDyscos;
 	}
+	
+	/**
+	 * Evaluates a set of newly created DyScos. In case they are duplicates it eliminates
+	 * them using a heuristic rule. Number of duplicates are multiplied over the score 
+	 * computed by comparing dyscos solr queries to the RSS collection. The returned DyScos
+	 * are ranked by their updated ranker scores.
+	 * @param dyscos
+	 * @return the updated list of ranked DyScos.
+	 */
+	public List<Dysco> evaluateDyscosByContent(List<Dysco> dyscos){
+	
+		Map<String,String> dyscosTitles = new HashMap<String,String>();
+		Map<String,Integer> dyscosCooccurrences = new HashMap<String,Integer>();
+		
+		for(Dysco dysco : dyscos){
+			List<Entity> entities = dysco.getEntities();
+			Set<String> keywords = dysco.getKeywords().keySet();
+			
+			int entitiesFound = 0;
+			int keywordsFound = 0;
+			boolean isDuplicate = false;
+			for(Map.Entry<String, String> entry : dyscosTitles.entrySet()){
+				for(Entity ent : entities){
+					if(entry.getValue().contains(ent.getName().toLowerCase()))
+						entitiesFound++;
+				}
+				for(String key : keywords){
+					if(entry.getValue().contains(key.toLowerCase()))
+						keywordsFound++;
+				}
+			
+				if((entitiesFound >=1 && keywordsFound >= 2) || dysco.getTitle().toLowerCase().equals(entry.getValue())){
+					isDuplicate = true;
+					Integer newScore = dyscosCooccurrences.get(entry.getKey()) + 1;
+					dyscosCooccurrences.put(entry.getKey(),newScore);
+					break;
+				}
+			}
+			
+			if(!isDuplicate){
+				dyscosTitles.put(dysco.getId(),dysco.getTitle().toLowerCase());
+				dyscosCooccurrences.put(dysco.getId(),1);
+				continue;
+			}
+		}
+		for(Dysco dysco : dyscos){
+			if(!dyscosCooccurrences.containsKey(dysco.getId())){
+				dysco.setRankerScore(-1.0);
+			}
+			else{
+				Double rankerScore = getScore(dysco) * dyscosCooccurrences.get(dysco.getId());
+				dysco.setRankerScore(rankerScore);
+			}
+		}
+		
+		
+		return rankDyscos(dyscos);
+	}
+	
+	
+	
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
+		
 	}	
 
 }
