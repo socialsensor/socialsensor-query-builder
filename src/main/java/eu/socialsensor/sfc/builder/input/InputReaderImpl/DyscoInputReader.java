@@ -24,6 +24,7 @@ import eu.socialsensor.framework.common.domain.feeds.KeywordsFeed;
 import eu.socialsensor.framework.common.domain.feeds.ListFeed;
 import eu.socialsensor.framework.common.domain.feeds.LocationFeed;
 import eu.socialsensor.framework.common.domain.feeds.SourceFeed;
+import eu.socialsensor.framework.common.util.Util;
 import eu.socialsensor.sfc.builder.input.InputReader;
 
 
@@ -75,20 +76,27 @@ public class DyscoInputReader implements InputReader{
 			List<String> listsOfUsers = customDysco.getListsOfUsers();
 			List<Location> locations = customDysco.getNearLocations();
 	    	
-			Map<String,String> otherUsers = customDysco.getOtherSocialNetworks();
+			List<String> otherUrls = customDysco.getOtherSocialNetworks();
 			
-			if(twitterUsers != null){
-				for(String user : twitterUsers){
+			if(twitterUsers != null) {
+				for(String user : twitterUsers) {
 					Source source = new Source(user,0f);
 					source.setNetwork("Twitter");
 					querySources.add(source);
 				}
 			}
-			if(otherUsers != null){
-				for(String user : otherUsers.keySet()){
-					Source source = new Source(user,0f);
-					source.setNetwork(otherUsers.get(user));
-					querySources.add(source);
+			if(otherUrls != null){
+				for(String url : otherUrls) {
+					try {
+						Map<String, String> map = Util.findNetworkSource(url);
+						for(String user : map.keySet()) {
+							Source source = new Source(user,0f);
+							source.setNetwork(map.get(user));
+							querySources.add(source);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			if(mentionedUsers != null){
@@ -99,12 +107,12 @@ public class DyscoInputReader implements InputReader{
 				
 			}
 			
-			if(listsOfUsers != null){
+			if(listsOfUsers != null) {
 				for(String list : listsOfUsers){
 					queryLists.add(list);
 				}
 			}
-			if(locations != null){
+			if(locations != null) {
 				for(Location location : locations){
 					queryLocations.add(location);
 				}
