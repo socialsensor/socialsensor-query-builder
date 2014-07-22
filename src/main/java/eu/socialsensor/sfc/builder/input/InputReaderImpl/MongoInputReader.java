@@ -210,7 +210,7 @@ public class MongoInputReader implements InputReader{
 			rssSources.addAll(rssSourceDao.getRssSources());
 		}
 		else {
-			List<Source> streamSources = sourceDao.findTopSources(5000, SocialNetworkSource.valueOf(streamType));
+			List<Source> streamSources = sourceDao.findTopSources(75000, SocialNetworkSource.valueOf(streamType));
 			Collections.shuffle(streamSources);
 			sources.addAll(streamSources);
 		}
