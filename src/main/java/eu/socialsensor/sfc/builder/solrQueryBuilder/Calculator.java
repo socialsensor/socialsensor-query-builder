@@ -95,7 +95,7 @@ public class Calculator {
 		if(elements.size() == 0)
 			return average;
 		
-		for(Float elem : elements){
+		for(Float elem : elements) {
 			average += elem;
 		}
 		

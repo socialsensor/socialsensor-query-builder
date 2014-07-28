@@ -33,12 +33,14 @@ public class TrendsRanker {
 	
 	private SolrItemHandler solrItemHandler;
 	
+	private BoundedList<Double> dyscoScoresList = new BoundedList<Double>(200);
+	private BoundedList<Double> rankerScoresList = new BoundedList<Double>(200);
+	
 	public TrendsRanker(String solrCollection) {
 		try {
 			solrItemHandler = SolrItemHandler.getInstance(solrCollection);
 			logger.info("SolrItemHandler initialized.. ");
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -49,7 +51,7 @@ public class TrendsRanker {
 	 * @param dysco
 	 * @return a double number
 	 */
-	public Double getScore(Dysco dysco) {
+	public Double getContentScore(Dysco dysco) {
 		Double score = 0.0;
 		
 		List<Query> solrQueries = dysco.getSolrQueries();
@@ -64,7 +66,8 @@ public class TrendsRanker {
 			Map<Item,Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
 		
 			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values()) * sQuery.getScore().floatValue();
-		
+			//float maxScore = Collections.max(itemsByRelevance.values()) * sQuery.getScore().floatValue();
+			
 			avgScore *= (queryLength/100);
 		
 			queriesScores.add(avgScore);
@@ -78,7 +81,8 @@ public class TrendsRanker {
 		double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
 	
 		score = Calculator.computeAverageFloat(queriesScores) * timeEval;
-	
+		//score = Collections.max(queriesScores) * timeEval;
+		
 		return score;
 	}
 	
@@ -88,7 +92,7 @@ public class TrendsRanker {
 	 * @param dysco
 	 * @return a double number
 	 */
-	public Double getScore(Dysco dysco, String listId) {
+	public Double getContentScore(Dysco dysco, String listId) {
 		Double score = 0.0;
 		
 		List<Query> solrQueries = dysco.getSolrQueries();
@@ -105,7 +109,8 @@ public class TrendsRanker {
 			Map<Item, Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
 		
 			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values()) * sQuery.getScore().floatValue();
-		
+			//float maxScore = Collections.max(itemsByRelevance.values()) * sQuery.getScore().floatValue();
+			
 			avgScore *= (queryLength/100);
 		
 			queriesScores.add(avgScore);
@@ -119,7 +124,8 @@ public class TrendsRanker {
 		double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
 	
 		score = Calculator.computeAverageFloat(queriesScores) * timeEval;
-	
+		//score = Collections.max(queriesScores) * timeEval;
+		
 		return score;
 	}
 	
@@ -172,6 +178,10 @@ public class TrendsRanker {
 		Map<String,Integer> dyscosCooccurrences = new HashMap<String,Integer>();
 		
 		for(Dysco dysco : dyscos) {
+			
+			Double dyscoScore = dysco.getScore();
+			dyscoScoresList.push(dyscoScore);
+			
 			List<Entity> entities = dysco.getEntities();
 			Set<String> keywords = dysco.getKeywords().keySet();
 			
@@ -209,11 +219,31 @@ public class TrendsRanker {
 				dysco.setRankerScore(-1.0);
 			}
 			else {
-				Double rankerScore = getScore(dysco) * dyscosCooccurrences.get(dysco.getId());
+				Double rankerScore = getContentScore(dysco) * dyscosCooccurrences.get(dysco.getId());
 				dysco.setRankerScore(rankerScore);
+				rankerScoresList.push(rankerScore);	
 			}
 		}
 		
+		Double minDyscoScore = Collections.min(dyscoScoresList);
+		Double minRankerScore = Collections.min(rankerScoresList);
+		Double maxDyscoScore = Collections.max(dyscoScoresList);
+		Double maxRankerScore = Collections.max(rankerScoresList);
+		
+		for(Dysco dysco : dyscos) {
+			double rankerScore = dysco.getRankerScore();
+			if(rankerScore != -1) {
+				Double normalizedRankerScore = (rankerScore - minRankerScore) / (maxRankerScore - minRankerScore);
+				dysco.setNormalizedRankerScore(normalizedRankerScore);
+				
+				double normalizedDyscoScore = (dysco.getScore() - minDyscoScore) / (maxDyscoScore - minDyscoScore);
+				dysco.setNormalizedDyscoScore(normalizedDyscoScore);
+			}
+			else {
+				dysco.setNormalizedRankerScore(-1);
+				dysco.setNormalizedDyscoScore(-1);
+			}
+		}
 		
 		return rankDyscos(dyscos);
 	}
@@ -233,6 +263,10 @@ public class TrendsRanker {
 		Map<String,Integer> dyscosCooccurrences = new HashMap<String,Integer>();
 		
 		for(Dysco dysco : dyscos) {
+			
+			Double dyscoScore = dysco.getScore();
+			dyscoScoresList.push(dyscoScore);
+			
 			List<Entity> entities = dysco.getEntities();
 			Set<String> keywords = dysco.getKeywords().keySet();
 			
@@ -275,15 +309,63 @@ public class TrendsRanker {
 				dysco.setRankerScore(-1.0);
 			}
 			else {
-				Double rankerScore = getScore(dysco, listId) * dyscosCooccurrences.get(dysco.getId());
+				Double rankerScore = getContentScore(dysco, listId) * dyscosCooccurrences.get(dysco.getId());
 				dysco.setRankerScore(rankerScore);
+				
+				rankerScoresList.push(rankerScore);
 			}
 		}
 		
+		Double minDyscoScore = Collections.min(dyscoScoresList);
+		Double minRankerScore = Collections.min(rankerScoresList);
+		Double maxDyscoScore = Collections.max(dyscoScoresList);
+		Double maxRankerScore = Collections.max(rankerScoresList);
+		
+		for(Dysco dysco : dyscos) {
+			double rankerScore = dysco.getRankerScore();
+			if(rankerScore >= 0) {
+				Double normalizedRankerScore = (rankerScore - minRankerScore) / (maxRankerScore - minRankerScore);
+				dysco.setNormalizedRankerScore(normalizedRankerScore);
+				
+				double normalizedDyscoScore = (dysco.getScore() - minDyscoScore) / (maxDyscoScore - minDyscoScore);
+				dysco.setNormalizedDyscoScore(normalizedDyscoScore);
+				
+			}
+			else {
+				dysco.setNormalizedRankerScore(-1.0);
+				dysco.setNormalizedDyscoScore(-1.0);
+			}
+			
+		}
 		
 		return rankDyscos(dyscos);
 	}
 
+	private static class BoundedList<T> extends LinkedList<T> {
+
+	    /**
+		 * 
+		 */
+		private static final long serialVersionUID = -8828336215826576541L;
+		private final int bound;
+
+	    public BoundedList(int bound) {
+	        this.bound = bound;
+	    }
+
+	    public synchronized void push(T item) {
+	        super.push(item);
+	        if (super.size() > bound) {
+	        	super.removeLast();                
+	        }
+	    }
+
+	    public synchronized T pop() {
+	        return super.poll();
+	    }
+
+	}
+	
 	/**
 	 * @param args
 	 */
