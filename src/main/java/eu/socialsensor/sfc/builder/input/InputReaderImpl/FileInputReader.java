@@ -42,15 +42,15 @@ public class FileInputReader implements InputReader{
 	
 	private Map<String,List<Feed>> feeds = new HashMap<String,List<Feed>>();
 	
-	public FileInputReader(InputConfiguration config){
+	public FileInputReader(InputConfiguration config) {
 		this.config = config;
 		streams = config.getStreamInputIds();
 	}
 	
 	@Override
-	public Map<FeedType,Object> getData(){
+	public Map<FeedType, Object> getData() {
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
-		List<String> input_lines = new ArrayList<String>();
+		Map<String, String> input_lines = new HashMap<String, String>();
 		String path = stream_config.getParameter(FileInputReader.PATH);
 		String type = stream_config.getParameter(FileInputReader.TYPE);
 		
@@ -60,7 +60,11 @@ public class FileInputReader implements InputReader{
 			line = reader.readLine();
 			while (line != null) {
 				
-				input_lines.add(line);
+				String[] parts = line.split("\t");
+				if(parts.length == 2) {
+					input_lines.put(parts[0], parts[1]);
+				}
+				
 	            line = reader.readLine();
 	        }
 			
@@ -68,14 +72,15 @@ public class FileInputReader implements InputReader{
 		} catch (IOException e) {
 	
 		}
-		if(type.equals("url"))
+		if(type.equals("url")) {
 			inputDataPerType.put(FeedType.URL, input_lines);
+		}
 		
 		return inputDataPerType;
 	}
 	
 	@Override
-	public Map<String,List<Feed>> createFeedsPerStream(){
+	public Map<String,List<Feed>> createFeedsPerStream() {
 		for(String stream : streams){
 			List<Feed> feedsPerStream = new ArrayList<Feed>();
 			
@@ -87,7 +92,7 @@ public class FileInputReader implements InputReader{
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
 			String since = stream_config.getParameter(FileInputReader.DATE);
 			Date dateToRetrieve = null;
-			if(since != null){
+			if(since != null) {
 				try {
 					dateToRetrieve = (Date) formatter.parse(since);
 					
@@ -96,18 +101,21 @@ public class FileInputReader implements InputReader{
 				}
 			}
 			
-			Map<FeedType,Object> inputData = getData();
+			Map<FeedType, Object> inputData = getData();
 			
-			for(FeedType feedType : inputData.keySet()){
-				switch(feedType){
+			for(FeedType feedType : inputData.keySet()) {
+				switch(feedType) {
 					case URL :
-						
 						@SuppressWarnings("unchecked")
-						List<String> urls = (List<String>) inputData.get(feedType);
+						Map<String, String> urlsMap = (Map<String, String>) inputData.get(feedType);
 						
-						for(String url : urls){
+						for(String url : urlsMap.keySet()) {
+							String listId = urlsMap.get(url);
+							
 							String feedId = UUID.randomUUID().toString();
-							URLFeed feed = new URLFeed(url,dateToRetrieve,feedId);
+							URLFeed feed = new URLFeed(url, dateToRetrieve, feedId);
+							feed.setLabel(listId);
+					
 							feedsPerStream.add(feed);
 						}
 						break;

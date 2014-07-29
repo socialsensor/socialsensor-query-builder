@@ -62,7 +62,7 @@ public class FeedsCreator {
 				
 				Set<String> newsCollectors = config.getStreamInputIds();
 				
-				if(!newsCollectors.isEmpty()){
+				if(!newsCollectors.isEmpty()) {
 					reader = new FileInputReader(config);
 				}
 				else{
