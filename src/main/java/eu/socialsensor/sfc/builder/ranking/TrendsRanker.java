@@ -109,6 +109,7 @@ public class TrendsRanker {
 			Map<Item, Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
 		
 			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values()) * sQuery.getScore().floatValue();
+			//TODO: Replace AVG with Max
 			//float maxScore = Collections.max(itemsByRelevance.values()) * sQuery.getScore().floatValue();
 			
 			avgScore *= (queryLength/100);
@@ -124,6 +125,7 @@ public class TrendsRanker {
 		double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
 	
 		score = Calculator.computeAverageFloat(queriesScores) * timeEval;
+		//TODO: Replace AVG with Max
 		//score = Collections.max(queriesScores) * timeEval;
 		
 		return score;
@@ -139,7 +141,7 @@ public class TrendsRanker {
 	public List<Dysco> rankDyscos(List<Dysco> dyscos) {
 		List<Dysco> rankedDyscos = new LinkedList<Dysco>();
 		
-		Map<Double,List<Dysco>> dyscosByValues = new TreeMap<Double,List<Dysco>>(Collections.reverseOrder());
+		Map<Double,List<Dysco>> dyscosByValues = new TreeMap<Double, List<Dysco>>(Collections.reverseOrder());
 		
 		for(Dysco dysco : dyscos) {
 			Double score = dysco.getRankerScore();
@@ -259,6 +261,8 @@ public class TrendsRanker {
 	 */
 	public List<Dysco> evaluateDyscosByContent(List<Dysco> dyscos, String listId) {
 	
+		logger.info("Evaluate " + dyscos.size() + " dyscos from list " + listId);
+		
 		Map<String,String> dyscosTitles = new HashMap<String,String>();
 		Map<String,Integer> dyscosCooccurrences = new HashMap<String,Integer>();
 		
@@ -321,6 +325,11 @@ public class TrendsRanker {
 		Double maxDyscoScore = Collections.max(dyscoScoresList);
 		Double maxRankerScore = Collections.max(rankerScoresList);
 		
+		logger.info("Min Dysco Score: " + minDyscoScore);
+		logger.info("Max Dysco Score: " + maxDyscoScore);
+		logger.info("Min Ranker Score: " + minRankerScore);
+		logger.info("Max Ranker Score: " + maxRankerScore);
+		
 		for(Dysco dysco : dyscos) {
 			double rankerScore = dysco.getRankerScore();
 			if(rankerScore >= 0) {
@@ -330,14 +339,16 @@ public class TrendsRanker {
 				double normalizedDyscoScore = (dysco.getScore() - minDyscoScore) / (maxDyscoScore - minDyscoScore);
 				dysco.setNormalizedDyscoScore(normalizedDyscoScore);
 				
+				logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore= " + normalizedRankerScore + 
+						",  normalizedDyscoScore=" + normalizedDyscoScore);
 			}
 			else {
 				dysco.setNormalizedRankerScore(-1.0);
 				dysco.setNormalizedDyscoScore(-1.0);
+				
+				logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore=-1,  normalizedDyscoScore=-1");
 			}
-			
 		}
-		
 		return rankDyscos(dyscos);
 	}
 
@@ -365,12 +376,5 @@ public class TrendsRanker {
 	    }
 
 	}
-	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		
-	}	
 
 }
