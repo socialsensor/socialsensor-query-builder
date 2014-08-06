@@ -104,17 +104,21 @@ public class TrendsRanker {
 			String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
 		
 			// Solr collection of NewsFeeds needs to be fixed!
-			//query += " AND (list : " + listId + ")";
+			query += " AND (lists : " + listId + ")";
 			
 			Map<Item, Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
 		
 			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values()) * sQuery.getScore().floatValue();
-			//TODO: Replace AVG with Max
-			//float maxScore = Collections.max(itemsByRelevance.values()) * sQuery.getScore().floatValue();
+			
+			//float maxScore = 0;
+			//if(!itemsByRelevance.isEmpty())
+			//	maxScore = Collections.max(itemsByRelevance.values()) * sQuery.getScore().floatValue();
 			
 			avgScore *= (queryLength/100);
-		
 			queriesScores.add(avgScore);
+			
+			//maxScore *= (queryLength/100);
+			//queriesScores.add(maxScore);
 		}
 		
 		long dateTimeOfDysco = dysco.getCreationDate().getTime();
@@ -125,8 +129,8 @@ public class TrendsRanker {
 		double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
 	
 		score = Calculator.computeAverageFloat(queriesScores) * timeEval;
-		//TODO: Replace AVG with Max
-		//score = Collections.max(queriesScores) * timeEval;
+		//if(!queriesScores.isEmpty())
+		//	score = Collections.max(queriesScores) * timeEval;
 		
 		return score;
 	}
@@ -269,6 +273,12 @@ public class TrendsRanker {
 		for(Dysco dysco : dyscos) {
 			
 			Double dyscoScore = dysco.getScore();
+			
+			if(dyscoScore == null) {
+				dysco.setScore(0.);
+				dyscoScore = 0.;
+			}
+			
 			dyscoScoresList.push(dyscoScore);
 			
 			List<Entity> entities = dysco.getEntities();

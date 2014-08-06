@@ -49,31 +49,36 @@ public class FileInputReader implements InputReader{
 	
 	@Override
 	public Map<FeedType, Object> getData() {
+		
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
-		Map<String, String> input_lines = new HashMap<String, String>();
+		Map<String, String> inputLines = new HashMap<String, String>();
 		String path = stream_config.getParameter(FileInputReader.PATH);
 		String type = stream_config.getParameter(FileInputReader.TYPE);
+		
+		System.out.println("GET DATA FROM " + path + " WITH TYPE " + type);
 		
 		String line;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(path));
 			line = reader.readLine();
 			while (line != null) {
-				
 				String[] parts = line.split("\t");
 				if(parts.length == 2) {
-					input_lines.put(parts[0], parts[1]);
+					inputLines.put(parts[0], parts[1]);
 				}
-				
+				else {
+					System.out.println("Parts size: " + parts.length);
+				}
 	            line = reader.readLine();
 	        }
 			
 			reader.close();
 		} catch (IOException e) {
-	
+	e.printStackTrace();
 		}
+		
 		if(type.equals("url")) {
-			inputDataPerType.put(FeedType.URL, input_lines);
+			inputDataPerType.put(FeedType.URL, inputLines);
 		}
 		
 		return inputDataPerType;
