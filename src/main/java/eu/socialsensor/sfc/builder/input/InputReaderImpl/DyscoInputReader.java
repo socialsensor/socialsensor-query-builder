@@ -45,27 +45,27 @@ public class DyscoInputReader implements InputReader{
 	private Date date;
 	private DateUtil dateUtil = new DateUtil();
 	
-	public DyscoInputReader(Dysco dysco){
+	public DyscoInputReader(Dysco dysco) {
 		this.dysco = dysco;
 
-		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)){
+		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)) {
 			this.customDysco = (CustomDysco) dysco;
 		}
 	
 	}
 	
 	@Override
-	public Map<FeedType,Object> getData(){
+	public Map<FeedType, Object> getData() {
 		Map<FeedType,Object> inputDataPerType = new HashMap<FeedType,Object>();
 		
-		this.date = dateUtil.addDays(dysco.getCreationDate(),-2);
+		this.date = dateUtil.addDays(dysco.getCreationDate(), -2);
 		
 		//standard for trending dysco 
 		Set<Keyword> queryKeywords = new HashSet<Keyword>();
 		
 		List<Query> solrQueries = dysco.getSolrQueries();
 		
-		if(customDysco != null){
+		if(customDysco != null) {
 			this.date = new Date(0l);
 			List<Source> querySources = new ArrayList<Source>();
 			List<Location> queryLocations = new ArrayList<Location>();
@@ -120,14 +120,16 @@ public class DyscoInputReader implements InputReader{
 			
 			if(!querySources.isEmpty())
 				inputDataPerType.put(FeedType.SOURCE, querySources);
+			
 			if(!queryLocations.isEmpty())
 				inputDataPerType.put(FeedType.LOCATION, queryLocations);
+			
 			if(!queryLists.isEmpty())
 				inputDataPerType.put(FeedType.LIST, queryLists);
 			
 		}
 		
-		if(solrQueries != null){
+		if(solrQueries != null) {
 			for(Query solrQuery : solrQueries){
 				String queryName = solrQuery.getName();
 				double score = 0.0;
@@ -155,36 +157,36 @@ public class DyscoInputReader implements InputReader{
 	}
 
 	@Override
-	public List<Feed> createFeeds(){
+	public List<Feed> createFeeds() {
 		
 		Map<FeedType,Object> inputData = getData();
 		
-		for(FeedType feedType : inputData.keySet()){
+		for(FeedType feedType : inputData.keySet()) {
 			switch(feedType){
 			case SOURCE :
 				@SuppressWarnings("unchecked")
 				List<Source> sources = (List<Source>) inputData.get(feedType);
-				for(Source source : sources){
+				for(Source source : sources) {
 					String feedID = UUID.randomUUID().toString();
-					SourceFeed sourceFeed = new SourceFeed(source,date,feedID);
+					SourceFeed sourceFeed = new SourceFeed(source, date, feedID);
 					feeds.add(sourceFeed);
 				}
 				break;
 			case KEYWORDS : 
 				@SuppressWarnings("unchecked")
 				Set<Keyword> keywords = (Set<Keyword>) inputData.get(feedType);
-				for(Keyword keyword : keywords){
+				for(Keyword keyword : keywords) {
 					String feedID = UUID.randomUUID().toString();
-					KeywordsFeed keywordsFeed = new KeywordsFeed(keyword,date,feedID);
+					KeywordsFeed keywordsFeed = new KeywordsFeed(keyword, date, feedID);
 					feeds.add(keywordsFeed);
 				}
 				break;
 			case LOCATION :
 				@SuppressWarnings("unchecked")
 				List<Location> locations = (List<Location>) inputData.get(feedType);
-				for(Location location : locations){
+				for(Location location : locations) {
 					String feedID = UUID.randomUUID().toString();
-					LocationFeed locationFeed = new LocationFeed(location,date,feedID);
+					LocationFeed locationFeed = new LocationFeed(location, date, feedID);
 					feeds.add(locationFeed);
 				}
 				break;
@@ -193,7 +195,7 @@ public class DyscoInputReader implements InputReader{
 				List<String> lists = (List<String>) inputData.get(feedType);
 				for(String list : lists){
 					String feedID = UUID.randomUUID().toString();
-					ListFeed listFeed = new ListFeed(list,date,feedID);
+					ListFeed listFeed = new ListFeed(list, date, feedID);
 					feeds.add(listFeed);
 				}
 			default:

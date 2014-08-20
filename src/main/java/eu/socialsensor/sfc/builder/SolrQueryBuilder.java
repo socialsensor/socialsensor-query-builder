@@ -35,9 +35,8 @@ public class SolrQueryBuilder {
 	//the more complicated the query turns out to be
 	private static final Integer NUMBER_OF_KEYWORDS_IN_QUERY = 4;
 	
-	public SolrQueryBuilder(){
+	public SolrQueryBuilder() {
 		logger.info("SolrQueryBuilder instance created");
-		
 	}
 	
 	/**
@@ -45,27 +44,25 @@ public class SolrQueryBuilder {
 	 * @param dysco
 	 * @return the solr query as String
 	 */
-	public String getSolrQueryString(Dysco dysco){
+	public String getSolrQueryString(Dysco dysco) {
 	
-		if(dysco.getDyscoType() == null){
+		if(dysco.getDyscoType() == null) {
 			logger.error("Dysco Type is not defined - Cannot extract solr query");
 			return null;
 		}
 		
-		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)){
+		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)) {
 			logger.info("Find solr query for custom dysco : "+dysco.getId());
 			
 			CustomDysco customDysco = (CustomDysco) dysco;
-			
 			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(customDysco);
 			
 			return customBuilder.createSolrQuery();
 		}
-		else{
+		else {
 			logger.info("Find solr query for trending dysco : "+dysco.getId());
 			
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
-			
 			return trendingBuilder.createSolrQuery();
 		}
 	}
@@ -75,28 +72,26 @@ public class SolrQueryBuilder {
 	 * @param dysco
 	 * @return List of Solr Queries
 	 */
-	public List<Query> getSolrQueries(Dysco dysco){
-		if(dysco.getDyscoType() == null){
+	public List<Query> getSolrQueries(Dysco dysco) {
+		
+		if(dysco.getDyscoType() == null) {
 			logger.error("Dysco Type is not defined - Cannot extract solr query");
 			return null;
 		}
 		
-		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)){
+		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)) {
 			logger.info("Find solr query for custom dysco : "+dysco.getId());
 			
 			CustomDysco customDysco = (CustomDysco) dysco;
-			 
 			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(customDysco);
 			
 			return customBuilder.createSolrQueries();
 		}
-		else{
+		else {
 			logger.info("Find solr query for trending dysco : "+dysco.getId());
 			
 			TrendingSolrQueryBuilder trendingBuilder = new TrendingSolrQueryBuilder(dysco);
-			
 			return trendingBuilder.createPrimalSolrQueries();
-				
 		}
 	}
 	
@@ -113,7 +108,7 @@ public class SolrQueryBuilder {
 	 * @param dysco
 	 * @return A list of Solr queries
 	 */
-	public List<Query> getExpandedSolrQueries(List<Item> items,Dysco dysco,Integer queryNumberLimit){
+	public List<Query> getExpandedSolrQueries(List<Item> items, Dysco dysco, Integer queryNumberLimit) {
 
 		List<Query> primalSolrQueries = dysco.getSolrQueries();
 		List<Query> formulatedSolrQueries = new ArrayList<Query>();
@@ -126,14 +121,14 @@ public class SolrQueryBuilder {
 		}
 
 		//Process keywords from items collection
-		KeywordsExtractor extractor = new KeywordsExtractor(items);
-		extractor.processItemsText();
-		List<String> topKeywords = extractor.getTopKeywords();
-		Set<String> contentToProcess = extractor.getTextContent();
+		KeywordsExtractor keywordExtractor = new KeywordsExtractor(items);
+		keywordExtractor.processItemsText();
+		List<String> topKeywords = keywordExtractor.getTopKeywords();
+		Set<String> contentToProcess = keywordExtractor.getTextContent();
 
 		//Create the graph on the content Keywords Exctractor gave as output
-		GraphCreator graphCreator = new GraphCreator(contentToProcess,topKeywords);
-		graphCreator.setSubstituteWords(extractor.getWordsToReplace());
+		GraphCreator graphCreator = new GraphCreator(contentToProcess, topKeywords);
+		graphCreator.setSubstituteWords(keywordExtractor.getWordsToReplace());
 		graphCreator.createGraph();
 		graphCreator.pruneLowConnectivityNodes();
 		//if graph has no nodes return no queries
@@ -141,7 +136,7 @@ public class SolrQueryBuilder {
 			return formulatedSolrQueries;
 		
 		//Track solr queries on the graph 
-		QueryFormulator qFormulator = new QueryFormulator(graphCreator.getGraph(),extractor.getTopHashtags());
+		QueryFormulator qFormulator = new QueryFormulator(graphCreator.getGraph(), keywordExtractor.getTopHashtags());
 		qFormulator.generateKeywordQueries(NUMBER_OF_KEYWORDS_IN_QUERY);
 		qFormulator.generateHashtagQueries();
 	
@@ -150,7 +145,7 @@ public class SolrQueryBuilder {
 		
 		//Process formulated keywords and hashtags queries to boost repetitive queries and eliminate similars.
 		//Keep the highly ranked queries.
-		while(formulatedSolrQueries.size() < queryNumberLimit){
+		while(formulatedSolrQueries.size() < queryNumberLimit) {
 			boolean keyFound = false;
 			boolean done = false;
 			Double elementToRemove = 0.0; 
@@ -158,36 +153,36 @@ public class SolrQueryBuilder {
 			if(scaledRankedKeywords.isEmpty() && scaledRankedHashtags.isEmpty())
 				break;
 
-			if(scaledRankedKeywords.isEmpty()){
-				for(Double hashScore : scaledRankedHashtags.keySet()){
+			if(scaledRankedKeywords.isEmpty()) { 
+				for(Double hashScore : scaledRankedHashtags.keySet()) {
 					
-					if(hashScore<1.5){
+					if(hashScore < 1.5) {
 						done = true;
 						break;
 					}
 				
-					for(String solrQuery : scaledRankedHashtags.get(hashScore)){
+					for(String solrQuery : scaledRankedHashtags.get(hashScore)) {
 						formulatedSolrQueries.add(new Query(solrQuery,hashScore));
-						if(formulatedSolrQueries.size() >= queryNumberLimit){
+						if(formulatedSolrQueries.size() >= queryNumberLimit) {
 							done = true;
 							break;
 						}
 					}
+					
 					if(done)
 						break;
 				}
 			}
-			else if(scaledRankedHashtags.isEmpty()){
-				for(Double keyScore : scaledRankedKeywords.keySet()){
-					
-					if(keyScore<0.5){
+			else if(scaledRankedHashtags.isEmpty()) {
+				for(Double keyScore : scaledRankedKeywords.keySet()) {
+					if(keyScore < 0.5) {
 						done = true;
 						break;
 					}
 						
-					for(String solrQuery : scaledRankedKeywords.get(keyScore)){
+					for(String solrQuery : scaledRankedKeywords.get(keyScore)) {
 						formulatedSolrQueries.add(new Query(solrQuery,keyScore));
-						if(formulatedSolrQueries.size() >= queryNumberLimit){
+						if(formulatedSolrQueries.size() >= queryNumberLimit) {
 							done = true;
 							break;
 						}
@@ -196,22 +191,22 @@ public class SolrQueryBuilder {
 						break;
 				}
 			}
-			else{
-				for(Double keyScore : scaledRankedKeywords.keySet()){
+			else {
+				for(Double keyScore : scaledRankedKeywords.keySet()) {
 					boolean hashFound = false;
-					for(Double hashScore : scaledRankedHashtags.keySet()){
-						if(keyScore<0.5 && hashScore<0.5){
+					for(Double hashScore : scaledRankedHashtags.keySet()) {
+						if(keyScore < 0.5 && hashScore < 0.5) {
 							done = true;
 							break;
 						}
 					
-						if(keyScore > hashScore){
+						if(keyScore > hashScore) {
 							break;
 						}
 					
-						for(String solrQuery : scaledRankedHashtags.get(hashScore)){
+						for(String solrQuery : scaledRankedHashtags.get(hashScore)) {
 							formulatedSolrQueries.add(new Query(solrQuery,hashScore));
-							if(formulatedSolrQueries.size() >= queryNumberLimit){
+							if(formulatedSolrQueries.size() >= queryNumberLimit) {
 								done = true;
 								break;
 							}
@@ -224,10 +219,10 @@ public class SolrQueryBuilder {
 					if(done)
 						break;
 					
-					if(!hashFound){
-						for(String solrQuery : scaledRankedKeywords.get(keyScore)){
+					if(!hashFound) {
+						for(String solrQuery : scaledRankedKeywords.get(keyScore)) {
 							formulatedSolrQueries.add(new Query(solrQuery,keyScore));
-							if(formulatedSolrQueries.size() >= queryNumberLimit){
+							if(formulatedSolrQueries.size() >= queryNumberLimit) {
 								done = true;
 								break;
 							}
@@ -235,13 +230,14 @@ public class SolrQueryBuilder {
 						elementToRemove = keyScore;
 						keyFound = true;
 					}
-					else{
+					else {
 						scaledRankedHashtags.remove(elementToRemove);
-						
 					}
+					
 					break;
 				}
-				if(keyFound){
+				
+				if(keyFound) {
 					scaledRankedKeywords.remove(elementToRemove);
 				}
 			}
@@ -257,19 +253,16 @@ public class SolrQueryBuilder {
 		List<Query> processedQueries = new ArrayList<Query>();
 		
 		//detect dysco entities inside newly formulated queries 
-		for(Query query : formulatedSolrQueries){
-			for(Entity ent : dysco.getEntities()){
-				if(query.getName().contains(ent.getName())||query.getName().equals(ent.getName())){
-			
+		for(Query query : formulatedSolrQueries) {
+			for(Entity ent : dysco.getEntities()) {
+				if(query.getName().contains(ent.getName())||query.getName().equals(ent.getName())) {
 					String temp = query.getName().replace(ent.getName(), "\""+ent.getName()+"\"");
 					query.setName(temp);
-					
 				}
-					
 			}
+			
 			query.setIsFromExpansion(true);
 			processedQueries.add(query);
-		
 		}
 		
 		//merge primal solr queries and additional formulated queries on the basis of their scores
@@ -288,38 +281,41 @@ public class SolrQueryBuilder {
 	 * @param queryLimit
 	 * @return List of merged queries
 	 */
-	private List<Query> mergeSolrQueries(List<Query> primalQueries,List<Query> processedQueries,int queryLimit){
+	private List<Query> mergeSolrQueries(List<Query> primalQueries, List<Query> processedQueries, int queryLimit) {
 		List<Query> finalSolrQueries = new ArrayList<Query>();
 		
 		Map<String,Query> primalSolrQueriesWeights = new HashMap<String,Query>();
 		Map<String,Query> processedSolrQueriesWeights = new HashMap<String,Query>();
 		Map<Double,List<Query>> allRankedQueries = new TreeMap<Double,List<Query>>(Collections.reverseOrder());
 		
-		for(Query q : primalQueries){
+		for(Query q : primalQueries) {
 			primalSolrQueriesWeights.put(q.getName(), q);
 		}
+		
 		for(Query q : processedQueries){
 			processedSolrQueriesWeights.put(q.getName(), q);
 		}
 			
-		for(Query primalQuery : primalQueries){
+		for(Query primalQuery : primalQueries) {
 			List<String> entities = new ArrayList<String>();
 			
 			String restPrimalQuery = primalQuery.getName();
 	
-			int start = 0,end=0;
-			while(start != -1 && end != -1){
+			int start = 0, end = 0;
+			while(start != -1 && end != -1) {
 				start = restPrimalQuery.indexOf("\"");
 		
 				if(start == -1)
 					break;
+				
     			String temp = restPrimalQuery.substring(start+1);
     		
-    			end = temp.indexOf("\"")+start+1;
+    			end = temp.indexOf("\"") + start + 1;
     			
     			if(end == -1)
 					break;
-    			end+=1;
+    			
+    			end += 1;
    
     			String entity = restPrimalQuery.substring(start, end);
     	
@@ -327,47 +323,48 @@ public class SolrQueryBuilder {
     			entities.add(entity);
 			}
 			
-			for(Query processedQuery : processedQueries){
+			for(Query processedQuery : processedQueries) {
 	
 				List<String> otherEntities = new ArrayList<String>();
 				String restProcessedQuery = processedQuery.getName();
 				
 				start = 0;
-				end=0;
-				while(start != -1 && end != -1){
+				end = 0;
+				while(start != -1 && end != -1) {
 					start = restProcessedQuery.indexOf("\"");
 				
 					if(start == -1)
 						break;
-	    			String temp = restProcessedQuery.substring(start+1);
+	    			
+					String temp = restProcessedQuery.substring(start+1);
 	    
-	    			end = temp.indexOf("\"")+start+1;
+	    			end = temp.indexOf("\"") + start + 1;
 	    
 	    			if(end == -1)
 						break;
-	    			end+=1;
+	    			
+	    			end += 1;
 	    			String entity = restProcessedQuery.substring(start, end);
 	   
 	    			restProcessedQuery = restProcessedQuery.replace(entity, "").trim();
 	    			otherEntities.add(entity);
 				}
 				
-				for(String ent : entities){
-					for(String oEnt : otherEntities){
-						if(ent.equals(oEnt)){
+				for(String ent : entities) {
+					for(String oEnt : otherEntities) {
+						if(ent.equals(oEnt)) {
 							processedQuery.setScore(processedSolrQueriesWeights.get(processedQuery.getName()).getScore()+primalQuery.getScore());
 							primalQuery.setScore(primalSolrQueriesWeights.get(primalQuery.getName()).getScore()+processedQuery.getScore());
 							
 							processedSolrQueriesWeights.put(processedQuery.getName(), processedQuery);
 							primalSolrQueriesWeights.put(primalQuery.getName(), primalQuery);
 						}
-					}
-					
-						
+					}		
 				}
+				
 				String[] words = restPrimalQuery.split("//s+");
-				for(String word : words){
-					if(processedQuery.getName().contains(word) || processedQuery.getName().equals(word)){
+				for(String word : words) {
+					if(processedQuery.getName().contains(word) || processedQuery.getName().equals(word)) {
 						processedQuery.setScore(processedSolrQueriesWeights.get(processedQuery.getName()).getScore()+primalQuery.getScore());
 						processedSolrQueriesWeights.put(processedQuery.getName(), processedQuery);
 					}
@@ -375,36 +372,34 @@ public class SolrQueryBuilder {
 				}
 				
 				String[] otherWords = restProcessedQuery.split("//s+");
-				for(String word : otherWords){
-					if(primalQuery.getName().contains(word) || primalQuery.getName().equals(word)){
+				for(String word : otherWords) {
+					if(primalQuery.getName().contains(word) || primalQuery.getName().equals(word)) {
 						primalQuery.setScore(primalSolrQueriesWeights.get(primalQuery.getName()).getScore()+processedQuery.getScore());
 						primalSolrQueriesWeights.put(primalQuery.getName(), primalQuery);
-					}
-						
+					}		
 				}
 			}
 		}
 		
-		for(Map.Entry<String, Query> entry : primalSolrQueriesWeights.entrySet()){
+		for(Map.Entry<String, Query> entry : primalSolrQueriesWeights.entrySet()) {
 			
-			if(allRankedQueries.containsKey(entry.getValue().getScore())){
+			if(allRankedQueries.containsKey(entry.getValue().getScore())) {
 				boolean exists = false;
 				List<Query> alreadyIn = allRankedQueries.get(entry.getValue().getScore());
 				
-				for(Query inQuery : alreadyIn)
-					if(inQuery.getName().equals(entry.getKey())){
+				for(Query inQuery : alreadyIn) {
+					if(inQuery.getName().equals(entry.getKey())) {
 						exists = true;
 						break;
 					}
+				}
 				
-				if(!exists){
+				if(!exists) {
 					alreadyIn.add(entry.getValue());
 					allRankedQueries.put(entry.getValue().getScore(), alreadyIn);
 				}
-				
-				
 			}
-			else{
+			else {
 				List<Query> alreadyIn = new ArrayList<Query>();
 				
 				alreadyIn.add(entry.getValue());
@@ -412,26 +407,25 @@ public class SolrQueryBuilder {
 			}
 		}
 		
-		for(Map.Entry<String, Query> entry : processedSolrQueriesWeights.entrySet()){
+		for(Map.Entry<String, Query> entry : processedSolrQueriesWeights.entrySet()) {
 		
-			if(allRankedQueries.containsKey(entry.getValue().getScore())){
+			if(allRankedQueries.containsKey(entry.getValue().getScore())) {
 				boolean exists = false;
 				List<Query> alreadyIn = allRankedQueries.get(entry.getValue().getScore());
 				
-				for(Query inQuery : alreadyIn)
-					if(inQuery.getName().equals(entry.getKey())){
+				for(Query inQuery : alreadyIn) {
+					if(inQuery.getName().equals(entry.getKey())) {
 						exists = true;
 						break;
 					}
+				}
 				
-				if(!exists){
+				if(!exists) {
 					alreadyIn.add(entry.getValue());
 					allRankedQueries.put(entry.getValue().getScore(), alreadyIn);
 				}
-					
-				
 			}
-			else{
+			else {
 				List<Query> alreadyIn = new ArrayList<Query>();
 				
 				alreadyIn.add(entry.getValue());
@@ -441,17 +435,18 @@ public class SolrQueryBuilder {
 		
 		Map<Double,List<Query>> allScaledRankedQueries = scaleKeywordsToWeight(allRankedQueries);
 		
-		for(Map.Entry<Double, List<Query>> entry : allScaledRankedQueries.entrySet()){
+		for(Map.Entry<Double, List<Query>> entry : allScaledRankedQueries.entrySet()) {
+			
 			if(finalSolrQueries.size() == queryLimit)
 				break;
-			for(Query finalQuery : entry.getValue()){
+			
+			for(Query finalQuery : entry.getValue()) {
 				if(finalSolrQueries.size() == queryLimit)
 					break;
 				
 				finalSolrQueries.add(finalQuery);
 			}
 		}
-		
 		return finalSolrQueries;
 	}
 	
@@ -460,8 +455,8 @@ public class SolrQueryBuilder {
 	 * @param inputData
 	 * @return Map of scaled scores to the queries they correspond to
 	 */
-	private Map<Double,List<Query>> scaleKeywordsToWeight(Map<Double,List<Query>> inputData){
-		Map<Double,List<Query>> scaledData = new TreeMap<Double,List<Query>>(Collections.reverseOrder());
+	private Map<Double,List<Query>> scaleKeywordsToWeight(Map<Double, List<Query>> inputData) {
+		Map<Double, List<Query>> scaledData = new TreeMap<Double, List<Query>>(Collections.reverseOrder());
 		
 		if(inputData.isEmpty())
 			return scaledData;
@@ -469,26 +464,26 @@ public class SolrQueryBuilder {
 		double max = 0.0;
 		double min = 1000000.0;
 		
-		for(Double score : inputData.keySet()){
-			if(score>max){
+		for(Double score : inputData.keySet()) {
+			if(score > max) {
 				max = score;
 			}
-			if(score<min){
+			
+			if(score < min) {
 				min = score;
 			}
 		}
 
-		for(Map.Entry<Double, List<Query>> entry : inputData.entrySet()){
-			if(min == max)
+		for(Map.Entry<Double, List<Query>> entry : inputData.entrySet()) {
+			if(min == max) {
 				scaledData.put(1.0, entry.getValue());
-			else{
+			}
+			else {
 				Double value = 30 * (entry.getKey() - min)/(max - min);
 				scaledData.put(value, entry.getValue());
 			}
 		}
-		
 		return scaledData; 
-		
 	}
 	
 	
