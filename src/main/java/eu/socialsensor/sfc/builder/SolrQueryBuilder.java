@@ -52,7 +52,7 @@ public class SolrQueryBuilder {
 		}
 		
 		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)) {
-			logger.info("Find solr query for custom dysco : "+dysco.getId());
+			logger.info("Find solr query for custom dysco : " + dysco.getId());
 			
 			CustomDysco customDysco = (CustomDysco) dysco;
 			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(customDysco);
@@ -80,7 +80,7 @@ public class SolrQueryBuilder {
 		}
 		
 		if(dysco.getDyscoType().equals(DyscoType.CUSTOM)) {
-			logger.info("Find solr query for custom dysco : "+dysco.getId());
+			logger.info("Find solr query for custom dysco : " + dysco.getId());
 			
 			CustomDysco customDysco = (CustomDysco) dysco;
 			CustomSolrQueryBuilder customBuilder = new CustomSolrQueryBuilder(customDysco);
@@ -112,12 +112,10 @@ public class SolrQueryBuilder {
 
 		List<Query> primalSolrQueries = dysco.getSolrQueries();
 		List<Query> formulatedSolrQueries = new ArrayList<Query>();
-		List<Query> finalSolrQueries = new ArrayList<Query>();
 		
-		for(Query pQuery : primalSolrQueries){
+		for(Query pQuery : primalSolrQueries) {
 			if(pQuery.getScore() == null)
 				pQuery.setScore(10.0);
-			
 		}
 
 		//Process keywords from items collection
@@ -131,6 +129,7 @@ public class SolrQueryBuilder {
 		graphCreator.setSubstituteWords(keywordExtractor.getWordsToReplace());
 		graphCreator.createGraph();
 		graphCreator.pruneLowConnectivityNodes();
+		
 		//if graph has no nodes return no queries
 		if(graphCreator.getGraph().getNodes().size() == 0)
 			return formulatedSolrQueries;
@@ -143,7 +142,7 @@ public class SolrQueryBuilder {
 		Map<Double, List<String>> scaledRankedKeywords = qFormulator.getRankedKeywordQueries();
 		Map<Double, List<String>> scaledRankedHashtags = qFormulator.getRankedHashtagQueries();
 		
-		//Process formulated keywords and hashtags queries to boost repetitive queries and eliminate similars.
+		//Process formulated keywords and hashtags queries to boost repetitive queries and eliminate similar.
 		//Keep the highly ranked queries.
 		while(formulatedSolrQueries.size() < queryNumberLimit) {
 			boolean keyFound = false;
@@ -162,15 +161,16 @@ public class SolrQueryBuilder {
 					}
 				
 					for(String solrQuery : scaledRankedHashtags.get(hashScore)) {
-						formulatedSolrQueries.add(new Query(solrQuery,hashScore));
+						formulatedSolrQueries.add(new Query(solrQuery, hashScore));
 						if(formulatedSolrQueries.size() >= queryNumberLimit) {
 							done = true;
 							break;
 						}
 					}
 					
-					if(done)
+					if(done) {
 						break;
+					}
 				}
 			}
 			else if(scaledRankedHashtags.isEmpty()) {
@@ -233,7 +233,6 @@ public class SolrQueryBuilder {
 					else {
 						scaledRankedHashtags.remove(elementToRemove);
 					}
-					
 					break;
 				}
 				
@@ -256,7 +255,7 @@ public class SolrQueryBuilder {
 		for(Query query : formulatedSolrQueries) {
 			for(Entity ent : dysco.getEntities()) {
 				if(query.getName().contains(ent.getName())||query.getName().equals(ent.getName())) {
-					String temp = query.getName().replace(ent.getName(), "\""+ent.getName()+"\"");
+					String temp = query.getName().replace(ent.getName(), "\"" + ent.getName()+"\"");
 					query.setName(temp);
 				}
 			}
@@ -266,9 +265,7 @@ public class SolrQueryBuilder {
 		}
 		
 		//merge primal solr queries and additional formulated queries on the basis of their scores
-		finalSolrQueries = mergeSolrQueries(primalSolrQueries,processedQueries,queryNumberLimit);
-		
-		return finalSolrQueries;
+		return mergeSolrQueries(primalSolrQueries, processedQueries, queryNumberLimit);
 	}
 
 	/**
@@ -282,6 +279,7 @@ public class SolrQueryBuilder {
 	 * @return List of merged queries
 	 */
 	private List<Query> mergeSolrQueries(List<Query> primalQueries, List<Query> processedQueries, int queryLimit) {
+		
 		List<Query> finalSolrQueries = new ArrayList<Query>();
 		
 		Map<String,Query> primalSolrQueriesWeights = new HashMap<String,Query>();
