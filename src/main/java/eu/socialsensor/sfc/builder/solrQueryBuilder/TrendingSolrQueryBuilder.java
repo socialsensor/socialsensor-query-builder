@@ -23,7 +23,7 @@ import eu.socialsensor.framework.common.domain.dysco.Entity;
  */
 public class TrendingSolrQueryBuilder {
 	public static final int NUMBER_OF_QUERIES = 5;
-	public static final int MIN_KEYWORD_LENGTH = 3;
+	public static final int MIN_KEYWORD_LENGTH = 2;
 	
 	public final Logger logger = Logger.getLogger(TrendingSolrQueryBuilder.class);
 	
