@@ -36,11 +36,11 @@ public class QueryFormulator {
 	private Double maxKeywordsQueryScore = 0.0;
 	private Double maxHashtagsQueryScore = 0.0;
 
-	public QueryFormulator(Graph graph){
+	public QueryFormulator(Graph graph) {
 		this.graph = graph;
 	}
 	
-	public QueryFormulator(Graph graph,Map<String,Double> hashtags){
+	public QueryFormulator(Graph graph,Map<String,Double> hashtags) {
 		this.graph = graph;
 		this.hashtags = hashtags;
 	
@@ -48,9 +48,9 @@ public class QueryFormulator {
 	/**
 	 * Prints keyword queries produced by the algorithm
 	 */
-	public void printQueries(){
+	public void printQueries() {
 		System.out.println("*** Queries ***");
-		for(Entry<String,Double> entry : keywordQueries.entrySet()){
+		for(Entry<String,Double> entry : keywordQueries.entrySet()) {
 			System.out.println();
 			System.out.println(entry.getKey()+" : "+entry.getValue());
 			System.out.println();
@@ -60,13 +60,13 @@ public class QueryFormulator {
 	/**
 	 * Prints ranked keyword queries by their weight.
 	 */
-	public void printRankedKeywordQueries(){
+	public void printRankedKeywordQueries() {
 		System.out.println("*** Ranked Keyword Queries ***");
 		System.out.println();
-		for(Double value : rankedKeywordQueries.keySet()){
+		for(Double value : rankedKeywordQueries.keySet()) {
 			System.out.println("---- SCORE "+value+" ----");
 			System.out.println();
-			for(String rQuery : rankedKeywordQueries.get(value)){
+			for(String rQuery : rankedKeywordQueries.get(value)) {
 				System.out.println("Q : "+rQuery);
 			}
 			System.out.println();
@@ -75,55 +75,56 @@ public class QueryFormulator {
 	/**
 	 * Prints ranked hashtag queries by their weight.
 	 */
-	public void printRankedHashtagQueries(){
+	public void printRankedHashtagQueries() {
 		System.out.println("*** Ranked Hashtag Queries ***");
 		System.out.println();
-		for(Double value : rankedHashtagQueries.keySet()){
+		for(Double value : rankedHashtagQueries.keySet()) {
 			System.out.println("---- SCORE "+value+" ----");
 			System.out.println();
-			for(String rQuery : rankedHashtagQueries.get(value)){
+			for(String rQuery : rankedHashtagQueries.get(value)) {
 				System.out.println("Q : "+rQuery);
 			}
 			System.out.println();
 		}
 	}
 	
-	public Double getMaxKeywordsQueryScore(){
+	public Double getMaxKeywordsQueryScore() {
 		return this.maxKeywordsQueryScore;
 	}
 	
-	public Double getMaxHashtagQueryScore(){
+	public Double getMaxHashtagQueryScore() { 
 		return this.maxHashtagsQueryScore;
 	}
+	
 	/**
 	 * Prints nodes out and in degrees. 
 	 */
-	public void printDegrees(){
+	public void printDegrees() {
 		Map<Integer,List<Node>> topInDegreeNodes = new HashMap<Integer,List<Node>>();
 		Map<Integer,List<Node>> topOutDegreeNodes = new HashMap<Integer,List<Node>>();
 		
 		Set<Integer> topInDegrees = new TreeSet<Integer>(Collections.reverseOrder());
 		Set<Integer> topOutDegrees = new TreeSet<Integer>(Collections.reverseOrder());
 		
-		for(Node node : graph.getNodes()){
-			if(topInDegreeNodes.get(node.getInDegree())!=null){
+		for(Node node : graph.getNodes()) {
+			if(topInDegreeNodes.get(node.getInDegree())!=null) {
 				List<Node> alreadyIn = topInDegreeNodes.get(node.getInDegree());
 				alreadyIn.add(node);
 				topInDegreeNodes.put(node.getInDegree(), alreadyIn);
 			}
-			else{
+			else {
 				List<Node> alreadyIn = new ArrayList<Node>();
 				alreadyIn.add(node);
 				topInDegreeNodes.put(node.getInDegree(), alreadyIn);
 			}
 			topInDegrees.add(node.getInDegree());
 			
-			if(topOutDegreeNodes.get(node.getOutDegree())!=null){
+			if(topOutDegreeNodes.get(node.getOutDegree())!=null) {
 				List<Node> alreadyIn = topOutDegreeNodes.get(node.getOutDegree());
 				alreadyIn.add(node);
 				topOutDegreeNodes.put(node.getOutDegree(), alreadyIn);
 			}
-			else{
+			else {
 				List<Node> alreadyIn = new ArrayList<Node>();
 				alreadyIn.add(node);
 				topOutDegreeNodes.put(node.getOutDegree(), alreadyIn);
@@ -133,10 +134,10 @@ public class QueryFormulator {
 		
 
 		System.out.println("----InDegrees----");
-		for(Integer inDegree : topInDegrees){
+		for(Integer inDegree : topInDegrees) {
 			List<Node> inNodes = topInDegreeNodes.get(inDegree);
 			System.out.print("In Degree "+inDegree+" :: ");
-			for(Node node : inNodes){
+			for(Node node : inNodes) {
 				System.out.print(node.getId()+" ");
 			}
 			System.out.println();
@@ -144,10 +145,10 @@ public class QueryFormulator {
 		System.out.println();
 		System.out.println();
 		System.out.println("----OutDegrees----");
-		for(Integer outDegree : topOutDegrees){
+		for(Integer outDegree : topOutDegrees) {
 			List<Node> outNodes = topOutDegreeNodes.get(outDegree);
 			System.out.print("Out Degree "+outDegree+" :: ");
-			for(Node node : outNodes){
+			for(Node node : outNodes) {
 				System.out.print(node.getId()+" ");
 			}
 			System.out.println();
