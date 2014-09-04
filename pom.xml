@@ -56,23 +56,25 @@
             <artifactId>socialsensor-framework-common</artifactId>
             <version>0.2.2-SNAPSHOT</version>
         </dependency>
+     	
      	<dependency>
             <groupId>eu.socialsensor</groupId>
             <artifactId>socialmedia-abstractions</artifactId>
             <version>0.2-SNAPSHOT</version>
         </dependency>
+        
         <dependency>
         	<groupId>eu.socialsensor</groupId>
             <artifactId>socialsensor-framework-client</artifactId>
             <version>0.2.2-SNAPSHOT</version>
         </dependency>
 		
-		
 		<dependency>
-  			<groupId>eu.socialsensor</groupId>
-  			<artifactId>gephi-toolkit</artifactId>
-  			<version>0.8.7</version>
-		</dependency>
+               <groupId>eu.socialsensor</groupId>
+               <artifactId>gephi-toolkit</artifactId>
+               <version>0.9</version>
+                <classifier>all</classifier>
+         </dependency>
 
         <dependency>
         	<groupId>it.uniroma1.dis.wsngroup.gexf4j</groupId>
@@ -103,8 +105,9 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
-    </repositories>
-    
+      	
+   	</repositories>
+   	
     <build>
         <plugins>
             <plugin>
