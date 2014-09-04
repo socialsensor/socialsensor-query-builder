@@ -17,9 +17,14 @@ import eu.socialsensor.framework.common.domain.JSONable;
  * @author ailiakop
  * @email ailiakop@iti.gr
  */
-public class Node implements JSONable{
+public class Node implements JSONable {
 	
-	public Node(String id){
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1659390011269781557L;
+
+	public Node(String id) {
 		this.id = id;
 	}
 	
@@ -56,10 +61,6 @@ public class Node implements JSONable{
 	private int outWeightedDegree;
 	
 	@Expose
-    @SerializedName(value = "mutDegree")
-	private int mutDegree;
-	
-	@Expose
     @SerializedName(value = "value")
 	private double value;
 	
@@ -75,19 +76,19 @@ public class Node implements JSONable{
 		return id;
 	}
 	
-	public void updateOutNeighbor(String nID, Integer weight){
+	public void updateOutNeighbor(String nID, Integer weight) {
 		outNeighbors.put(nID, weight);
 	}
 	
-	public Integer getOutNeighborsWeight(String nID){
+	public Integer getOutNeighborsWeight(String nID) {
 		return outNeighbors.get(nID);
 	}
 	
-	public Set<String> getOutNeighbors(){
+	public Set<String> getOutNeighbors() {
 		return outNeighbors.keySet();
 	}
 	
-	public void removeFromOutNeighbors(String neighId){
+	public void removeFromOutNeighbors(String neighId) {
 		outNeighbors.remove(neighId);
 	}
 	
@@ -98,12 +99,12 @@ public class Node implements JSONable{
 		return false;
 	}
 	
-	public void addInNeighbor(String nID){
+	public void addInNeighbor(String nID) {
 		inNeighbors.add(nID);
 	}
 	
 
-	public Set<String> getInNeighbors(){
+	public Set<String> getInNeighbors() {
 		return inNeighbors;
 	}
 	
@@ -111,14 +112,14 @@ public class Node implements JSONable{
 		inNeighbors.remove(neighId);
 	}
 	
-	public boolean isInNeighbor(String neighID){
+	public boolean isInNeighbor(String neighID) {
 		if(inNeighbors.contains(neighID))
 			return true;
 		
 		return false;
 	}
 	
-	public void setPrimaryNode(boolean isPrimary){
+	public void setPrimaryNode(boolean isPrimary) {
 		this.primary = true;
 	}
 	
@@ -130,47 +131,39 @@ public class Node implements JSONable{
 		this.isEntity = isEntity;
 	}
 	
-	public boolean isEntityNode(){
+	public boolean isEntityNode() {
 		return isEntity;
 	}
 	
-	public void setInDegree(int inDegree){
+	public void setInDegree(int inDegree) {
 		this.inDegree = inDegree;
 	}
 	
-	public void setOutDegree(int outDegree){
+	public void setOutDegree(int outDegree) {
 		this.outDegree = outDegree;
 	}
 	
-	public void setOutWeightedDegree(int outWeightedDegree){
+	public void setOutWeightedDegree(int outWeightedDegree) {
 		this.outWeightedDegree = outWeightedDegree;
 	}
 	
-	public void setMutDegree(int mutDegree){
-		this.mutDegree = mutDegree;
-	}
-	
-	public int getInDegree(){
+	public int getInDegree() {
 		return inDegree;
 	}
 	
-	public int getOutDegree(){
+	public int getOutDegree() {
 		return outDegree;
 	}
 	
-	public int getOutWeightedDegree(){
+	public int getOutWeightedDegree() {
 		return outWeightedDegree;
 	}
 	
-	public int getMutDegree(){
-		return mutDegree;
-	}
-	
-	public double getValue(){
+	public double getValue() {
 		return value;
 	}
 	
-	public void setValue(double value){
+	public void setValue(double value) {
 		this.value = value;
 	}
 	
@@ -179,10 +172,10 @@ public class Node implements JSONable{
 	 * 
 	 * @return the maximum weight of the node
 	 */
-	public int computeMaxOutNeighborsWeight(){
+	public int computeMaxOutNeighborsWeight() {
 		int maxWeight = 0;
-		for(String neighId : outNeighbors.keySet()){
-			if(maxWeight < outNeighbors.get(neighId)){
+		for(String neighId : outNeighbors.keySet()) {
+			if(maxWeight < outNeighbors.get(neighId)) {
 				maxWeight = outNeighbors.get(neighId);
 			}
 		}
