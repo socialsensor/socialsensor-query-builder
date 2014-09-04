@@ -262,7 +262,7 @@ public class SolrQueryBuilder {
 		}
 		
 		//merge primal solr queries and additional formulated queries on the basis of their scores
-		return mergeSolrQueries(primalSolrQueries, processedQueries, queryNumberLimit);
+		return mergeSolrQueries(primalSolrQueries, processedQueries, 2*queryNumberLimit);
 	}
 
 	/**
