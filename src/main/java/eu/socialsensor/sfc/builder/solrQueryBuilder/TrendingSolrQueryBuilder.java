@@ -197,27 +197,26 @@ public class TrendingSolrQueryBuilder {
 		}
 		
 		//if(entities.isEmpty()) {
-			for(Keyword keyword : keywords) {
-				String name = keyword.getName();
-				String[] parts = name.split("//s+");
-				if(parts.length >= TrendingSolrQueryBuilder.MIN_KEYWORD_LENGTH) {
+		for(Keyword keyword : keywords) {
+			String name = keyword.getName();
+			String[] parts = name.split("\\s+");
+			if(parts.length >= TrendingSolrQueryBuilder.MIN_KEYWORD_LENGTH) {
 					
-					double kScore = parts.length * keyword.getScore();
+				double kScore = parts.length * keyword.getScore();
 					
-					Query query = new Query();
-					query.setName(name);
-					query.setScore(kScore);
-					query.setType(Query.Type.Keywords);
+				Query query = new Query();
+				query.setName(name);
+				query.setScore(kScore);
+				query.setType(Query.Type.Keywords);
 
-					List<Query> alreadyIn = rankedQueries.get(kScore);
-					if(alreadyIn == null) {
-						alreadyIn = new ArrayList<Query>();
-						rankedQueries.put(kScore, alreadyIn);
-					}
-					alreadyIn.add(query);
-
+				List<Query> alreadyIn = rankedQueries.get(kScore);
+				if(alreadyIn == null) {
+					alreadyIn = new ArrayList<Query>();
+					rankedQueries.put(kScore, alreadyIn);
 				}
+				alreadyIn.add(query);
 			}
+		}
 		//}
 		
 		List<Query> solrQueries = new ArrayList<Query>();
@@ -417,6 +416,6 @@ public class TrendingSolrQueryBuilder {
 	}
 	
 	public static void main(String[] args) {
-	
+
 	}
 }
