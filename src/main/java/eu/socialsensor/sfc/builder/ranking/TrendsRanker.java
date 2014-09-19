@@ -374,10 +374,10 @@ public class TrendsRanker {
 		Double maxDyscoScore = dyscoScoresList.isEmpty() ? 0d : Collections.max(dyscoScoresList);
 		Double maxRankerScore = rankerScoresList.isEmpty() ? 0d : Collections.max(rankerScoresList);
 		
-		//logger.info("Min Dysco Score: " + minDyscoScore);
-		//logger.info("Max Dysco Score: " + maxDyscoScore);
-		//logger.info("Min Ranker Score: " + minRankerScore);
-		//logger.info("Max Ranker Score: " + maxRankerScore);
+		logger.info("Min Dysco Score: " + minDyscoScore);
+		logger.info("Max Dysco Score: " + maxDyscoScore);
+		logger.info("Min Ranker Score: " + minRankerScore);
+		logger.info("Max Ranker Score: " + maxRankerScore);
 		
 		for(Dysco dysco : dyscos) {
 			double rankerScore = dysco.getRankerScore();
@@ -392,14 +392,14 @@ public class TrendsRanker {
 					normalizedDyscoScore = (dysco.getScore() - minDyscoScore) / (maxDyscoScore - minDyscoScore);
 				dysco.setNormalizedDyscoScore(normalizedDyscoScore);
 				
-				//logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore= " + normalizedRankerScore + 
-				//		",  normalizedDyscoScore=" + normalizedDyscoScore);
+				logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore= " + normalizedRankerScore + 
+						",  normalizedDyscoScore=" + normalizedDyscoScore);
 			}
 			else {
 				dysco.setNormalizedRankerScore(-1.0);
 				dysco.setNormalizedDyscoScore(-1.0);
 				
-				//logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore=-1,  normalizedDyscoScore=-1");
+				logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore=-1,  normalizedDyscoScore=-1");
 			}
 		}
 		return rankDyscos(dyscos);
