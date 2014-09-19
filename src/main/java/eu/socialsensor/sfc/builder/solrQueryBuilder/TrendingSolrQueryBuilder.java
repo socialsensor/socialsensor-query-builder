@@ -9,11 +9,15 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import eu.socialsensor.framework.client.dao.impl.DyscoDAOImpl;
+import eu.socialsensor.framework.client.search.SearchEngineResponse;
+import eu.socialsensor.framework.common.domain.Item;
 import eu.socialsensor.framework.common.domain.Keyword;
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.Stopwords;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Entity;
+import eu.socialsensor.sfc.builder.SolrQueryBuilder;
 
 /**
  * @brief The class that creates the solr query based on the 
@@ -246,10 +250,10 @@ public class TrendingSolrQueryBuilder {
 		entity = entity.toLowerCase();
 		keywords = keywords.toLowerCase();
 		
-		for(String key : keywords.split(" "))
+		for(String key : keywords.split("\\s+"))
 			splittedKeywords.add(key);
 		
-		String[] entityWords = entity.split(" "); 
+		String[] entityWords = entity.split("\\s+"); 
 			
 		List<String> wordsFound = new ArrayList<String>();
 		for(String eWord : entityWords) {
@@ -416,6 +420,6 @@ public class TrendingSolrQueryBuilder {
 	}
 	
 	public static void main(String[] args) {
-
+		
 	}
 }

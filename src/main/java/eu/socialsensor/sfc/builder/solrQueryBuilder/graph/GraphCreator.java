@@ -15,6 +15,7 @@ import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphFactory;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.io.exporter.api.ExportController;
+import org.gephi.project.api.Project;
 import org.gephi.project.api.ProjectController;
 import org.gephi.project.api.Workspace;
 import org.openide.util.Lookup;
@@ -34,35 +35,26 @@ public class GraphCreator {
 	private List<String> keywords = new ArrayList<String>();
 	private Set<String> textContent = new HashSet<String>();
 	
-	private Map<String,String> substituteWords = new HashMap<String, String>();
+	private Map<String, String> substituteWords = new HashMap<String, String>();
 	
 	//gephi graph
-	private ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
-	private Workspace workspace;
+	private Lookup lookup = Lookup.getDefault();
 	
-	//private AttributeModel attributeModel;
+	private ProjectController projectController = lookup.lookup(ProjectController.class);
+	
 	private DirectedGraph gephiGraph;
 	
 	private Stopwords stopwords = new Stopwords();
 	
-	Map<String, Integer> nodesToIndeces = new HashMap<String, Integer>();
+	private Map<String, Integer> nodesToIndeces = new HashMap<String, Integer>();
 	
-	public GraphCreator(Set<String> textContent,List<String> keywords) {
-		this.keywords = keywords;
-		
+	public GraphCreator(Set<String> textContent) {
 		this.textContent = textContent;
-		
 	}
 	
-	public GraphCreator(Set<String> textContent){
-
+	public GraphCreator(Set<String> textContent, List<String> keywords) {
+		this.keywords = keywords;	
 		this.textContent = textContent;
-	
-	}
-	
-	public GraphCreator(Set<String> textContent, List<String> keywords, List<String> hashtags) {
-		this.textContent = textContent;
-		this.keywords = keywords;
 	}
 	
 	/**
@@ -88,7 +80,6 @@ public class GraphCreator {
 		addNodesToGraph(keywords);
 		createGephiGraph();
 		detectInAndOutDegrees();
-		reset();
 	}
 	
 	/**
@@ -97,12 +88,15 @@ public class GraphCreator {
 	 * and incoming edges in the directed graph structure.
 	 */
 	public void createGephiGraph() {
-		pc.newProject();
-		workspace = pc.getCurrentWorkspace();
+		projectController.newProject();
+		Project project = projectController.getCurrentProject();
 		
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
+		Workspace workspace = projectController.newWorkspace(project);
+		
+		GraphController graphController = lookup.lookup(GraphController.class);
+		GraphModel graphModel = graphController.getGraphModel();
 		GraphFactory graphFactory = graphModel.factory();
-		
+
 		//attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
 		
 		Vector<org.gephi.graph.api.Node> gNodes = new Vector<org.gephi.graph.api.Node>();
@@ -142,6 +136,12 @@ public class GraphCreator {
 		for(int i=0; i<gEdges.size(); i++) {
 			gephiGraph.addEdge(gEdges.get(i));
 		}
+		
+		projectController.cleanWorkspace(workspace);
+		projectController.closeCurrentWorkspace();
+		projectController.deleteWorkspace(workspace);
+		projectController.closeCurrentProject();
+		projectController.removeProject(project);
 	}
 	
 	/**
@@ -200,22 +200,21 @@ public class GraphCreator {
 	 * 
 	 * @param words
 	 */
-	private void addNodesToGraph(List<String> words){
-		for(String word : words){
+	private void addNodesToGraph(List<String> words) {
+		for(String word : words) {
 			List<String> neighbors = new ArrayList<String>();
-			for(String content : textContent){
-
-				List<String> neighIDs = detectAdjacentWords(word,content);
-				if(neighIDs != null){
-					for(String neighId : neighIDs){
-						if(!neighId.contains("#")){
+			for(String content : textContent) {
+				List<String> neighIDs = detectAdjacentWords(word, content);
+				if(neighIDs != null) {
+					for(String neighId : neighIDs) {
+						if(!neighId.contains("#")) {
 							String rightWord = getRightWord(neighId);
-							if(keywords.contains(neighId))
+							if(keywords.contains(neighId)) {
 								neighbors.add(rightWord);
+							}
 						}	
 					}
 				}
-				
 			}
 			
 			if(neighbors.isEmpty())
@@ -224,33 +223,32 @@ public class GraphCreator {
 			String rightWord = getRightWord(word);
 			
 			Node node;
-			if(!graph.exists(rightWord)){
+			if(!graph.exists(rightWord)) {
 				node = new Node(rightWord);
 				node.setEntityNode(true);
 				
 				graph.addNode(node);
 				
 			}
-			else{
+			else {
 				node = graph.getNode(rightWord);
 			}
 					
-			for(String neigh : neighbors){
-				if(node.isOutNeighbor(neigh)){
+			for(String neigh : neighbors) {
+				if(node.isOutNeighbor(neigh)) {
 					node.updateOutNeighbor(neigh, node.getOutNeighborsWeight(neigh)+1);
 				}
-				else{
-					if(!graph.exists(neigh)){
+				else {
+					if(!graph.exists(neigh)) {
 						Node neighNode = new Node(neigh);
 						graph.addNode(neighNode);
 					}
 					node.updateOutNeighbor(neigh, 1);
 				}
-				if(graph.getNode(neigh)!=null){
+				if(graph.getNode(neigh)!=null) {
 					Node neighbor = graph.getNode(neigh);
 					neighbor.addInNeighbor(rightWord);
 				}
-					
 			}
 		}
 	}
@@ -294,11 +292,11 @@ public class GraphCreator {
 		return adjacentWords;
 	}
 	
-	private void reset() {
-		pc.cleanWorkspace(workspace);
-		pc.closeCurrentWorkspace();
-		pc.closeCurrentProject();
-	}
+	//private void reset() {
+	//	pc.cleanWorkspace(workspace);
+	//	pc.closeCurrentWorkspace();
+	//	pc.closeCurrentProject();	
+	//}
 	
 	/**
 	 * Prunes the nodes that are lightly weighted in the graph to reduce
@@ -357,8 +355,6 @@ public class GraphCreator {
 			createGephiGraph();
 			detectInAndOutDegrees();
 			nodesToPrune.clear();
-			
-			reset();
 		}
 		
 	}
@@ -368,8 +364,29 @@ public class GraphCreator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		
+		Set<String> content = new HashSet<String>();
+		
+		content.add("@SkyNewsBreak: Sheffield Council unanimous vote of no confidence in Sth Yorks Police & Crime Commissioner Shaun Wright re Rotherham");
+		content.add("Unanimous vote of no confidence in South Yorkshire PCC Shaun Wright by Sheffield Council after Rotherham scandal http://t.co/0Td7fqITHa");
+		content.add("Sheffield Council passes vote of no confidence in South Yorkshire Police and Crime Commissioner Shaun Wright http://t.co/AMbDVkvnOJ");
+		content.add("Sheffield Council leader says @SYPCC Shaun Wright has lost confidence of the public and should stand down. #RotherhamAbuse");
+		content.add("Unanimous vote of no confidence in @SYPCC Shaun Wright. @SheffCouncil @BBCSheffield");
+		content.add("Mr Fitzgerald backs calls for public enquiry into #RotherhamAbuse but  ... 1/2");
+		content.add("At Sheffield Town Hall where the council are discussing a motion calling for the resignation of PCC Shaun Wright #RotherhamAbuse");
+		
+		List<String> keywords = new ArrayList<String>();
+		keywords.add("Rotherham scandal");
+		keywords.add("Sheffield Council");
+		keywords.add("Shaun Wright");
+		keywords.add("Sheffield");
+		keywords.add("Police");
+		
+		
+		GraphCreator gCreator = new GraphCreator(content, keywords);
+		gCreator.createGraph();
+		Graph g = gCreator.getGraph();
+		g.printGraph();
 	}
 
 }

@@ -1,16 +1,21 @@
 package eu.socialsensor.sfc.builder.ranking;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import eu.socialsensor.framework.client.dao.impl.DyscoDAOImpl;
+import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.client.search.solr.SolrItemHandler;
 import eu.socialsensor.framework.common.domain.Item;
 import eu.socialsensor.framework.common.domain.Query;
@@ -54,35 +59,38 @@ public class TrendsRanker {
 	public Double getContentScore(Dysco dysco) {
 		Double score = 0.0;
 		
-		List<Query> solrQueries = dysco.getSolrQueries();
+		try {
+			List<Query> solrQueries = dysco.getSolrQueries();
+			List<Float> queriesScores = new ArrayList<Float>();
 		
-		List<Float> queriesScores = new ArrayList<Float>();
-		
-		for(Query sQuery : solrQueries) {
-			float queryLength = sQuery.getName().length();
+			for(Query sQuery : solrQueries) {
+				float queryLength = sQuery.getName().length();
 			
-			String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
+				String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
 		
-			Map<Item,Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
+				Map<Item,Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
 		
-			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values()) * sQuery.getScore().floatValue();
-			//float maxScore = Collections.max(itemsByRelevance.values()) * sQuery.getScore().floatValue();
+				float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values()) * sQuery.getScore().floatValue();
+				//float maxScore = Collections.max(itemsByRelevance.values()) * sQuery.getScore().floatValue();
 			
-			avgScore *= (queryLength/100);
-		
-			queriesScores.add(avgScore);
-		}
-		
-		long dateTimeOfDysco = dysco.getCreationDate().getTime();
-		long currentDateTime = System.currentTimeMillis();
-		
-		double timeDiff = (double) Math.abs(dateTimeOfDysco - currentDateTime)/DAY_IN_MILLISECONDS;
-		
-		double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
+				avgScore *= (queryLength/100);
 	
-		score = Calculator.computeAverageFloat(queriesScores) * timeEval;
-		//score = Collections.max(queriesScores) * timeEval;
+				queriesScores.add(avgScore);
+			}
 		
+			long dateTimeOfDysco = dysco.getCreationDate().getTime();
+			long currentDateTime = System.currentTimeMillis();
+		
+			double timeDiff = (double) Math.abs(dateTimeOfDysco - currentDateTime)/DAY_IN_MILLISECONDS;
+		
+			double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
+	
+			score = Calculator.computeAverageFloat(queriesScores) * timeEval;
+			//score = Collections.max(queriesScores) * timeEval;
+		}
+		catch(Exception e) {
+			logger.equals(e.getMessage());
+		}
 		return score;
 	}
 	
@@ -98,40 +106,49 @@ public class TrendsRanker {
 		List<Query> solrQueries = dysco.getSolrQueries();
 		List<Float> queriesScores = new ArrayList<Float>();
 		
-		for(Query sQuery : solrQueries) {
-			float queryLength = sQuery.getName().length();
+		try {
+			for(Query sQuery : solrQueries) {
+				float queryLength = sQuery.getName().length();
 			
-			String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
+				//String query = "(title : ("+sQuery.getName()+")) OR (description : ("+sQuery.getName()+"))";
 		
-			// Solr collection of NewsFeeds needs to be fixed!
-			query += " AND (lists : " + listId + ")";
+				String queryName = sQuery.getName();
+				queryName = queryName.replaceAll("\"", " ");
+				queryName = queryName.trim();
+				queryName = queryName.replaceAll("\\s+", " AND ");		
+				String query = "(title : (" + queryName + ")) OR (description : (" + queryName + "))";
+				
+				query += " AND (lists : " + listId + ")";
 			
-			Map<Item, Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
-		
-			float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values()) * sQuery.getScore().floatValue();
+				Map<Item, Float> itemsByRelevance = solrItemHandler.findItemsWithScore(query);
+				//System.out.println(query + " => " + itemsByRelevance.size());
+				
+				float avgScore = Calculator.computeAverageFloat(itemsByRelevance.values()) * sQuery.getScore().floatValue();
 			
-			//float maxScore = 0;
-			//if(!itemsByRelevance.isEmpty())
-			//	maxScore = Collections.max(itemsByRelevance.values()) * sQuery.getScore().floatValue();
+				//float maxScore = 0;
+				//if(!itemsByRelevance.isEmpty())
+				//	maxScore = Collections.max(itemsByRelevance.values()) * sQuery.getScore().floatValue();
 			
-			avgScore *= (queryLength/100);
-			queriesScores.add(avgScore);
+				avgScore *= (queryLength/100);
+				queriesScores.add(avgScore);
 			
-			//maxScore *= (queryLength/100);
-			//queriesScores.add(maxScore);
-		}
+				//maxScore *= (queryLength/100);
+				//queriesScores.add(maxScore);
+			}
 		
-		long dateTimeOfDysco = dysco.getCreationDate().getTime();
-		long currentDateTime = System.currentTimeMillis();
+			long dateTimeOfDysco = dysco.getCreationDate().getTime();
+			long currentDateTime = System.currentTimeMillis();
 		
-		double timeDiff = (double) Math.abs(dateTimeOfDysco - currentDateTime)/DAY_IN_MILLISECONDS;
-		
-		double timeEval = Math.sqrt(20/(20 + (Math.exp(timeDiff))));
+			double timeDiff = (double) Math.abs(dateTimeOfDysco - currentDateTime)/DAY_IN_MILLISECONDS;
+			double timeEval = Math.sqrt(20 / (20 + (Math.exp(timeDiff))));
 	
-		score = Calculator.computeAverageFloat(queriesScores) * timeEval;
-		//if(!queriesScores.isEmpty())
-		//	score = Collections.max(queriesScores) * timeEval;
-		
+			score = Calculator.computeAverageFloat(queriesScores) * timeEval;
+			//if(!queriesScores.isEmpty())
+			//	score = Collections.max(queriesScores) * timeEval;
+		}
+		catch(Exception e) {
+			logger.error(e.getMessage());
+		}
 		return score;
 	}
 	
@@ -144,27 +161,31 @@ public class TrendsRanker {
 	 */
 	public List<Dysco> rankDyscos(List<Dysco> dyscos) {
 		List<Dysco> rankedDyscos = new LinkedList<Dysco>();
+		Map<Double, List<Dysco>> dyscosByValues = new TreeMap<Double, List<Dysco>>(Collections.reverseOrder());		
 		
-		Map<Double,List<Dysco>> dyscosByValues = new TreeMap<Double, List<Dysco>>(Collections.reverseOrder());
-		
-		for(Dysco dysco : dyscos) {
-			Double score = dysco.getRankerScore();
-			if(dyscosByValues.get(score) == null) {
-				List<Dysco> alreadyIn = new ArrayList<Dysco>();
-				alreadyIn.add(dysco);
-				dyscosByValues.put(score, alreadyIn);
-			}
-			else {
+		try {
+			for(Dysco dysco : dyscos) {
+				Double score = dysco.getRankerScore();
+				
+				if(score == null)
+					continue;
+				
 				List<Dysco> alreadyIn = dyscosByValues.get(score);
+				if(alreadyIn == null) {
+					alreadyIn = new ArrayList<Dysco>();
+					dyscosByValues.put(score, alreadyIn);
+				}
 				alreadyIn.add(dysco);
-				dyscosByValues.put(score, alreadyIn);
+			}
+		
+			for(Map.Entry<Double, List<Dysco>> entry : dyscosByValues.entrySet()) {
+				for(Dysco dysco : entry.getValue()) {
+					rankedDyscos.add(dysco);
+				}
 			}
 		}
-		
-		for(Map.Entry<Double, List<Dysco>> entry : dyscosByValues.entrySet()) {
-			for(Dysco dysco : entry.getValue()) {
-				rankedDyscos.add(dysco);
-			}
+		catch(Exception e) {
+			logger.error(e.getMessage());
 		}
 		
 		return rankedDyscos;
@@ -194,7 +215,7 @@ public class TrendsRanker {
 			int entitiesFound = 0;
 			int keywordsFound = 0;
 			boolean isDuplicate = false;
-			for(Map.Entry<String, String> entry : dyscosTitles.entrySet()){
+			for(Map.Entry<String, String> entry : dyscosTitles.entrySet()) {
 				
 				for(Entity ent : entities){
 					if(entry.getValue().contains(ent.getName().toLowerCase()))
@@ -267,8 +288,8 @@ public class TrendsRanker {
 	
 		logger.info("Evaluate " + dyscos.size() + " dyscos from list " + listId);
 		
-		Map<String,String> dyscosTitles = new HashMap<String,String>();
-		Map<String,Integer> dyscosCooccurrences = new HashMap<String,Integer>();
+		Map<String, String> dyscosTitles = new HashMap<String, String>();
+		Map<String, Integer> dyscosCooccurrences = new HashMap<String, Integer>();
 		
 		for(Dysco dysco : dyscos) {
 			
@@ -281,6 +302,11 @@ public class TrendsRanker {
 			
 			dyscoScoresList.push(dyscoScore);
 			
+			String currentDyscoTitle = dysco.getTitle();
+			if(currentDyscoTitle == null) {
+				continue;
+			}
+			
 			List<Entity> entities = dysco.getEntities();
 			Set<String> keywords = dysco.getKeywords().keySet();
 			
@@ -292,27 +318,34 @@ public class TrendsRanker {
 				
 				String dyscoId = entry.getKey();
 				String dyscoTitle = entry.getValue();
-				
-				for(Entity ent : entities) {
-					if(dyscoTitle.contains(ent.getName().toLowerCase()))
-						entitiesFound++;
+				if(entities != null) {
+					for(Entity entity : entities) {
+						String entityName = entity.getName();
+						if(entityName != null && dyscoTitle.contains(entityName.toLowerCase())) {
+							entitiesFound++;
+						}
+					}
 				}
 				
-				for(String keyword : keywords) {
-					if(dyscoTitle.contains(keyword.toLowerCase()))
-						keywordsFound++;
+				if(keywords != null) {
+					for(String keyword : keywords) {
+						if(dyscoTitle.contains(keyword.toLowerCase())) {
+							keywordsFound++;
+						}
+					}
 				}
-			
-				if((entitiesFound >=1 && keywordsFound >= 2) || dysco.getTitle().toLowerCase().equals(dyscoTitle)) {
+				
+				if((entitiesFound >=1 && keywordsFound >= 2) || currentDyscoTitle.toLowerCase().equals(dyscoTitle)) {
 					isDuplicate = true;
-					Integer newScore = dyscosCooccurrences.get(dyscoId) + 1;
+					Integer pScore = dyscosCooccurrences.get(dyscoId);
+					Integer newScore =  (pScore==null ? 0 : pScore) + 1;
 					dyscosCooccurrences.put(dyscoId, newScore);
 					break;
 				}
 			}
 			
 			if(!isDuplicate) {
-				dyscosTitles.put(dysco.getId(), dysco.getTitle().toLowerCase());
+				dyscosTitles.put(dysco.getId(), currentDyscoTitle.toLowerCase());
 				dyscosCooccurrences.put(dysco.getId(), 1);
 				continue;
 			}
@@ -323,40 +356,50 @@ public class TrendsRanker {
 				dysco.setRankerScore(-1.0);
 			}
 			else {
-				Double rankerScore = getContentScore(dysco, listId) * dyscosCooccurrences.get(dysco.getId());
+				
+				Double contentScore = getContentScore(dysco, listId);
+				Integer cooccurrences = dyscosCooccurrences.get(dysco.getId());
+				if(cooccurrences == null)
+					cooccurrences = 0;
+				
+				Double rankerScore =  contentScore * cooccurrences;
 				dysco.setRankerScore(rankerScore);
 				
 				rankerScoresList.push(rankerScore);
 			}
 		}
 		
-		Double minDyscoScore = Collections.min(dyscoScoresList);
-		Double minRankerScore = Collections.min(rankerScoresList);
-		Double maxDyscoScore = Collections.max(dyscoScoresList);
-		Double maxRankerScore = Collections.max(rankerScoresList);
+		Double minDyscoScore = dyscoScoresList.isEmpty() ? 0d : Collections.min(dyscoScoresList);
+		Double minRankerScore = rankerScoresList.isEmpty() ? 0d : Collections.min(rankerScoresList);
+		Double maxDyscoScore = dyscoScoresList.isEmpty() ? 0d : Collections.max(dyscoScoresList);
+		Double maxRankerScore = rankerScoresList.isEmpty() ? 0d : Collections.max(rankerScoresList);
 		
-		logger.info("Min Dysco Score: " + minDyscoScore);
-		logger.info("Max Dysco Score: " + maxDyscoScore);
-		logger.info("Min Ranker Score: " + minRankerScore);
-		logger.info("Max Ranker Score: " + maxRankerScore);
+		//logger.info("Min Dysco Score: " + minDyscoScore);
+		//logger.info("Max Dysco Score: " + maxDyscoScore);
+		//logger.info("Min Ranker Score: " + minRankerScore);
+		//logger.info("Max Ranker Score: " + maxRankerScore);
 		
 		for(Dysco dysco : dyscos) {
 			double rankerScore = dysco.getRankerScore();
 			if(rankerScore >= 0) {
-				Double normalizedRankerScore = (rankerScore - minRankerScore) / (maxRankerScore - minRankerScore);
+				Double normalizedRankerScore = 0d;
+				if((maxRankerScore - minRankerScore) != 0)
+					normalizedRankerScore = (rankerScore - minRankerScore) / (maxRankerScore - minRankerScore);
 				dysco.setNormalizedRankerScore(normalizedRankerScore);
 				
-				double normalizedDyscoScore = (dysco.getScore() - minDyscoScore) / (maxDyscoScore - minDyscoScore);
+				Double normalizedDyscoScore = 0d;
+				if((maxDyscoScore - minDyscoScore) != 0)
+					normalizedDyscoScore = (dysco.getScore() - minDyscoScore) / (maxDyscoScore - minDyscoScore);
 				dysco.setNormalizedDyscoScore(normalizedDyscoScore);
 				
-				logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore= " + normalizedRankerScore + 
-						",  normalizedDyscoScore=" + normalizedDyscoScore);
+				//logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore= " + normalizedRankerScore + 
+				//		",  normalizedDyscoScore=" + normalizedDyscoScore);
 			}
 			else {
 				dysco.setNormalizedRankerScore(-1.0);
 				dysco.setNormalizedDyscoScore(-1.0);
 				
-				logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore=-1,  normalizedDyscoScore=-1");
+				//logger.info("Dysco: " + dysco.getId() + ",  normalizedRankerScore=-1,  normalizedDyscoScore=-1");
 			}
 		}
 		return rankDyscos(dyscos);
@@ -377,7 +420,12 @@ public class TrendsRanker {
 	    public synchronized void push(T item) {
 	        super.push(item);
 	        if (super.size() > bound) {
-	        	super.removeLast();                
+	        	try {
+	        		super.removeLast();                
+	        	}
+	        	catch(Exception e) {
+	        		
+	        	}
 	        }
 	    }
 
@@ -387,4 +435,28 @@ public class TrendsRanker {
 
 	}
 
+	public static void main(String...args) throws Exception {
+		
+		SolrDyscoHandler solrDyscoHandler = SolrDyscoHandler.getInstance("http://xxx.xxx.xxx.xxx/solr/dyscos");
+        TrendsRanker ranker = new TrendsRanker("http://xxx.xxx.xxx.xxx/solr/NewsFeed");
+        
+        Date date = new Date(System.currentTimeMillis() - 15*60000);
+        TimeZone tz = TimeZone.getDefault();
+	    Date gmtDate = new Date( date.getTime() - tz.getRawOffset() );
+	    if ( tz.inDaylightTime( gmtDate )){
+	        Date dstDate = new Date( gmtDate.getTime() - tz.getDSTSavings() );
+	        if ( tz.inDaylightTime( dstDate )) {
+	        	gmtDate = dstDate;
+	        }
+	     }
+	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		String formattedDate = dateFormat.format(gmtDate);
+		
+		List<Dysco> dyscos = solrDyscoHandler.findDyscosInTimeframe(formattedDate).getResults();
+        System.out.println(dyscos.size() + " dyscos");
+        
+		List<Dysco> rankedDyscos = ranker.evaluateDyscosByContent(dyscos, "1");
+		System.out.println(rankedDyscos.size() + " ranked dyscos");
+		
+	}
 }

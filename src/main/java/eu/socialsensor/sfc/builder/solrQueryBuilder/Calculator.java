@@ -99,7 +99,7 @@ public class Calculator {
 			average += elem;
 		}
 		
-		return average/= elements.size();
+		return average = average / elements.size();
 	}
 
 }
