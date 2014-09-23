@@ -14,7 +14,6 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import eu.socialsensor.framework.client.dao.impl.DyscoDAOImpl;
 import eu.socialsensor.framework.client.search.solr.SolrDyscoHandler;
 import eu.socialsensor.framework.client.search.solr.SolrItemHandler;
 import eu.socialsensor.framework.common.domain.Item;
@@ -104,8 +103,11 @@ public class TrendsRanker {
 		Double score = 0.0;
 		
 		List<Query> solrQueries = dysco.getSolrQueries();
-		List<Float> queriesScores = new ArrayList<Float>();
+		if(solrQueries == null) {
+			return score;
+		}
 		
+		List<Float> queriesScores = new ArrayList<Float>();
 		try {
 			for(Query sQuery : solrQueries) {
 				float queryLength = sQuery.getName().length();
