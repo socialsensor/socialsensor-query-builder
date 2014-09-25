@@ -381,6 +381,9 @@ public class TrendsRanker {
 		logger.info("Min Ranker Score: " + minRankerScore);
 		logger.info("Max Ranker Score: " + maxRankerScore);
 		
+		logger.info("Size of RankerScoresList: " + rankerScoresList.size());
+		logger.info("Size of DyscoScoresList: " + dyscoScoresList.size());
+		
 		for(Dysco dysco : dyscos) {
 			double rankerScore = dysco.getRankerScore();
 			if(rankerScore >= 0) {
@@ -420,21 +423,16 @@ public class TrendsRanker {
 	    }
 
 	    public synchronized void push(T item) {
-	        super.push(item);
-	        if (super.size() > bound) {
-	        	try {
+	    	try {
+	    		super.push(item);
+	    		if (super.size() > bound) {	        	
 	        		super.removeLast();                
 	        	}
-	        	catch(Exception e) {
-	        		
-	        	}
 	        }
+	    	catch(Exception e) {
+        		
+        	}
 	    }
-
-	    public synchronized T pop() {
-	        return super.poll();
-	    }
-
 	}
 
 	public static void main(String...args) throws Exception {

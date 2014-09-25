@@ -9,15 +9,11 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import eu.socialsensor.framework.client.dao.impl.DyscoDAOImpl;
-import eu.socialsensor.framework.client.search.SearchEngineResponse;
-import eu.socialsensor.framework.common.domain.Item;
 import eu.socialsensor.framework.common.domain.Keyword;
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.Stopwords;
 import eu.socialsensor.framework.common.domain.dysco.Dysco;
 import eu.socialsensor.framework.common.domain.dysco.Entity;
-import eu.socialsensor.sfc.builder.SolrQueryBuilder;
 
 /**
  * @brief The class that creates the solr query based on the 
@@ -26,6 +22,7 @@ import eu.socialsensor.sfc.builder.SolrQueryBuilder;
  * @email  ailiakop@iti.gr
  */
 public class TrendingSolrQueryBuilder {
+	
 	public static final int NUMBER_OF_QUERIES = 5;
 	public static final int MIN_KEYWORD_LENGTH = 2;
 	
@@ -226,9 +223,9 @@ public class TrendingSolrQueryBuilder {
 		List<Query> solrQueries = new ArrayList<Query>();
 		for(Map.Entry<Double, List<Query>> entry : rankedQueries.entrySet()) {
 			for(Query q : entry.getValue()) {
-				if(solrQueries.size() == TrendingSolrQueryBuilder.NUMBER_OF_QUERIES)
+				if(solrQueries.size() == TrendingSolrQueryBuilder.NUMBER_OF_QUERIES) {
 					break;
-				
+				}
 				solrQueries.add(q);
 			}
 		}

@@ -93,9 +93,10 @@
 			<artifactId>nlptools-core_2.10</artifactId>
 			<version>2.4.4</version>
 		</dependency>
+		
     </dependencies>
+    
     <repositories>
-      	
       	 <repository>
             <id>prometheus-atc-releases</id>
             <name>prometheus-atc-releases</name>
@@ -105,7 +106,6 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
-      	
    	</repositories>
    	
     <build>
