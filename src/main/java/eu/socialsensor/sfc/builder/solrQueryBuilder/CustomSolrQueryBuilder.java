@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 
 import eu.socialsensor.framework.common.domain.Query;
 import eu.socialsensor.framework.common.domain.dysco.CustomDysco;
-import eu.socialsensor.framework.common.domain.dysco.Dysco;
 
 /**
  * @brief The class that creates the solr query based on the 

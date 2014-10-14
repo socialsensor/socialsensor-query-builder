@@ -32,14 +32,14 @@ public class KeywordsExtractor {
 	private Map<String,Integer> popularHashtags = new HashMap<String,Integer>();
 	private Map<String,String>  wordsToReplace = new HashMap<String,String>();
 	
-	private Set<String> stemWords = new HashSet<String>();
+	//private Set<String> stemWords = new HashSet<String>();
 	private Set<String> textContent = new HashSet<String>();
 	
 	private Map<String,Double> rankedKeywords = new HashMap<String,Double>();
 	private Map<String,Double> rankedHashtags = new HashMap<String,Double>();
 	
-	private double keywordsDev;
-	private double hashtagsDev;
+	//private double keywordsDev;
+	//private double hashtagsDev;
 	
 	double keywordsAVG = 0.0;
 	double hashtagsAVG = 0.0;
@@ -339,11 +339,11 @@ public class KeywordsExtractor {
 		//Compute averages - deviations
 		if(keywordsWeights == null){
 			keywordsAVG = 0;
-			keywordsDev = 0;
+			//keywordsDev = 0;
 		}
 		else{
 			keywordsAVG = Calculator.computeAverage(keywordsWeights);
-			keywordsDev = Math.sqrt(Calculator.computeVariance(keywordsWeights,keywordsAVG));
+			//keywordsDev = Math.sqrt(Calculator.computeVariance(keywordsWeights,keywordsAVG));
 			
 			index = 0;
 			for(int i=keywordsWeights.length-1;i>0;i--){
@@ -360,12 +360,12 @@ public class KeywordsExtractor {
 		
 		if(hashtagsWeights == null){
 			hashtagsAVG = 0;
-			hashtagsDev = 0;
+			//hashtagsDev = 0;
 			
 		}	
 		else{
 			hashtagsAVG = Calculator.computeAverage(hashtagsWeights);
-			hashtagsDev = Math.sqrt(Calculator.computeVariance(hashtagsWeights,hashtagsAVG));
+			//hashtagsDev = Math.sqrt(Calculator.computeVariance(hashtagsWeights,hashtagsAVG));
 			
 			index = 0;
 			alreadyChecked.clear();
