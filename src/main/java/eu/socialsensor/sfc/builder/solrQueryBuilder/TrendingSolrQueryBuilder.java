@@ -23,8 +23,8 @@ import eu.socialsensor.framework.common.domain.dysco.Entity;
  */
 public class TrendingSolrQueryBuilder {
 	
-	public static final int NUMBER_OF_QUERIES = 5;
-	public static final int MIN_KEYWORD_LENGTH = 2;
+	public static final int NUMBER_OF_QUERIES = 10;
+	public static final int MIN_KEYWORD_LENGTH = 3;
 	
 	public final Logger logger = Logger.getLogger(TrendingSolrQueryBuilder.class);
 	
@@ -144,18 +144,56 @@ public class TrendingSolrQueryBuilder {
 		
 		//create queries from hashtags
 		for(Keyword hashtag : hashtags) {
+			
 			Query query = new Query();
 			query.setName(hashtag.getName());
 			query.setScore(hashtag.getScore());
 			query.setType(Query.Type.Keywords);
-
+			
 			double score = hashtag.getScore();
 			List<Query> alreadyIn = rankedQueries.get(score);
+			
 			if(alreadyIn == null) {
 				alreadyIn = new ArrayList<Query>();
 				rankedQueries.put(score, alreadyIn);
 			}
 			alreadyIn.add(query);
+			
+			for(Entity entity : entities) {
+				String qStr = hashtag.getName() + " " + entity.getName();
+				
+				query = new Query();
+				query.setName(qStr);
+				query.setScore(hashtag.getScore());
+				query.setType(Query.Type.Keywords);
+				
+				score = hashtag.getScore();
+				alreadyIn = rankedQueries.get(score);
+				
+				if(alreadyIn == null) {
+					alreadyIn = new ArrayList<Query>();
+					rankedQueries.put(score, alreadyIn);
+				}
+				alreadyIn.add(query);
+			}
+			
+			for(Keyword keyword : keywords) {	
+				String qStr = hashtag.getName() + " " + keyword.getName();
+				
+				query = new Query();
+				query.setName(qStr);
+				query.setScore(hashtag.getScore());
+				query.setType(Query.Type.Keywords);
+				
+				score = hashtag.getScore();
+				alreadyIn = rankedQueries.get(score);
+				if(alreadyIn == null) {
+					alreadyIn = new ArrayList<Query>();
+					rankedQueries.put(score, alreadyIn);
+				}
+				alreadyIn.add(query);
+			}
+			
 		}
 		
 		//create queries from entities - keywords combination
@@ -197,13 +235,13 @@ public class TrendingSolrQueryBuilder {
 			alreadyIn.add(query);
 		}
 		
-		//if(entities.isEmpty()) {
 		for(Keyword keyword : keywords) {
 			String name = keyword.getName();
 			String[] parts = name.split("\\s+");
-			if(parts.length >= TrendingSolrQueryBuilder.MIN_KEYWORD_LENGTH) {
-					
-				double kScore = parts.length * keyword.getScore();
+			
+			double kScore = parts.length * keyword.getScore();
+			
+			if(parts.length >= TrendingSolrQueryBuilder.MIN_KEYWORD_LENGTH) {		
 					
 				Query query = new Query();
 				query.setName(name);
@@ -218,7 +256,6 @@ public class TrendingSolrQueryBuilder {
 				alreadyIn.add(query);
 			}
 		}
-		//}
 		
 		List<Query> solrQueries = new ArrayList<Query>();
 		for(Map.Entry<Double, List<Query>> entry : rankedQueries.entrySet()) {
@@ -227,6 +264,7 @@ public class TrendingSolrQueryBuilder {
 					break;
 				}
 				solrQueries.add(q);
+				
 			}
 		}
 		return solrQueries;
