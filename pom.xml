@@ -4,7 +4,7 @@
   
   	<groupId>eu.socialsensor</groupId>
   	<artifactId>socialsensor-query-builder</artifactId>
-  	<version>0.2</version>
+  	<version>0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 
@@ -20,7 +20,7 @@
         <connection>scm:git:git@github.com:socialsensor/socialsensor-query-builder.git</connection>
         <developerConnection>scm:git:git@github.com:socialsensor/socialsensor-query-builder.git</developerConnection>
         <url>git@github.com:socialsensor/socialsensor-query-builder.git</url>
-      <tag>socialsensor-query-builder-0.2</tag>
+      <tag>HEAD</tag>
   </scm>
     
     <developers>
