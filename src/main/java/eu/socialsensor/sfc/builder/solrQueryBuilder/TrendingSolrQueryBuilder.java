@@ -237,7 +237,13 @@ public class TrendingSolrQueryBuilder {
 		
 		for(Keyword keyword : keywords) {
 			String name = keyword.getName();
-			String[] parts = name.split("\\s+");
+			String[] parts = null;
+			try {
+				parts = name.split("\\s+");
+			}
+			catch(Exception e) {
+				continue;
+			}
 			
 			double kScore = parts.length * keyword.getScore();
 			
